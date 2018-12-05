@@ -11,7 +11,7 @@ class Administrator extends Model
 
     public $timestamps = false;
 
-    public $NAME = "ADMIN";
+    public $NAME = "ADM";
     public $GENDER_MALE = 1;
     public $GENDER_FEMALE = 2;
 
