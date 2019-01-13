@@ -4,7 +4,12 @@ namespace App\Http\Controllers\API;
 
 use App\Classes\GlobalClass;
 use App\Model\Administrator;
+use App\Model\Company;
+use App\Model\Contact;
 use App\Model\Employee;
+use App\Model\Haid;
+use App\Model\Holiday;
+use App\Model\Standard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -62,6 +67,400 @@ class DesktopController extends Controller
                 return response()->json($feedback);
             }
         }
+    }
+
+    public function add_data(){
+        $_global_class = new GlobalClass();
+        $_table = null;
+
+        $fields = [];
+        $index = [];
+        $data = array();
+        $id = "";
+        $i=0;
+
+        $postdata = file_get_contents("php://input");
+        if (isset($postdata)) {
+            $request = json_decode($postdata);
+            $table = $request->table;
+
+            if(strtolower($table) === "company"){
+                $_table = new Company();
+                $fields = [
+                    "name", "email", "address", "description", "phone_1", "phone_2", "phone_3", "phone_4"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "administrator"){
+                $_table = new Administrator();
+                $fields = [
+                    "id_company", "first_name", "last_name", "user_name", "email", "dob"
+                ];
+
+
+                //<editor-fold desc="CHECK IS USERNAME EXIST">
+                $user_name = $request->user_name;
+                if(!$this->check_username($_table, $user_name)){
+                    $feedback = [
+                        "message" => "Username already exist.",
+                        "status" => $_global_class->STATUS_ERROR,
+                    ];
+
+                    return response()->json($feedback);
+                };
+                //</editor-fold>
+
+                $gender = $request->gender;
+                if(strtolower($gender) === "male"){
+                    $gender = $_table->GENDER_MALE;
+                } else {
+                    $gender = $_table->GENDER_FEMALE;
+                }
+                $data += ["gender" => $gender];
+
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["role" => "administrator"];
+                $data += ["password" => $_global_class->generatePassword("12345")];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "contact"){
+                $_table = new Contact();
+                $fields = [
+                    "first_name", "last_name", "email", "id_company", "address", "description", "phone_1", "phone_2", "phone_3", "phone_4", "phone_5", "phone_6"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "standard"){
+                $_table = new Standard();
+                $fields = [
+                    "name", "year", "nominal"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "holiday"){
+                $_table = new Holiday();
+                $fields = [
+                    "date", "description"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "haid"){
+                $_table = new Haid();
+                $fields = [
+                    "id_employee"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["date" => date("d-m-Y")];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            foreach ($fields as $field) {
+                ${$field} = $request->$field;
+                $data += ["{$field}" => "${$field}"];
+            }
+
+            $check_insert = DB::table($_table->BASETABLE)->insert($data);
+
+            if($check_insert){
+                $feedback = [
+                    "message" => $table . " Inserted successfully",
+                    "status" => $_global_class->STATUS_SUCCESS,
+                ];
+
+                return response()->json($feedback);
+            } else {
+                $feedback = [
+                    "message" => "There is something error. Please try again later.",
+                    "status" => $_global_class->STATUS_ERROR,
+                ];
+
+                return response()->json($feedback);
+            }
+        }
+    }
+
+    public function load_data(){
+        $_global_class = new GlobalClass();
+        $_table = null;
+        $_data = null;
+
+        $postdata = file_get_contents("php://input");
+        if (isset($postdata)) {
+            $request = json_decode($postdata);
+            $table = $request->table;
+            $id = $request->id;
+
+            if (strtolower($table) === "company") {
+                $_table = new Company();
+
+                if(strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id' , '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "administrator") {
+                $_table = new Administrator();
+
+                if(strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id' , '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "contact") {
+                $_table = new Contact();
+
+                if(strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id' , '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "standard") {
+                $_table = new Standard();
+
+                if(strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id' , '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "holiday") {
+                $_table = new Holiday();
+
+                if(strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id' , '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "haid") {
+                $_data = [];
+                $_table = new Employee();
+
+                if(strtolower($id) === "all") {
+                    $_employee = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    $_table = new Haid();
+                    $_month = date("m");
+                    $_year = date("Y");
+
+                    if (count($_employee) > 0){
+                        foreach ($_employee as $emplo => $emp) {
+                            $_emp_id = $emp->id;
+
+                            if ($emp->status === 1){
+                                $status = "Harian Atas";
+                            } elseif ($emp->status === 2){
+                                $status = "Borongan";
+                            } elseif ($emp->status === 3){
+                                $status = "Harian Bawah";
+                            }
+
+                            $_is_haid = DB::select(DB::raw("SELECT * FROM haid
+                                                            WHERE id_employee = '$_emp_id'
+                                                            AND SUBSTR(`date`,4,2) = '$_month'
+                                                            AND SUBSTR(`date`,7,4) = '$_year'
+                                                            AND is_active = '1'"));
+
+                            $date = "";
+
+                            if (count($_is_haid) > 0){
+                                foreach ($_is_haid as $is_haid => $sh) {
+                                    $date = $sh->date;
+                                }
+                            }
+
+                            $temp = array(
+                                "id" => $emp->id,
+                                "first_name" => $emp->first_name,
+                                "last_name" => $emp->last_name,
+                                "status" => $status,
+                                "date" => $date
+                            );
+
+                            array_push($_data, $temp);
+                        }
+                    }
+                }
+            }
+
+            $feedback = [
+                "message" => $_data,
+                "status" => $_global_class->STATUS_SUCCESS,
+            ];
+
+            return response()->json($feedback);
+        }
+    }
+
+    public function update_data(){
+        $_global_class = new GlobalClass();
+        $_table = null;
+
+        $fields = [];
+        $index = [];
+        $data = array();
+        $id = "";
+        $i=0;
+
+        $postdata = file_get_contents("php://input");
+        if (isset($postdata)) {
+            $request = json_decode($postdata);
+            $table = $request->table;
+            $id = $request->id;
+
+            if (strtolower($table) === "company") {
+                $_table = new Company();
+                $fields = [
+                    "name", "email", "address", "description", "phone_1", "phone_2", "phone_3", "phone_4"
+                ];
+            }
+
+            if (strtolower($table) === "administrator") {
+                $_table = new Administrator();
+                $fields = [
+                    "id_company", "first_name", "last_name", "user_name", "email", "dob"
+                ];
+
+                //<editor-fold desc="CHECK IS USERNAME EXIST EXCEPT USER ID">
+                $user_name = $request->user_name;
+                if(!$this->check_username_but_id($_table, $id, $user_name)){
+                    $feedback = [
+                        "message" => "Username already exist.",
+                        "status" => $_global_class->STATUS_ERROR,
+                    ];
+
+                    return response()->json($feedback);
+                };
+                //</editor-fold>
+
+                $gender = $request->gender;
+                if(strtolower($gender) === "male"){
+                    $gender = $_table->GENDER_MALE;
+                } else {
+                    $gender = $_table->GENDER_FEMALE;
+                }
+                $data += ["gender" => $gender];
+            }
+
+            if (strtolower($table) === "contact") {
+                $_table = new Contact();
+                $fields = [
+                    "first_name", "last_name", "email", "id_company", "address", "description", "phone_1", "phone_2", "phone_3", "phone_4", "phone_5", "phone_6"
+                ];
+            }
+
+            if (strtolower($table) === "standard") {
+                $_table = new Standard();
+                $fields = [
+                    "name", "year", "nominal"
+                ];
+            }
+
+            if (strtolower($table) === "holiday") {
+                $_table = new Holiday();
+                $fields = [
+                    "date", "description"
+                ];
+            }
+
+            foreach ($fields as $field) {
+                ${$field} = $request->$field;
+                $data += ["{$field}" => "${$field}"];
+            }
+
+            $_data = DB::table($_table->BASETABLE)
+                ->where('id', '=', $id)
+                ->update($data);
+
+            $feedback = [
+                "message" => $table . ' Updated Successfully.',
+                "status" => $_global_class->STATUS_SUCCESS,
+            ];
+
+            return response()->json($feedback);
+        }
+    }
+
+    function in_array_r($needle, $haystack, $strict = false) {
+        foreach ($haystack as $item) {
+            if (($strict ? $item === $needle : $item == $needle) || (is_array($item) && in_array_r($needle, $item, $strict))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function check_username($_table, $user_name){
+        $data_user = DB::table($_table->BASETABLE)
+            ->where('user_name', '=', $user_name)
+            ->first();
+
+        if (!empty($data_user)) {
+            return false;
+        }
+        return true;
+    }
+    public function check_username_but_id($_table, $id, $user_name){
+        $data_user = DB::table($_table->BASETABLE)
+            ->where('user_name', '=', $user_name)
+            ->where('id', '!=' , $id)
+            ->first();
+
+        if (!empty($data_user)) {
+            return false;
+        }
+        return true;
     }
 
     //region ADMINISTRATOR
@@ -407,6 +806,7 @@ class DesktopController extends Controller
         $postdata = file_get_contents("php://input");
         if (isset($postdata)) {
             $request = json_decode($postdata);
+            $id_company = $request->id_company;
             $first_name = $request->first_name;
             $last_name = $request->last_name;
             $email = $request->email;
@@ -427,14 +827,17 @@ class DesktopController extends Controller
                 $gender = $_employee->GENDER_FEMALE;
             }
 
-            if(strtolower($status) === "harian"){
-                $status = $_employee->STATUS_HARIAN;
+            if(strtolower($status) === "harian_atas"){
+                $status = $_employee->STATUS_HARIAN_ATAS;
+            } else if(strtolower($status) === "harian_bawah"){
+                $status = $_employee->STATUS_HARIAN_BAWAH;
             } else {
                 $status = $_employee->STATUS_BORONGAN;
             }
 
             $data = [
                 "id" => $generate_id,
+                "id_company" => $id_company,
                 "first_name" => $first_name,
                 "last_name" => $last_name,
                 "email" => $email,
@@ -476,6 +879,7 @@ class DesktopController extends Controller
 
         $fields = [
             "id",
+            "id_company",
             "first_name",
             "last_name",
             "email",
@@ -489,7 +893,7 @@ class DesktopController extends Controller
             "status"
         ];
 
-        $index = [1,2,3,4,5,6,7,8,9];
+        $index = [1,2,3,4,5,6,7,8,9,10];
 
         $postdata = file_get_contents("php://input");
         if (isset($postdata)) {
@@ -511,7 +915,7 @@ class DesktopController extends Controller
                     $id = $request->$field;
                 }
 
-                if($i===10){
+                if($i===11){
                     if(strtolower($request->$field) === "male"){
                         $gender = $_employee->GENDER_MALE;
                     } else {
@@ -520,9 +924,11 @@ class DesktopController extends Controller
                     $data += ["gender" => $gender];
                 }
 
-                if($i===11){
-                    if(strtolower($request->$field) === "harian"){
-                        $status = $_employee->STATUS_HARIAN;
+                if($i===12){
+                    if(strtolower($request->$field) === "harian_atas"){
+                        $status = $_employee->STATUS_HARIAN_ATAS;
+                    } else if(strtolower($request->$field) === "harian_bawah"){
+                        $status = $_employee->STATUS_HARIAN_BAWAH;
                     } else {
                         $status = $_employee->STATUS_BORONGAN;
                     }

@@ -31,6 +31,12 @@ Route::post('/uploadFile', 'API\DesktopController@uploadFile');
 
 Route::post('/signin', 'API\DesktopController@signin');
 
+
+Route::post('/add_data', 'API\DesktopController@add_data');
+Route::post('/load_data', 'API\DesktopController@load_data');
+Route::post('/update_data', 'API\DesktopController@update_data');
+
+
 Route::post('/administrator_load_data', 'API\DesktopController@administrator_load_data');
 Route::post('/administrator_add_data', 'API\DesktopController@administrator_add_data');
 Route::post('/administrator_update_data', 'API\DesktopController@administrator_update_data');
