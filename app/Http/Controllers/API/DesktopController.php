@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Classes\GlobalClass;
 use App\Model\Administrator;
+use App\Model\Attendance;
 use App\Model\Company;
 use App\Model\Contact;
 use App\Model\Employee;
@@ -70,6 +71,7 @@ class DesktopController extends Controller
     }
 
     public function add_data(){
+        date_default_timezone_set("Asia/Jakarta");
         $_global_class = new GlobalClass();
         $_table = null;
 
@@ -169,6 +171,30 @@ class DesktopController extends Controller
                 $data += ["is_active" => $_table->STATUS_ACTIVE];
             }
 
+            if(strtolower($table) === "attendance"){
+                $_table = new Attendance();
+                $fields = [
+                    "id_employee"
+                ];
+
+                $status = $request->status;
+                if(strtolower($status) === "masuk"){
+                    $status = $_table->STATUS_MASUK;
+                } elseif(strtolower($status) === "setengah hari"){
+                    $status = $_table->STATUS_SETENGAH_HARI;
+                } elseif(strtolower($status) === "tidak masuk"){
+                    $status = $_table->STATUS_TIDAK_MASUK;
+                } elseif(strtolower($status) === "ijin"){
+                    $status = $_table->STATUS_IJIN;
+                }
+
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["date" => date("d-m-Y")];
+                $data += ["status" => $status];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
             foreach ($fields as $field) {
                 ${$field} = $request->$field;
                 $data += ["{$field}" => "${$field}"];
@@ -195,6 +221,7 @@ class DesktopController extends Controller
     }
 
     public function load_data(){
+        date_default_timezone_set("Asia/Jakarta");
         $_global_class = new GlobalClass();
         $_table = null;
         $_data = null;
@@ -232,6 +259,63 @@ class DesktopController extends Controller
                         ->where('id' , '=', $id)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->first();
+                }
+            }
+
+            if (strtolower($table) === "employee") {
+                $_table = new Employee();
+                $_data = [];
+
+                if(strtolower($id) === "all") {
+                    $_employee = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    if (count($_employee) > 0) {
+                        foreach ($_employee as $emplo => $emp) {
+                            $_emp_id = $emp->id;
+
+                            if ($emp->status === 1) {
+                                $status = "Harian Atas";
+                            } elseif ($emp->status === 2) {
+                                $status = "Borongan";
+                            } elseif ($emp->status === 3) {
+                                $status = "Harian Bawah";
+                            }
+
+                            $temp = array(
+                                "id" => $emp->id,
+                                "first_name" => $emp->first_name,
+                                "last_name" => $emp->last_name,
+                                "status" => $status
+                            );
+
+                            array_push($_data, $temp);
+                        }
+                    }
+
+                } else {
+                    $_employee = DB::table($_table->BASETABLE)
+                        ->where('id' , '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+
+                    if ($_employee->status === 1) {
+                        $status = "Harian Atas";
+                    } elseif ($_employee->status === 2) {
+                        $status = "Borongan";
+                    } elseif ($_employee->status === 3) {
+                        $status = "Harian Bawah";
+                    }
+
+                    $temp = array(
+                        "id" => $_employee->id,
+                        "first_name" => $_employee->first_name,
+                        "last_name" => $_employee->last_name,
+                        "status" => $status
+                    );
+
+                    array_push($_data, $temp);
                 }
             }
 
@@ -333,6 +417,64 @@ class DesktopController extends Controller
                 }
             }
 
+            if (strtolower($table) === "attendance") {
+                $_data = [];
+                $_table = new Employee();
+
+                if(strtolower($id) === "all") {
+                    $_employee = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    $_table = new Attendance();
+                    $_date = date("d");
+                    $_month = date("m");
+                    $_year = date("Y");
+
+                    if (count($_employee) > 0){
+                        foreach ($_employee as $emplo => $emp) {
+                            $_emp_id = $emp->id;
+
+                            if ($emp->status === 1){
+                                $status = "Harian Atas";
+                            } elseif ($emp->status === 2){
+                                $status = "Borongan";
+                            } elseif ($emp->status === 3){
+                                $status = "Harian Bawah";
+                            }
+
+                            $_is_att = DB::select(DB::raw("SELECT * FROM attendance
+                                                            WHERE id_employee = '$_emp_id'
+                                                            AND SUBSTR(`date`,1,2) = '$_date'
+                                                            AND SUBSTR(`date`,4,2) = '$_month'
+                                                            AND SUBSTR(`date`,7,4) = '$_year'
+                                                            AND is_active = '1'"));
+
+                            $att_status = "";
+                            $att_id = "";
+
+                            if (count($_is_att) > 0){
+                                foreach ($_is_att as $is_att => $att) {
+                                    $att_status = $att->status;
+                                    $att_id = $att->id;
+                                }
+                            }
+
+                            $temp = array(
+                                "id" => $emp->id,
+                                "first_name" => $emp->first_name,
+                                "last_name" => $emp->last_name,
+                                "status" => $status,
+                                "attendance" => $att_status,
+                                "attendance_id" => $att_id
+                            );
+
+                            array_push($_data, $temp);
+                        }
+                    }
+                }
+            }
+
             $feedback = [
                 "message" => $_data,
                 "status" => $_global_class->STATUS_SUCCESS,
@@ -343,6 +485,7 @@ class DesktopController extends Controller
     }
 
     public function update_data(){
+        date_default_timezone_set("Asia/Jakarta");
         $_global_class = new GlobalClass();
         $_table = null;
 
@@ -411,6 +554,27 @@ class DesktopController extends Controller
                 $fields = [
                     "date", "description"
                 ];
+            }
+
+            if (strtolower($table) === "attendance") {
+                $_table = new Attendance();
+                $fields = [
+
+                ];
+
+                $status = $request->status;
+                if(strtolower($status) === "masuk"){
+                    $status = $_table->STATUS_MASUK;
+                } elseif(strtolower($status) === "setengah hari"){
+                    $status = $_table->STATUS_SETENGAH_HARI;
+                } elseif(strtolower($status) === "tidak masuk"){
+                    $status = $_table->STATUS_TIDAK_MASUK;
+                } elseif(strtolower($status) === "ijin"){
+                    $status = $_table->STATUS_IJIN;
+                }
+
+                $data += ["status" => $status];
+
             }
 
             foreach ($fields as $field) {

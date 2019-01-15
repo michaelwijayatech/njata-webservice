@@ -26,6 +26,7 @@ return array(
     'App\\Model\\Company' => $baseDir . '/app/Model/Company.php',
     'App\\Model\\Contact' => $baseDir . '/app/Model/Contact.php',
     'App\\Model\\Employee' => $baseDir . '/app/Model/Employee.php',
+    'App\\Model\\Haid' => $baseDir . '/app/Model/Haid.php',
     'App\\Model\\Holiday' => $baseDir . '/app/Model/Holiday.php',
     'App\\Model\\Standard' => $baseDir . '/app/Model/Standard.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',

@@ -337,6 +337,7 @@ class ComposerStaticInitbe8c83f102eb035422e07963de4c9dc0
         'App\\Model\\Company' => __DIR__ . '/../..' . '/app/Model/Company.php',
         'App\\Model\\Contact' => __DIR__ . '/../..' . '/app/Model/Contact.php',
         'App\\Model\\Employee' => __DIR__ . '/../..' . '/app/Model/Employee.php',
+        'App\\Model\\Haid' => __DIR__ . '/../..' . '/app/Model/Haid.php',
         'App\\Model\\Holiday' => __DIR__ . '/../..' . '/app/Model/Holiday.php',
         'App\\Model\\Standard' => __DIR__ . '/../..' . '/app/Model/Standard.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
