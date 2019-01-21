@@ -8,6 +8,8 @@ use App\Model\Attendance;
 use App\Model\Company;
 use App\Model\Contact;
 use App\Model\Employee;
+use App\Model\GroupDetail;
+use App\Model\GroupHeader;
 use App\Model\Haid;
 use App\Model\Holiday;
 use App\Model\Standard;
@@ -188,10 +190,36 @@ class DesktopController extends Controller
                     $status = $_table->STATUS_IJIN;
                 }
 
+                $_date = $request->date;
+                if ($_date === ""){
+                    $data += ["date" => date("d-m-Y")];
+                } else {
+                    $data += ["date" => $_date];
+                }
+
                 $generate_id = $_global_class->generateID($_table->NAME);
                 $data += ["id" => $generate_id];
-                $data += ["date" => date("d-m-Y")];
                 $data += ["status" => $status];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "group_header"){
+                $_table = new GroupHeader();
+                $fields = [
+                    "name"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "group_detail"){
+                $_table = new GroupDetail();
+                $fields = [
+                    "name"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
                 $data += ["is_active" => $_table->STATUS_ACTIVE];
             }
 
@@ -467,6 +495,66 @@ class DesktopController extends Controller
                                 "status" => $status,
                                 "attendance" => $att_status,
                                 "attendance_id" => $att_id
+                            );
+
+                            array_push($_data, $temp);
+                        }
+                    }
+                } elseif (strtolower($id) === "update_attendance") {
+                    $_table = new Attendance();
+                    $id_employee = $request->id_employee;
+                    $date = $request->date;
+
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id_employee' , '=', $id_employee)
+                        ->where('date', '=', $date)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "group_header") {
+                $_table = new GroupHeader();
+
+                if(strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id' , '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "group_detail") {
+                $_table = new GroupDetail();
+                $_data = [];
+
+                if(strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_gds = DB::table($_table->BASETABLE)
+                        ->where('id_group' , '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    if (count($_gds) > 0) {
+                        foreach ($_gds as $_gd => $gd) {
+                            $_emp_id = $gd->id_employee;
+
+                            $_employee = DB::table($_table->BASETABLE)
+                                ->where('id' , '=', $_emp_id)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->first();
+
+                            $temp = array(
+                                "id" => $gd->id,
+                                "id_employee" => $gd->id_employee,
+                                "first_name" => $_employee->first_name,
+                                "last_name" => $_employee->last_name
                             );
 
                             array_push($_data, $temp);

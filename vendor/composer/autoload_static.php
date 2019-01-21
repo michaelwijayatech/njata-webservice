@@ -334,6 +334,7 @@ class ComposerStaticInitbe8c83f102eb035422e07963de4c9dc0
         'App\\Http\\Middleware\\TrustProxies' => __DIR__ . '/../..' . '/app/Http/Middleware/TrustProxies.php',
         'App\\Http\\Middleware\\VerifyCsrfToken' => __DIR__ . '/../..' . '/app/Http/Middleware/VerifyCsrfToken.php',
         'App\\Model\\Administrator' => __DIR__ . '/../..' . '/app/Model/Administrator.php',
+        'App\\Model\\Attendance' => __DIR__ . '/../..' . '/app/Model/Attendance.php',
         'App\\Model\\Company' => __DIR__ . '/../..' . '/app/Model/Company.php',
         'App\\Model\\Contact' => __DIR__ . '/../..' . '/app/Model/Contact.php',
         'App\\Model\\Employee' => __DIR__ . '/../..' . '/app/Model/Employee.php',
