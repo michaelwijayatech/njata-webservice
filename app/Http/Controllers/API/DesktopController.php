@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Classes\GlobalClass;
 use App\Model\Administrator;
 use App\Model\Attendance;
+use App\Model\Carton;
 use App\Model\Company;
 use App\Model\Contact;
 use App\Model\Employee;
@@ -217,6 +218,16 @@ class DesktopController extends Controller
                 $_table = new GroupDetail();
                 $fields = [
                     "name"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "group_detail_employee"){
+                $_table = new GroupDetail();
+                $fields = [
+                    "id_group", "id_employee"
                 ];
                 $generate_id = $_global_class->generateID($_table->NAME);
                 $data += ["id" => $generate_id];
@@ -532,8 +543,14 @@ class DesktopController extends Controller
                 $_data = [];
 
                 if(strtolower($id) === "all") {
+                    $_table = new Employee();
                     $_data = DB::table($_table->BASETABLE)
+                        ->select('id', 'first_name', 'last_name')
+                        ->where('status', '=', $_table->STATUS_BORONGAN)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->whereNotIn('id', function ($query){
+                            $query->select('id_employee')->from('group_detail');
+                        })
                         ->get();
                 } else {
                     $_gds = DB::table($_table->BASETABLE)
@@ -543,6 +560,7 @@ class DesktopController extends Controller
 
                     if (count($_gds) > 0) {
                         foreach ($_gds as $_gd => $gd) {
+                            $_table = new Employee();
                             $_emp_id = $gd->id_employee;
 
                             $_employee = DB::table($_table->BASETABLE)
@@ -560,6 +578,58 @@ class DesktopController extends Controller
                             array_push($_data, $temp);
                         }
                     }
+                }
+            }
+
+            if (strtolower($table) === "carton") {
+                $_table = new GroupHeader();
+                $_data = [];
+                $_date = date("d-m-Y");
+
+                if(strtolower($id) === "all") {
+                    $_ghs = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    if (count($_ghs) > 0) {
+                        foreach ($_ghs as $ghs => $gh) {
+                            $gh_id = $gh->id;
+                            $gh_name = $gh->name;
+
+                            $_table = new Carton();
+                            $cartons = DB::table($_table->BASETABLE)
+                                ->where('id_group' , '=', $gh_id)
+                                ->where('date', '=', $_date)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->first();
+
+                            if (!empty($cartons)){
+                                $temp = array(
+                                    "id" => $cartons->id,
+                                    "id_group" => $gh_id,
+                                    "group_name" => $gh_name,
+                                    "carton" => $cartons->carton
+                                );
+
+                                array_push($_data, $temp);
+                            } else {
+                                $temp = array(
+                                    "id" => "",
+                                    "id_group" => $gh_id,
+                                    "group_name" => $gh_name,
+                                    "carton" => "-"
+                                );
+
+                                array_push($_data, $temp);
+                            }
+
+                        }
+                    }
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id' , '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
                 }
             }
 
@@ -665,6 +735,52 @@ class DesktopController extends Controller
 
             }
 
+            if (strtolower($table) === "carton") {
+                $_table = new Carton();
+                $id = $request->id;
+                $carton = $request->carton;
+                $_date = date("d-m-Y");
+
+                $fields = [
+                    "carton"
+                ];
+
+                $cartons = DB::table($_table->BASETABLE)
+                    ->where('id_group' , '=', $id)
+                    ->where('date', '=', $_date)
+                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                    ->first();
+
+                if (!empty($cartons)){
+                    $id = $cartons->id;
+                } else {
+                    $generate_id = $_global_class->generateID($_table->NAME);
+                    $data += ["id" => $generate_id];
+                    $data += ["id_group" => $id];
+                    $data += ["date" => $_date];
+                    $data += ["carton" => $carton];
+                    $data += ["is_active" => $_table->STATUS_ACTIVE];
+
+                    $check_insert = DB::table($_table->BASETABLE)->insert($data);
+
+                    if($check_insert){
+                        $feedback = [
+                            "message" => $table . " Inserted successfully",
+                            "status" => $_global_class->STATUS_SUCCESS,
+                        ];
+
+                        return response()->json($feedback);
+                    } else {
+                        $feedback = [
+                            "message" => "There is something error. Please try again later.",
+                            "status" => $_global_class->STATUS_ERROR,
+                        ];
+
+                        return response()->json($feedback);
+                    }
+                }
+            }
+
             foreach ($fields as $field) {
                 ${$field} = $request->$field;
                 $data += ["{$field}" => "${$field}"];
@@ -680,6 +796,41 @@ class DesktopController extends Controller
             ];
 
             return response()->json($feedback);
+        }
+    }
+
+    public function destroy_data(){
+        date_default_timezone_set("Asia/Jakarta");
+        $_global_class = new GlobalClass();
+        $_table = null;
+
+        $fields = [];
+        $index = [];
+        $data = array();
+        $id = "";
+        $i=0;
+
+        $postdata = file_get_contents("php://input");
+        if (isset($postdata)) {
+            $request = json_decode($postdata);
+            $table = $request->table;
+            $id = $request->id;
+
+            if (strtolower($table) === "group_detail") {
+                $_table = new GroupDetail();
+            }
+
+            $_data = DB::table($_table->BASETABLE)
+                ->where('id', '=', $id)
+                ->delete();
+
+            $feedback = [
+                "message" => $table . ' Destroy Successfully.',
+                "status" => $_global_class->STATUS_SUCCESS,
+            ];
+
+            return response()->json($feedback);
+
         }
     }
 
