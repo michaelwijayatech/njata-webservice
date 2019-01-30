@@ -127,6 +127,17 @@ class GlobalClass
 
         return $send_mail;
     }
+
+    public function removeMoneySeparator($MONEY){
+        return (int)str_replace('.', '', $MONEY);
+    }
+
+    public function checkDifferenceBetweenTwoDate($DATE1, $DATE2){
+        $_date1 = explode("-", $DATE1)[2] . '-' . explode("-", $DATE1)[1] . '-' . explode("-", $DATE1)[0];
+        $_date2 = explode("-", $DATE2)[2] . '-' . explode("-", $DATE2)[1] . '-' . explode("-", $DATE2)[0];
+//        return $_date1->diff($_date2)->m + ($_date1->diff($_date2)->y*12);
+        return (int)abs((strtotime($_date1) - strtotime($_date2))/(60*60*24*30));
+    }
 }
 
 ?>

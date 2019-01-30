@@ -6,6 +6,7 @@ use App\Classes\GlobalClass;
 use App\Model\Administrator;
 use App\Model\Attendance;
 use App\Model\Carton;
+use App\Model\Chop;
 use App\Model\Company;
 use App\Model\Contact;
 use App\Model\Employee;
@@ -13,6 +14,7 @@ use App\Model\GroupDetail;
 use App\Model\GroupHeader;
 use App\Model\Haid;
 use App\Model\Holiday;
+use App\Model\RevisionSalary;
 use App\Model\Standard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -234,6 +236,17 @@ class DesktopController extends Controller
                 $data += ["is_active" => $_table->STATUS_ACTIVE];
             }
 
+            if(strtolower($table) === "revision_salary"){
+                $_table = new RevisionSalary();
+                $fields = [
+                    "id_employee", "msit", "pokok", "premi", "haid", "potongan_bpjs", "total_before", "total_revisi", "total_after"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["date" => date("d-m-Y")];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
             foreach ($fields as $field) {
                 ${$field} = $request->$field;
                 $data += ["{$field}" => "${$field}"];
@@ -274,13 +287,13 @@ class DesktopController extends Controller
             if (strtolower($table) === "company") {
                 $_table = new Company();
 
-                if(strtolower($id) === "all") {
+                if (strtolower($id) === "all") {
                     $_data = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
                 } else {
                     $_data = DB::table($_table->BASETABLE)
-                        ->where('id' , '=', $id)
+                        ->where('id', '=', $id)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->first();
                 }
@@ -289,13 +302,13 @@ class DesktopController extends Controller
             if (strtolower($table) === "administrator") {
                 $_table = new Administrator();
 
-                if(strtolower($id) === "all") {
+                if (strtolower($id) === "all") {
                     $_data = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
                 } else {
                     $_data = DB::table($_table->BASETABLE)
-                        ->where('id' , '=', $id)
+                        ->where('id', '=', $id)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->first();
                 }
@@ -305,7 +318,7 @@ class DesktopController extends Controller
                 $_table = new Employee();
                 $_data = [];
 
-                if(strtolower($id) === "all") {
+                if (strtolower($id) === "all") {
                     $_employee = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
@@ -335,7 +348,7 @@ class DesktopController extends Controller
 
                 } else {
                     $_employee = DB::table($_table->BASETABLE)
-                        ->where('id' , '=', $id)
+                        ->where('id', '=', $id)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->first();
 
@@ -361,13 +374,13 @@ class DesktopController extends Controller
             if (strtolower($table) === "contact") {
                 $_table = new Contact();
 
-                if(strtolower($id) === "all") {
+                if (strtolower($id) === "all") {
                     $_data = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
                 } else {
                     $_data = DB::table($_table->BASETABLE)
-                        ->where('id' , '=', $id)
+                        ->where('id', '=', $id)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->first();
                 }
@@ -376,13 +389,13 @@ class DesktopController extends Controller
             if (strtolower($table) === "standard") {
                 $_table = new Standard();
 
-                if(strtolower($id) === "all") {
+                if (strtolower($id) === "all") {
                     $_data = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
                 } else {
                     $_data = DB::table($_table->BASETABLE)
-                        ->where('id' , '=', $id)
+                        ->where('id', '=', $id)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->first();
                 }
@@ -391,13 +404,29 @@ class DesktopController extends Controller
             if (strtolower($table) === "holiday") {
                 $_table = new Holiday();
 
-                if(strtolower($id) === "all") {
+                if (strtolower($id) === "all") {
                     $_data = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
                 } else {
                     $_data = DB::table($_table->BASETABLE)
-                        ->where('id' , '=', $id)
+                        ->where('id', '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "chop") {
+                $_table = new Chop();
+                $date = date("d-m-Y");
+
+                if (strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('date', '=', $date)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->first();
                 }
@@ -407,7 +436,7 @@ class DesktopController extends Controller
                 $_data = [];
                 $_table = new Employee();
 
-                if(strtolower($id) === "all") {
+                if (strtolower($id) === "all") {
                     $_employee = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
@@ -416,15 +445,15 @@ class DesktopController extends Controller
                     $_month = date("m");
                     $_year = date("Y");
 
-                    if (count($_employee) > 0){
+                    if (count($_employee) > 0) {
                         foreach ($_employee as $emplo => $emp) {
                             $_emp_id = $emp->id;
 
-                            if ($emp->status === 1){
+                            if ($emp->status === 1) {
                                 $status = "Harian Atas";
-                            } elseif ($emp->status === 2){
+                            } elseif ($emp->status === 2) {
                                 $status = "Borongan";
-                            } elseif ($emp->status === 3){
+                            } elseif ($emp->status === 3) {
                                 $status = "Harian Bawah";
                             }
 
@@ -436,7 +465,7 @@ class DesktopController extends Controller
 
                             $date = "";
 
-                            if (count($_is_haid) > 0){
+                            if (count($_is_haid) > 0) {
                                 foreach ($_is_haid as $is_haid => $sh) {
                                     $date = $sh->date;
                                 }
@@ -460,7 +489,7 @@ class DesktopController extends Controller
                 $_data = [];
                 $_table = new Employee();
 
-                if(strtolower($id) === "all") {
+                if (strtolower($id) === "all") {
                     $_employee = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
@@ -470,15 +499,15 @@ class DesktopController extends Controller
                     $_month = date("m");
                     $_year = date("Y");
 
-                    if (count($_employee) > 0){
+                    if (count($_employee) > 0) {
                         foreach ($_employee as $emplo => $emp) {
                             $_emp_id = $emp->id;
 
-                            if ($emp->status === 1){
+                            if ($emp->status === 1) {
                                 $status = "Harian Atas";
-                            } elseif ($emp->status === 2){
+                            } elseif ($emp->status === 2) {
                                 $status = "Borongan";
-                            } elseif ($emp->status === 3){
+                            } elseif ($emp->status === 3) {
                                 $status = "Harian Bawah";
                             }
 
@@ -492,7 +521,7 @@ class DesktopController extends Controller
                             $att_status = "";
                             $att_id = "";
 
-                            if (count($_is_att) > 0){
+                            if (count($_is_att) > 0) {
                                 foreach ($_is_att as $is_att => $att) {
                                     $att_status = $att->status;
                                     $att_id = $att->id;
@@ -517,7 +546,7 @@ class DesktopController extends Controller
                     $date = $request->date;
 
                     $_data = DB::table($_table->BASETABLE)
-                        ->where('id_employee' , '=', $id_employee)
+                        ->where('id_employee', '=', $id_employee)
                         ->where('date', '=', $date)
                         ->first();
                 }
@@ -526,13 +555,13 @@ class DesktopController extends Controller
             if (strtolower($table) === "group_header") {
                 $_table = new GroupHeader();
 
-                if(strtolower($id) === "all") {
+                if (strtolower($id) === "all") {
                     $_data = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
                 } else {
                     $_data = DB::table($_table->BASETABLE)
-                        ->where('id' , '=', $id)
+                        ->where('id', '=', $id)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->first();
                 }
@@ -542,19 +571,19 @@ class DesktopController extends Controller
                 $_table = new GroupDetail();
                 $_data = [];
 
-                if(strtolower($id) === "all") {
+                if (strtolower($id) === "all") {
                     $_table = new Employee();
                     $_data = DB::table($_table->BASETABLE)
                         ->select('id', 'first_name', 'last_name')
                         ->where('status', '=', $_table->STATUS_BORONGAN)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                        ->whereNotIn('id', function ($query){
+                        ->whereNotIn('id', function ($query) {
                             $query->select('id_employee')->from('group_detail');
                         })
                         ->get();
                 } else {
                     $_gds = DB::table($_table->BASETABLE)
-                        ->where('id_group' , '=', $id)
+                        ->where('id_group', '=', $id)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
 
@@ -564,7 +593,7 @@ class DesktopController extends Controller
                             $_emp_id = $gd->id_employee;
 
                             $_employee = DB::table($_table->BASETABLE)
-                                ->where('id' , '=', $_emp_id)
+                                ->where('id', '=', $_emp_id)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->first();
 
@@ -586,7 +615,7 @@ class DesktopController extends Controller
                 $_data = [];
                 $_date = date("d-m-Y");
 
-                if(strtolower($id) === "all") {
+                if (strtolower($id) === "all") {
                     $_ghs = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
@@ -598,12 +627,12 @@ class DesktopController extends Controller
 
                             $_table = new Carton();
                             $cartons = DB::table($_table->BASETABLE)
-                                ->where('id_group' , '=', $gh_id)
+                                ->where('id_group', '=', $gh_id)
                                 ->where('date', '=', $_date)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->first();
 
-                            if (!empty($cartons)){
+                            if (!empty($cartons)) {
                                 $temp = array(
                                     "id" => $cartons->id,
                                     "id_group" => $gh_id,
@@ -627,10 +656,378 @@ class DesktopController extends Controller
                     }
                 } else {
                     $_data = DB::table($_table->BASETABLE)
-                        ->where('id' , '=', $id)
+                        ->where('id', '=', $id)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->first();
                 }
+            }
+
+            if (strtolower($table) === "gaji_borongan") {
+                $_table = new GroupHeader();
+                $start_date = $request->start_date;
+                $end_date = $request->end_date;
+                $_potongan_bpjs = $request->potongan_bpjs;
+
+                $_data = [];
+                $cartons = null;
+                $haid = 0;
+                $haid_name = null;
+                $ijin = 0;
+                $ijin_name = null;
+                $ijin_name_arr = [];
+                $tidak_masuk = 0;
+                $tidak_masuk_name = null;
+                $tidak_masuk_name_arr = [];
+                $potongan_bpjs = 0;
+                $_total = 0;
+                $upah_borongan = 0;
+                $cuti_haid = 0;
+                $upah_harian = 0;
+
+                if (strtolower($id) === "all") {
+                    $_ghs = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    if (count($_ghs) > 0) {
+                        foreach ($_ghs as $ghs => $gh) {
+                            $gh_id = $gh->id;
+
+                            $_carton = DB::table('carton')
+                                ->where('id_group', $gh_id)
+                                ->where('date', '>=', $start_date)
+                                ->where('date', '<=', $end_date)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->sum('carton');
+
+                            $_haids = DB::table('haid')
+                                ->where('date', '>=', $start_date)
+                                ->where('date', '<=', $end_date)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->get();
+
+                            if (count($_haids) > 0) {
+                                foreach ($_haids as $_haid => $hid) {
+                                    $_checkgroup = DB::table('group_detail')
+                                        ->where('id_employee', '=', $hid->id_employee)
+                                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                        ->first();
+
+                                    if (!empty($_checkgroup)) {
+                                        if ($_checkgroup->id_group === $gh_id) {
+                                            $haid = $haid + 1;
+
+                                            $_employees = DB::table('employee')
+                                                ->where('id', '=', $hid->id_employee)
+                                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                                ->first();
+
+                                            $haid_name .= $_employees->first_name . ' ' . $_employees->last_name . '@!#';
+                                        }
+                                    }
+
+                                }
+                            } else {
+                                $haid = 0;
+                            }
+
+                            if ($_potongan_bpjs) {
+                                $_gds = DB::table('group_detail')
+                                    ->where('id_group', '=', $gh_id)
+                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                    ->get();
+
+                                if (count($_gds) > 0) {
+                                    foreach ($_gds as $gds => $gd) {
+                                        $gd_id_emp = $gd->id_employee;
+                                        $_table = new Employee();
+                                        $emplo = DB::table($_table->BASETABLE)
+                                            ->where('id', '=', $gd_id_emp)
+                                            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                            ->first();
+                                        $pot_bpjs = $_global_class->removeMoneySeparator($emplo->potongan_bpjs);
+                                        $potongan_bpjs = $potongan_bpjs + $pot_bpjs;
+                                    }
+                                }
+                            } else {
+                                $potongan_bpjs = 0;
+                            }
+
+                            //CEK ABSENSI
+                            $_gds = DB::table('group_detail')
+                                ->where('id_group', '=', $gh_id)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->get();
+
+                            if (count($_ghs) > 0) {
+                                foreach ($_gds as $gds => $gd) {
+                                    $gd_id_empl = $gd->id_employee;
+
+                                    $_atts = DB::table('attendance')
+                                        ->join('employee', 'employee.id', '=', 'attendance.id_employee')
+                                        ->where('attendance.date', '>=', $start_date)
+                                        ->where('attendance.date', '<=', $end_date)
+                                        ->where('attendance.id_employee', '=', $gd_id_empl)
+                                        ->select('employee.id', 'employee.first_name', 'employee.last_name', 'attendance.id', 'attendance.status')
+                                        ->get();
+
+                                    if (count($_atts) > 0) {
+                                        foreach ($_atts as $atts => $att) {
+                                            $att_stat = $att->status;
+                                            $empl_name = $att->first_name . ' ' . $att->last_name;
+
+                                            if ($att_stat === '3') {
+                                                $ijin = $ijin + 1;
+
+                                                if (!in_array($empl_name, $ijin_name_arr)) {
+                                                    array_push($ijin_name_arr, $empl_name);
+                                                    $ijin_name .= $empl_name . '@!#';
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            //HITUNG TOTAL
+
+                            $_year = date("Y");
+                            $_table = new Standard();
+                            $_standarts = DB::table($_table->BASETABLE)
+                                ->where('year', '=', $_year)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->get();
+
+                            if (count($_standarts) > 0) {
+                                foreach ($_standarts as $standarts => $standart) {
+                                    if ($standart->name === "upah_borongan") {
+                                        $upah_borongan = $_global_class->removeMoneySeparator($standart->nominal);
+                                    }
+                                    if ($standart->name === "cuti_haid") {
+                                        $cuti_haid = $_global_class->removeMoneySeparator($standart->nominal);
+                                    }
+                                    if ($standart->name === "upah_harian") {
+                                        $upah_harian = $_global_class->removeMoneySeparator($standart->nominal);
+                                    }
+                                }
+                            }
+
+                            $total_carton = (int)$_carton * $upah_borongan;
+                            $total_haid = $haid * $cuti_haid;
+                            $total_ijin = $ijin * $upah_harian;
+                            $_total = ($total_carton + $total_haid + $total_ijin) - $potongan_bpjs;
+
+                            $temp = array(
+                                "id_group" => $gh_id,
+                                "group_name" => $gh->name,
+                                "carton" => $_carton,
+                                "haid" => $haid,
+                                "haid_name" => $haid_name,
+                                "potongan_bpjs" => $potongan_bpjs,
+                                "ijin" => $ijin,
+                                "ijin_name" => $ijin_name,
+                                "total" => $_total
+                            );
+
+                            array_push($_data, $temp);
+
+                            $cartons = null;
+                            $haid = 0;
+                            $haid_name = null;
+                            $ijin = 0;
+                            $ijin_name = null;
+                            $ijin_name_arr = [];
+                            $potongan_bpjs = 0;
+                            $_total = 0;
+                        }
+                    }
+                } // else here
+            }
+
+            if (strtolower($table) === "gaji_harian") {
+                $_table = new Employee();
+                $_year = date("Y");
+                $start_date = $request->start_date;
+                $end_date = $request->end_date;
+                $_potongan_bpjs = $request->potongan_bpjs;
+
+                $_data = [];
+                $_chop_date_arr = [];
+                $_pokok = 0;
+                $_premi = 0;
+                $_haid = 0;
+                $_tot = 0;
+                $_pot_bpjs = 0;
+                $_std_harian = 0;
+                $_std_haid = 0;
+                $_masuk = 0;
+                $_setengah_hari = 0;
+                $_ijin = 0;
+                $_tidak_masuk = 0;
+
+                $_stat_harian_atas = $_table->STATUS_HARIAN_ATAS;
+                $_stat_harian_bawah = $_table->STATUS_HARIAN_BAWAH;
+
+                if (strtolower($id) === "all") {
+                    $_table = new Standard();
+                    $_stds = DB::table($_table->BASETABLE)
+                        ->where('year', '=', $_year)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                    if (count($_stds) > 0) {
+                        foreach ($_stds as $stds => $std) {
+                            if ($std->name === "upah_harian"){
+                                $_std_harian = $_global_class->removeMoneySeparator($std->nominal);
+                            }
+                            if ($std->name === "cuti_haid"){
+                                $_std_haid = $_global_class->removeMoneySeparator($std->nominal);
+                            }
+                        }
+                    }
+
+                    $_table = new Chop();
+                    $_chops = DB::table($_table->BASETABLE)
+                        ->where('date', '>=', $start_date)
+                        ->where('date', '<=', $end_date)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                    if (count($_chops) > 0) {
+                        foreach ($_chops as $chops => $chop) {
+                            $chop_date = $chop->date;
+                            array_push($_chop_date_arr, $chop_date);
+                        }
+                    }
+
+                    $_table = new Holiday();
+                    $_holiday = DB::table($_table->BASETABLE)
+                        ->where('date', '>=', $start_date)
+                        ->where('date', '<=', $end_date)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->count();
+
+                    $_table = new Employee();
+                    $_empls = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->where('status', '=', $_table->STATUS_HARIAN_ATAS)
+                        ->orWhere('status', '=', $_table->STATUS_HARIAN_BAWAH)
+                        ->get();
+                    if (count($_empls) > 0) {
+                        foreach ($_empls as $empls => $empl) {
+                            $empl_id = $empl->id;
+                            $empl_name = $empl->first_name . ' ' . $empl->last_name;
+                            $empl_premi = $_global_class->removeMoneySeparator($empl->premi);
+                            $empl_stat = $empl->status;
+                            $empl_start_work_date = $empl->start_date;
+                            $empl_pot_bpjs = $_global_class->removeMoneySeparator($empl->potongan_bpjs);
+
+                            $_table = new Attendance();
+                            $_atts = DB::table($_table->BASETABLE)
+                                ->where('date', '>=', $start_date)
+                                ->where('date', '<=', $end_date)
+                                ->where('id_employee', '=', $empl_id)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->get();
+                            if (count($_atts) > 0) {
+                                foreach ($_atts as $atts => $att) {
+                                    $att_stat = $att->status;
+                                    $att_date = $att->date;
+                                    if ($att_stat === (string)$_table->STATUS_MASUK){
+                                        $_pokok += $_std_harian;
+                                        $_masuk += 1;
+//                                        CHECK IF TODAY IS CHOP
+                                        if ($empl_stat === $_stat_harian_atas){
+                                            $_premi += $empl_premi;
+                                        }
+                                        if ($empl_stat === $_stat_harian_bawah){
+                                            if (in_array($att_date, $_chop_date_arr)){
+                                                $_premi += $empl_premi;
+                                            }
+                                        }
+                                    }
+                                    if ($att_stat === (string)$_table->STATUS_IJIN){
+                                        $_pokok += $_std_harian;
+                                        $_premi += 0;
+                                        $_ijin += 1;
+                                    }
+                                    if ($att_stat === (string)$_table->STATUS_SETENGAH_HARI){
+                                        $_pokok += ($_std_harian / 2);
+                                        $_premi += ($empl_premi / 2);
+                                        $_setengah_hari += 1;
+                                    }
+
+                                    if ($att_stat === (string)$_table->STATUS_TIDAK_MASUK){
+                                        $_tidak_masuk += 1;
+                                    }
+                                }
+                            }
+                            // END ATTS
+
+//                            if ($empl_stat === $_stat_harian_atas){
+//                                $_premi += ($_masuk * $empl_premi);
+//                                $_premi += ($_setengah_hari * ($empl_premi / 2));
+//                            }
+//                            if ($empl_stat === $_stat_harian_bawah){
+//                                $_premi += 999;
+//                            }
+
+
+                            //UPAH LIBUR
+                            if ($_global_class->checkDifferenceBetweenTwoDate($empl_start_work_date, date("d-m-Y")) >= 12){
+                                $upah_libur = $_holiday * $_std_harian;
+                                $_pokok += $upah_libur;
+                            }
+
+                            //UPAH HAID
+                            $_table = new Haid();
+                            $_haids = DB::table($_table->BASETABLE)
+                                ->where('id_employee', '=', $empl_id)
+                                ->where('date', '>=', $start_date)
+                                ->where('date', '<=', $end_date)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->count();
+                            if ($_haids > 0){
+                                $_haid += $_std_haid;
+                            }
+
+                            if ($_potongan_bpjs){
+                                $_pot_bpjs += $empl_pot_bpjs;
+                            }
+
+                            $_tot = ($_pokok + $_premi + $_haid) - $_pot_bpjs;
+
+                            $temp = array(
+                                "id_employee" => $empl_id,
+                                "employee_name" => $empl_name,
+                                "pokok" => $_pokok,
+                                "haid" => $_haid,
+                                "premi" => $_premi,
+                                "potongan_bpjs" => $_pot_bpjs,
+                                "msit" => $_masuk . ' | ' . $_setengah_hari . ' | ' . $_ijin . ' | ' . $_tidak_masuk,
+                                "libur" => $_holiday,
+                                "total" => $_tot,
+                                "std_harian" => $_std_harian,
+                                "std_cuti" => $_std_haid,
+                                "rajang" => count($_chop_date_arr),
+                                "_rajang" => $_chop_date_arr,
+                            );
+
+                            array_push($_data, $temp);
+
+                            // RESET VARIABLE
+                            $_pokok = 0;
+                            $_premi = 0;
+                            $_haid = 0;
+                            $_tot = 0;
+                            $_pot_bpjs = 0;
+                            $_masuk = 0;
+                            $_setengah_hari = 0;
+                            $_ijin = 0;
+                            $_tidak_masuk = 0;
+                        }
+                    }
+                    // END EMPLOYEE
+                }
+
             }
 
             $feedback = [
@@ -712,6 +1109,50 @@ class DesktopController extends Controller
                 $fields = [
                     "date", "description"
                 ];
+            }
+
+            if (strtolower($table) === "chop") {
+                $_table = new Chop();
+                $_date = date("d-m-Y");
+
+                $fields = [
+                    "number"
+                ];
+
+                $chops = DB::table($_table->BASETABLE)
+                    ->where('date', '=', $_date)
+                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                    ->first();
+
+                if (!empty($chops)){
+                    $id = $chops->id;
+                } else {
+                    $generate_id = $_global_class->generateID($_table->NAME);
+                    $data += ["id" => $generate_id];
+                    $data += ["date" => $_date];
+                    $data += ["number" => $request->number];
+                    $data += ["is_active" => $_table->STATUS_ACTIVE];
+
+                    $check_insert = DB::table($_table->BASETABLE)->insert($data);
+
+                    if($check_insert){
+                        $feedback = [
+                            "message" => $table . " Inserted successfully",
+                            "status" => $_global_class->STATUS_SUCCESS,
+                        ];
+
+                        return response()->json($feedback);
+                    } else {
+                        $feedback = [
+                            "message" => "There is something error. Please try again later.",
+                            "status" => $_global_class->STATUS_ERROR,
+                        ];
+
+                        return response()->json($feedback);
+                    }
+                }
+
+
             }
 
             if (strtolower($table) === "attendance") {
@@ -804,6 +1245,8 @@ class DesktopController extends Controller
         $_global_class = new GlobalClass();
         $_table = null;
 
+        $_date = date("d-m-Y");
+
         $fields = [];
         $index = [];
         $data = array();
@@ -818,6 +1261,19 @@ class DesktopController extends Controller
 
             if (strtolower($table) === "group_detail") {
                 $_table = new GroupDetail();
+            }
+
+            if (strtolower($table) === "chop") {
+                $_table = new Chop();
+
+                $chops = DB::table($_table->BASETABLE)
+                    ->where('date', '=', $_date)
+                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                    ->first();
+
+                if (!empty($chops)){
+                    $id = $chops->id;
+                }
             }
 
             $_data = DB::table($_table->BASETABLE)
@@ -1217,6 +1673,7 @@ class DesktopController extends Controller
             $phone_2 = $request->phone_2;
             $domicile_address = $request->domicile_address;
             $premi = $request->premi;
+            $potongan_bpjs = $request->potongan_bpjs;
             $dob = $request->dob;
             $start_date = $request->start_date;
             $gender = $request->gender;
@@ -1248,6 +1705,7 @@ class DesktopController extends Controller
                 "phone_2" => $phone_2,
                 "domicile_address" => $domicile_address,
                 "premi" => $premi,
+                "potongan_bpjs" => $potongan_bpjs,
                 "dob" => $dob,
                 "start_date" => $start_date,
                 "gender" => $gender,
@@ -1290,6 +1748,7 @@ class DesktopController extends Controller
             "phone_2",
             "domicile_address",
             "premi",
+            "potongan_bpjs",
             "dob",
             "start_date",
             "gender",
