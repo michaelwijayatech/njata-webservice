@@ -36,13 +36,13 @@ class DesktopController extends Controller
 
             $data_user = DB::table($_administrator->BASETABLE)
                 ->where('user_name', '=', $username)
-                ->first();
+                ->first(['id', 'password', 'role', 'is_active']);
 
             if (!empty($data_user)) {
                 if($_global_class->checkPassword($password, $data_user->password)){
                     if($data_user->is_active === $_administrator->STATUS_ACTIVE){
                         $feedback = [
-                            "message" => $data_user->id,
+                            "message" => $data_user,
                             "status" => $_global_class->STATUS_SUCCESS,
                         ];
 
@@ -1088,6 +1088,13 @@ class DesktopController extends Controller
                     $gender = $_table->GENDER_FEMALE;
                 }
                 $data += ["gender" => $gender];
+            }
+
+            if (strtolower($table) === "administrator_role") {
+                $_table = new Administrator();
+                $fields = [
+                    "role"
+                ];
             }
 
             if (strtolower($table) === "contact") {
