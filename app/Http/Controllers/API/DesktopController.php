@@ -438,6 +438,7 @@ class DesktopController extends Controller
 
                 if (strtolower($id) === "all") {
                     $_employee = DB::table($_table->BASETABLE)
+                        ->where('gender', '=', $_table->GENDER_FEMALE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
 
@@ -893,8 +894,15 @@ class DesktopController extends Controller
                         ->get();
                     if (count($_chops) > 0) {
                         foreach ($_chops as $chops => $chop) {
-                            $chop_date = $chop->date;
-                            array_push($_chop_date_arr, $chop_date);
+                            $chop_number = $chop->number;
+                            if ($chop_number === (string)$_table->NUMBER_SINGAPORE){
+                                $chop_date = $chop->date;
+                                array_push($_chop_date_arr, $chop_date);
+                                array_push($_chop_date_arr, $chop_date);
+                            } else {
+                                $chop_date = $chop->date;
+                                array_push($_chop_date_arr, $chop_date);
+                            }
                         }
                     }
 
@@ -939,9 +947,18 @@ class DesktopController extends Controller
                                             $_premi += $empl_premi;
                                         }
                                         if ($empl_stat === $_stat_harian_bawah){
-                                            if (in_array($att_date, $_chop_date_arr)){
-                                                $_premi += $empl_premi;
+                                            $ctr_temp = 0;
+                                            for ($i = 0; $i < count($_chop_date_arr); $i++) {
+                                                if ($_chop_date_arr[$i] === $att_date){
+                                                    $ctr_temp++;
+                                                }
                                             }
+
+                                            $_premi += ($empl_premi * $ctr_temp);
+
+//                                            if (in_array($att_date, $_chop_date_arr)){
+//                                                $_premi += $empl_premi;
+//                                            }
                                         }
                                     }
                                     if ($att_stat === (string)$_table->STATUS_IJIN){
@@ -951,7 +968,13 @@ class DesktopController extends Controller
                                     }
                                     if ($att_stat === (string)$_table->STATUS_SETENGAH_HARI){
                                         $_pokok += ($_std_harian / 2);
-                                        $_premi += ($empl_premi / 2);
+                                        $ctr_temp = 0;
+                                        for ($i = 0; $i < count($_chop_date_arr); $i++) {
+                                            if ($_chop_date_arr[$i] === $att_date){
+                                                $ctr_temp++;
+                                            }
+                                        }
+                                        $_premi += (($empl_premi * $ctr_temp) / 2);
                                         $_setengah_hari += 1;
                                     }
 
@@ -1095,6 +1118,31 @@ class DesktopController extends Controller
                 $fields = [
                     "role"
                 ];
+            }
+
+            if (strtolower($table) === "employee") {
+                $_table = new Employee();
+                $fields = [
+                    "id_company", "first_name", "last_name", "email", "phone_1", "phone_2", "domicile_address", "premi", "potongan_bpjs", "dob", "start_date"
+                ];
+
+                $gender = $request->gender;
+                if(strtolower($gender) === "male"){
+                    $gender = $_table->GENDER_MALE;
+                } else {
+                    $gender = $_table->GENDER_FEMALE;
+                }
+                $data += ["gender" => $gender];
+
+                $status = $request->status;
+                if(strtolower($status) === "borongan"){
+                    $status = $_table->STATUS_BORONGAN;
+                } else if(strtolower($status) === "harian_bawah"){
+                    $status = $_table->STATUS_HARIAN_BAWAH;
+                } else if(strtolower($status) === "harian_atas"){
+                    $status = $_table->STATUS_HARIAN_ATAS;
+                }
+                $data += ["status" => $status];
             }
 
             if (strtolower($table) === "contact") {
@@ -1762,7 +1810,7 @@ class DesktopController extends Controller
             "status"
         ];
 
-        $index = [1,2,3,4,5,6,7,8,9,10];
+        $index = [1,2,3,4,5,6,7,8,9,10,11,12,13];
 
         $postdata = file_get_contents("php://input");
         if (isset($postdata)) {
@@ -1784,16 +1832,19 @@ class DesktopController extends Controller
                     $id = $request->$field;
                 }
 
-                if($i===11){
+                if($i===12){
+//                    $gender = null;
                     if(strtolower($request->$field) === "male"){
-                        $gender = $_employee->GENDER_MALE;
+//                        $gender = $_employee->GENDER_MALE;
+                        $data += ["gender" => $_employee->GENDER_MALE];
                     } else {
-                        $gender = $_employee->GENDER_FEMALE;
+//                        $gender = $_employee->GENDER_FEMALE;
+                        $data += ["gender" => $_employee->GENDER_FEMALE];
                     }
-                    $data += ["gender" => $gender];
+//                    $data += ["gender" => $gender];
                 }
 
-                if($i===12){
+                if($i===13){
                     if(strtolower($request->$field) === "harian_atas"){
                         $status = $_employee->STATUS_HARIAN_ATAS;
                     } else if(strtolower($request->$field) === "harian_bawah"){
