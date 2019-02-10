@@ -827,7 +827,7 @@ class DesktopController extends Controller
 
                                     if (count($_atts2) > 0) {
                                         foreach ($_atts2 as $atts2 => $att2) {
-                                            $empl_start_work_date = $att->start_date;
+                                            $empl_start_work_date = $att2->start_date;
                                             if ($_global_class->checkDifferenceBetweenTwoDate($empl_start_work_date, date("d-m-Y")) >= 12){
                                                 $upah_libur = $_holiday * $upah_harian;
                                                 $_upah_libur += $upah_libur;
