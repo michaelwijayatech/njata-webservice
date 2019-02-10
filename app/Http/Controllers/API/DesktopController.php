@@ -820,7 +820,7 @@ class DesktopController extends Controller
                                         }
                                     }
 
-                                    $_atts2 =  DB::table('attendance')
+                                    $_atts2 =  DB::table('employee')
                                         ->where('id', '=', $gd_id_empl)
                                         ->where('is_active', '=' , '1')
                                         ->get();
