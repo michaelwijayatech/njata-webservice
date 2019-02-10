@@ -9,13 +9,16 @@ use App\Model\Carton;
 use App\Model\Chop;
 use App\Model\Company;
 use App\Model\Contact;
+use App\Model\Distributor;
 use App\Model\Employee;
 use App\Model\GroupDetail;
 use App\Model\GroupHeader;
 use App\Model\Haid;
 use App\Model\Holiday;
+use App\Model\Product;
 use App\Model\RevisionSalary;
 use App\Model\Standard;
+use App\Model\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -173,6 +176,36 @@ class DesktopController extends Controller
                 $generate_id = $_global_class->generateID($_table->NAME);
                 $data += ["id" => $generate_id];
                 $data += ["date" => date("d-m-Y")];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "product"){
+                $_table = new Product();
+                $fields = [
+                    "name", "price"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "distributor"){
+                $_table = new Distributor();
+                $fields = [
+                    "name", "address", "phone_number"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "supplier"){
+                $_table = new Supplier();
+                $fields = [
+                    "name", "address", "phone_number"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
                 $data += ["is_active" => $_table->STATUS_ACTIVE];
             }
 
@@ -373,6 +406,51 @@ class DesktopController extends Controller
 
             if (strtolower($table) === "contact") {
                 $_table = new Contact();
+
+                if (strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id', '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "product") {
+                $_table = new Product();
+
+                if (strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id', '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "distributor") {
+                $_table = new Distributor();
+
+                if (strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id', '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "supplier") {
+                $_table = new Supplier();
 
                 if (strtolower($id) === "all") {
                     $_data = DB::table($_table->BASETABLE)
@@ -1185,6 +1263,27 @@ class DesktopController extends Controller
                 $_table = new Standard();
                 $fields = [
                     "name", "year", "nominal"
+                ];
+            }
+
+            if (strtolower($table) === "product") {
+                $_table = new Product();
+                $fields = [
+                    "name", "price"
+                ];
+            }
+
+            if (strtolower($table) === "distributor") {
+                $_table = new Distributor();
+                $fields = [
+                    "name", "phone_number", "address"
+                ];
+            }
+
+            if (strtolower($table) === "supplier") {
+                $_table = new Supplier();
+                $fields = [
+                    "name", "phone_number", "address"
                 ];
             }
 
