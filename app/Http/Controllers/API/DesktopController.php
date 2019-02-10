@@ -808,12 +808,6 @@ class DesktopController extends Controller
                                         foreach ($_atts as $atts => $att) {
                                             $att_stat = $att->status;
                                             $empl_name = $att->first_name . ' ' . $att->last_name;
-                                            $empl_start_work_date = $att->start_date;
-
-                                            if ($_global_class->checkDifferenceBetweenTwoDate($empl_start_work_date, date("d-m-Y")) >= 12){
-                                                $upah_libur = $_holiday * $upah_harian;
-                                                $_upah_libur += $upah_libur;
-                                            }
 
                                             if ($att_stat === '3') {
                                                 $ijin = $ijin + 1;
@@ -822,6 +816,21 @@ class DesktopController extends Controller
                                                     array_push($ijin_name_arr, $empl_name);
                                                     $ijin_name .= $empl_name . '@!#';
                                                 }
+                                            }
+                                        }
+                                    }
+
+                                    $_atts2 =  DB::table('attendance')
+                                        ->where('id', '=', $gd_id_empl)
+                                        ->where('is_active', '=' , '1')
+                                        ->get();
+
+                                    if (count($_atts2) > 0) {
+                                        foreach ($_atts2 as $atts2 => $att2) {
+                                            $empl_start_work_date = $att->start_date;
+                                            if ($_global_class->checkDifferenceBetweenTwoDate($empl_start_work_date, date("d-m-Y")) >= 12){
+                                                $upah_libur = $_holiday * $upah_harian;
+                                                $_upah_libur += $upah_libur;
                                             }
                                         }
                                     }
