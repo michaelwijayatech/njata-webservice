@@ -684,6 +684,10 @@ class DesktopController extends Controller
                 $upah_borongan = 0;
                 $cuti_haid = 0;
                 $upah_harian = 0;
+                $_upah_libur = 0;
+
+                $_stat_harian_atas = $_table->STATUS_HARIAN_ATAS;
+                $_stat_harian_bawah = $_table->STATUS_HARIAN_BAWAH;
 
                 if (strtolower($id) === "all") {
                     $_ghs = DB::table($_table->BASETABLE)
@@ -700,6 +704,34 @@ class DesktopController extends Controller
                                 ->where('date', '<=', $end_date)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->sum('carton');
+
+                            $_table = new Holiday();
+                            $_holiday = DB::table($_table->BASETABLE)
+                                ->where('date', '>=', $start_date)
+                                ->where('date', '<=', $end_date)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->count();
+
+                            $_year = date("Y");
+                            $_table = new Standard();
+                            $_standarts = DB::table($_table->BASETABLE)
+                                ->where('year', '=', $_year)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->get();
+
+                            if (count($_standarts) > 0) {
+                                foreach ($_standarts as $standarts => $standart) {
+                                    if ($standart->name === "upah_borongan") {
+                                        $upah_borongan = $_global_class->removeMoneySeparator($standart->nominal);
+                                    }
+                                    if ($standart->name === "cuti_haid") {
+                                        $cuti_haid = $_global_class->removeMoneySeparator($standart->nominal);
+                                    }
+                                    if ($standart->name === "upah_harian") {
+                                        $upah_harian = $_global_class->removeMoneySeparator($standart->nominal);
+                                    }
+                                }
+                            }
 
                             $_haids = DB::table('haid')
                                 ->where('date', '>=', $start_date)
@@ -769,13 +801,19 @@ class DesktopController extends Controller
                                         ->where('attendance.date', '>=', $start_date)
                                         ->where('attendance.date', '<=', $end_date)
                                         ->where('attendance.id_employee', '=', $gd_id_empl)
-                                        ->select('employee.id', 'employee.first_name', 'employee.last_name', 'attendance.id', 'attendance.status')
+                                        ->select('employee.id', 'employee.first_name', 'employee.last_name', 'attendance.id', 'attendance.status', 'employee.start_date')
                                         ->get();
 
                                     if (count($_atts) > 0) {
                                         foreach ($_atts as $atts => $att) {
                                             $att_stat = $att->status;
                                             $empl_name = $att->first_name . ' ' . $att->last_name;
+                                            $empl_start_work_date = $att->start_date;
+
+                                            if ($_global_class->checkDifferenceBetweenTwoDate($empl_start_work_date, date("d-m-Y")) >= 12){
+                                                $upah_libur = $_holiday * $upah_harian;
+                                                $_upah_libur += $upah_libur;
+                                            }
 
                                             if ($att_stat === '3') {
                                                 $ijin = $ijin + 1;
@@ -792,31 +830,10 @@ class DesktopController extends Controller
 
                             //HITUNG TOTAL
 
-                            $_year = date("Y");
-                            $_table = new Standard();
-                            $_standarts = DB::table($_table->BASETABLE)
-                                ->where('year', '=', $_year)
-                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                ->get();
-
-                            if (count($_standarts) > 0) {
-                                foreach ($_standarts as $standarts => $standart) {
-                                    if ($standart->name === "upah_borongan") {
-                                        $upah_borongan = $_global_class->removeMoneySeparator($standart->nominal);
-                                    }
-                                    if ($standart->name === "cuti_haid") {
-                                        $cuti_haid = $_global_class->removeMoneySeparator($standart->nominal);
-                                    }
-                                    if ($standart->name === "upah_harian") {
-                                        $upah_harian = $_global_class->removeMoneySeparator($standart->nominal);
-                                    }
-                                }
-                            }
-
                             $total_carton = (int)$_carton * $upah_borongan;
                             $total_haid = $haid * $cuti_haid;
                             $total_ijin = $ijin * $upah_harian;
-                            $_total = ($total_carton + $total_haid + $total_ijin) - $potongan_bpjs;
+                            $_total = ($total_carton + $total_haid + $total_ijin + $_upah_libur) - $potongan_bpjs;
 
                             $temp = array(
                                 "id_group" => $gh_id,
@@ -827,7 +844,9 @@ class DesktopController extends Controller
                                 "potongan_bpjs" => $potongan_bpjs,
                                 "ijin" => $ijin,
                                 "ijin_name" => $ijin_name,
-                                "total" => $_total
+                                "total" => $_total,
+                                "upah_libur" => $_upah_libur,
+                                "info_empl" => $_atts,
                             );
 
                             array_push($_data, $temp);
@@ -839,6 +858,7 @@ class DesktopController extends Controller
                             $ijin_name = null;
                             $ijin_name_arr = [];
                             $potongan_bpjs = 0;
+                            $_upah_libur = 0;
                             $_total = 0;
                         }
                     }
