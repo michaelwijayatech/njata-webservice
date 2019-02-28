@@ -132,6 +132,10 @@ class GlobalClass
         return (int)str_replace('.', '', $MONEY);
     }
 
+    public function addMoneySeparator($MONEY, $DECIMAL){
+        return number_format($MONEY, $DECIMAL,",",".");
+    }
+
     public function checkDifferenceBetweenTwoDate($DATE1, $DATE2){
         $_date1 = explode("-", $DATE1)[2] . '-' . explode("-", $DATE1)[1] . '-' . explode("-", $DATE1)[0];
         $_date2 = explode("-", $DATE2)[2] . '-' . explode("-", $DATE2)[1] . '-' . explode("-", $DATE2)[0];

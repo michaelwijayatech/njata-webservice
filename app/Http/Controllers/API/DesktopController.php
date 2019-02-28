@@ -3,20 +3,29 @@
 namespace App\Http\Controllers\API;
 
 use App\Classes\GlobalClass;
+use App\Model\Account;
+use App\Model\Accountancy;
 use App\Model\Administrator;
 use App\Model\Attendance;
+use App\Model\Balance;
 use App\Model\Carton;
 use App\Model\Chop;
 use App\Model\Company;
 use App\Model\Contact;
 use App\Model\Distributor;
 use App\Model\Employee;
+use App\Model\Expense;
 use App\Model\GroupDetail;
 use App\Model\GroupHeader;
 use App\Model\Haid;
 use App\Model\Holiday;
+use App\Model\Income;
+use App\Model\Payment;
 use App\Model\Product;
+use App\Model\Purchase;
 use App\Model\RevisionSalary;
+use App\Model\Sales;
+use App\Model\SalesDetail;
 use App\Model\Standard;
 use App\Model\Supplier;
 use Illuminate\Http\Request;
@@ -182,7 +191,7 @@ class DesktopController extends Controller
             if(strtolower($table) === "product"){
                 $_table = new Product();
                 $fields = [
-                    "name", "price"
+                    "name", "price", "gram"
                 ];
                 $generate_id = $_global_class->generateID($_table->NAME);
                 $data += ["id" => $generate_id];
@@ -278,6 +287,224 @@ class DesktopController extends Controller
                 $data += ["id" => $generate_id];
                 $data += ["date" => date("d-m-Y")];
                 $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "purchase"){
+                $_table = new Purchase();
+                $fields = [
+                    "id_supplier", "name", "description", "nominal"
+                ];
+
+                $nominal = $request->nominal;
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $generate_date = date("d-m-Y");
+                $data += ["date" => $generate_date];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+
+                foreach ($fields as $field) {
+                    ${$field} = $request->$field;
+                    $data += ["{$field}" => "${$field}"];
+                }
+
+                $local_insert = DB::table($_table->BASETABLE)->insert($data);
+
+                if($local_insert){
+                    $check_acc = $this->accountancy('ADD', 'CREDIT', $generate_id, date("d-m-Y"), $nominal);
+                    if ($check_acc){
+                        $feedback = [
+                            "message" => "Accountancy Inserted successfully",
+                            "status" => $_global_class->STATUS_SUCCESS,
+                        ];
+
+                        return response()->json($feedback);
+                    } else {
+                        $feedback = [
+                            "message" => "There is something error. Please try again later. [Accountancy]",
+                            "status" => $_global_class->STATUS_ERROR,
+                        ];
+
+                        return response()->json($feedback);
+                    }
+                } else {
+                    $feedback = [
+                        "message" => "There is something error. Please try again later.",
+                        "status" => $_global_class->STATUS_ERROR,
+                    ];
+
+                    return response()->json($feedback);
+                }
+            }
+
+            if(strtolower($table) === "sales"){
+                $_table = new Sales();
+                $fields = [
+                    "id_distributor", "nota_number", "total"
+                ];
+
+                foreach ($fields as $field) {
+                    ${$field} = $request->$field;
+                    $data += ["{$field}" => "${$field}"];
+                }
+
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["date" => date("d-m-Y")];
+                $data += ["paid" => "0"];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+
+                $check_insert = DB::table($_table->BASETABLE)->insert($data);
+
+                if($check_insert){
+                    $feedback = [
+                        "message" => $generate_id,
+                        "status" => $_global_class->STATUS_SUCCESS,
+                    ];
+
+                    return response()->json($feedback);
+                } else {
+                    $feedback = [
+                        "message" => "There is something error. Please try again later.",
+                        "status" => $_global_class->STATUS_ERROR,
+                    ];
+
+                    return response()->json($feedback);
+                }
+            }
+
+            if(strtolower($table) === "sales_detail"){
+                $_table = new SalesDetail();
+                $fields = [
+                    "id_sales", "id_product", "quantity", "price", "total"
+                ];
+                $id_helper = $request->id_helper;
+                $generate_id = $_global_class->generateID($_table->NAME) . $id_helper;
+                $data += ["id" => $generate_id];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
+            if(strtolower($table) === "payment"){
+                $_table = new Payment();
+                $fields = [
+                    "id_sales", "nominal"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["date" => date("d-m-Y")];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+
+                foreach ($fields as $field) {
+                    ${$field} = $request->$field;
+                    $data += ["{$field}" => "${$field}"];
+                }
+
+                $check_insert = DB::table($_table->BASETABLE)->insert($data);
+
+                if($check_insert){
+                    $feedback = [
+                        "message" => $generate_id,
+                        "status" => $_global_class->STATUS_SUCCESS,
+                    ];
+
+                    return response()->json($feedback);
+                } else {
+                    $feedback = [
+                        "message" => "There is something error. Please try again later.",
+                        "status" => $_global_class->STATUS_ERROR,
+                    ];
+
+                    return response()->json($feedback);
+                }
+            }
+
+            if(strtolower($table) === "expenses"){
+                $_table = new Expense();
+                $fields = [
+                    "id_account", "name", "nominal", "description"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["date" => date("d-m-Y")];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+
+                foreach ($fields as $field) {
+                    ${$field} = $request->$field;
+                    $data += ["{$field}" => "${$field}"];
+                }
+
+                $local_insert = DB::table($_table->BASETABLE)->insert($data);
+
+                if($local_insert){
+                    $nominal = $request->nominal;
+                    $check_acc = $this->accountancy('ADD', 'CREDIT', $generate_id, date("d-m-Y"), $nominal);
+                    if ($check_acc){
+                        $feedback = [
+                            "message" => "Accountancy Inserted successfully",
+                            "status" => $_global_class->STATUS_SUCCESS,
+                        ];
+
+                        return response()->json($feedback);
+                    } else {
+                        $feedback = [
+                            "message" => "There is something error. Please try again later. [Accountancy]",
+                            "status" => $_global_class->STATUS_ERROR,
+                        ];
+
+                        return response()->json($feedback);
+                    }
+                } else {
+                    $feedback = [
+                        "message" => "There is something error. Please try again later.",
+                        "status" => $_global_class->STATUS_ERROR,
+                    ];
+
+                    return response()->json($feedback);
+                }
+            }
+
+            if(strtolower($table) === "income"){
+                $_table = new Income();
+                $fields = [
+                    "name", "nominal", "description"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["date" => date("d-m-Y")];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+
+                foreach ($fields as $field) {
+                    ${$field} = $request->$field;
+                    $data += ["{$field}" => "${$field}"];
+                }
+
+                $local_insert = DB::table($_table->BASETABLE)->insert($data);
+
+                if($local_insert){
+                    $nominal = $request->nominal;
+                    $check_acc = $this->accountancy('ADD', 'DEBIT', $generate_id, date("d-m-Y"), $nominal);
+                    if ($check_acc){
+                        $feedback = [
+                            "message" => "Accountancy Inserted successfully",
+                            "status" => $_global_class->STATUS_SUCCESS,
+                        ];
+
+                        return response()->json($feedback);
+                    } else {
+                        $feedback = [
+                            "message" => "There is something error. Please try again later. [Accountancy]",
+                            "status" => $_global_class->STATUS_ERROR,
+                        ];
+
+                        return response()->json($feedback);
+                    }
+                } else {
+                    $feedback = [
+                        "message" => "There is something error. Please try again later.",
+                        "status" => $_global_class->STATUS_ERROR,
+                    ];
+
+                    return response()->json($feedback);
+                }
             }
 
             foreach ($fields as $field) {
@@ -689,6 +916,46 @@ class DesktopController extends Controller
                 }
             }
 
+            if (strtolower($table) === "purchase") {
+                $_table = new Purchase();
+                $start_date = $request->start_date;
+                $end_date = $request->end_date;
+
+                if (strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->join('supplier', 'supplier.id', '=', 'purchase.id_supplier')
+                        ->where('purchase.date', '>=', $start_date)
+                        ->where('purchase.date', '<=', $end_date)
+                        ->where('purchase.is_active', '=', $_table->STATUS_ACTIVE)
+                        ->select('purchase.id', 'purchase.date', 'purchase.name as p_name', 'purchase.nominal', 'supplier.name as s_name')
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->join('supplier', 'supplier.id', '=', 'purchase.id_supplier')
+                        ->where('purchase.id_supplier', '=', $id)
+                        ->where('purchase.date', '>=', $start_date)
+                        ->where('purchase.date', '<=', $end_date)
+                        ->where('purchase.is_active', '=', $_table->STATUS_ACTIVE)
+                        ->select('purchase.id', 'purchase.date', 'purchase.name as p_name', 'purchase.nominal', 'supplier.name as s_name')
+                        ->get();
+                }
+            }
+
+            if (strtolower($table) === "purchase_detail") {
+                $_table = new Purchase();
+
+                if (strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id', '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
             if (strtolower($table) === "carton") {
                 $_table = new GroupHeader();
                 $_data = [];
@@ -738,6 +1005,57 @@ class DesktopController extends Controller
                         ->where('id', '=', $id)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->first();
+                }
+            }
+
+            if (strtolower($table) === "sales") {
+                $_table = new Sales();
+
+                if (strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+
+                    $_data = DB::table($_table->BASETABLE)
+                        ->join('distributor', 'distributor.id', '=', 'sales.id_distributor')
+                        ->where('sales.nota_number', '=', $id)
+                        ->where('sales.is_active', '=', $_table->STATUS_ACTIVE)
+                        ->select('sales.id as sales_id', 'sales.id_distributor as sales_id_distributor', 'sales.nota_number', 'sales.date', 'sales.total', 'sales.paid', 'distributor.name as distributor_name')
+                        ->get();
+                }
+            }
+
+            if (strtolower($table) === "sales_by_distributor") {
+                $_table = new Sales();
+
+                if (strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id_distributor', '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                }
+            }
+
+            if (strtolower($table) === "sales_detail") {
+                $_table = new SalesDetail();
+
+                if (strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+
+                    $_data = DB::table($_table->BASETABLE)
+                        ->join('product', 'product.id', '=', 'sales_detail.id_product')
+                        ->where('sales_detail.id_sales', '=', $id)
+                        ->where('sales_detail.is_active', '=', $_table->STATUS_ACTIVE)
+                        ->select('sales_detail.id as sd_id', 'sales_detail.id_product as sd_id_product', 'sales_detail.quantity as sd_quantity', 'sales_detail.price as sd_price', 'sales_detail.total as sd_total', 'product.name as product_name')
+                        ->get();
                 }
             }
 
@@ -1160,6 +1478,57 @@ class DesktopController extends Controller
 
             }
 
+            if (strtolower($table) === "account") {
+                $_table = new Account();
+
+                if (strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id', '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "expenses") {
+                $_table = new Expense();
+                if (strtolower($id) === "all") {
+                    $start_date = $request->start_date;
+                    $end_date = $request->end_date;
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('date', '>=', $start_date)
+                        ->where('date', '<=', $end_date)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id', '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
+            if (strtolower($table) === "income") {
+                $_table = new Income();
+                if (strtolower($id) === "all") {
+                    $start_date = $request->start_date;
+                    $end_date = $request->end_date;
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('date', '>=', $start_date)
+                        ->where('date', '<=', $end_date)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id', '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
             $feedback = [
                 "message" => $_data,
                 "status" => $_global_class->STATUS_SUCCESS,
@@ -1269,7 +1638,7 @@ class DesktopController extends Controller
             if (strtolower($table) === "product") {
                 $_table = new Product();
                 $fields = [
-                    "name", "price"
+                    "name", "price", "gram"
                 ];
             }
 
@@ -1292,6 +1661,81 @@ class DesktopController extends Controller
                 $fields = [
                     "date", "description"
                 ];
+            }
+
+            if (strtolower($table) === "sales_paid") {
+                $_table = new Sales();
+                $fields = [
+                    "paid"
+                ];
+
+                foreach ($fields as $field) {
+                    ${$field} = $request->$field;
+                    $data += ["{$field}" => "${$field}"];
+                }
+
+                $_data = DB::table($_table->BASETABLE)
+                    ->where('id', '=', $id)
+                    ->update($data);
+
+                if ($_data){
+                    $_date = date("d-m-Y");
+                    $nominal = $request->new_paid;
+                    $id_payment = $request->id_payment;
+                    $check_acc = $this->accountancy('add', 'debit', $id_payment, $_date, $nominal);
+                    if ($check_acc){
+                        $feedback = [
+                            "message" => "Payment Inserted successfully",
+                            "status" => $_global_class->STATUS_SUCCESS,
+                        ];
+
+                        return response()->json($feedback);
+                    } else {
+                        $feedback = [
+                            "message" => "There is something error. Please try again later. [Accountancy]",
+                            "status" => $_global_class->STATUS_ERROR,
+                        ];
+
+                        return response()->json($feedback);
+                    }
+                }
+            }
+
+            if (strtolower($table) === "purchase") {
+                $_table = new Purchase();
+                $fields = [
+                    "date", "name", "description", "nominal"
+                ];
+
+                foreach ($fields as $field) {
+                    ${$field} = $request->$field;
+                    $data += ["{$field}" => "${$field}"];
+                }
+
+                $_data = DB::table($_table->BASETABLE)
+                    ->where('id', '=', $id)
+                    ->update($data);
+
+                if ($_data){
+                    $nominal = $request->nominal;
+                    $date = $request->date;
+                    $check_acc = $this->accountancy('update', 'credit', $id, $date, $nominal);
+                    if ($check_acc){
+                        $feedback = [
+                            "message" => "Accountancy Updated successfully",
+                            "status" => $_global_class->STATUS_SUCCESS,
+                        ];
+
+                        return response()->json($feedback);
+                    } else {
+                        $feedback = [
+                            "message" => "There is something error. Please try again later. [Accountancy]",
+                            "status" => $_global_class->STATUS_ERROR,
+                        ];
+
+                        return response()->json($feedback);
+                    }
+                }
             }
 
             if (strtolower($table) === "chop") {
@@ -1405,6 +1849,87 @@ class DesktopController extends Controller
                 }
             }
 
+            if (strtolower($table) === "account") {
+                $_table = new Account();
+                $fields = [
+                    "name", "number"
+                ];
+            }
+
+            if (strtolower($table) === "expenses") {
+                $_table = new Expense();
+                $fields = [
+                    "id_account", "date", "name", "nominal", "description"
+                ];
+
+                foreach ($fields as $field) {
+                    ${$field} = $request->$field;
+                    $data += ["{$field}" => "${$field}"];
+                }
+
+                $_data = DB::table($_table->BASETABLE)
+                    ->where('id', '=', $id)
+                    ->update($data);
+
+                if ($_data){
+                    $nominal = $request->nominal;
+                    $date = $request->date;
+                    $check_acc = $this->accountancy('update','credit', $id, $date, $nominal);
+                    if ($check_acc){
+                        $feedback = [
+                            "message" => "Accountancy Updated successfully",
+                            "status" => $_global_class->STATUS_SUCCESS,
+                        ];
+
+                        return response()->json($feedback);
+                    } else {
+                        $feedback = [
+                            "message" => "There is something error. Please try again later. [Accountancy]",
+                            "status" => $_global_class->STATUS_ERROR,
+                        ];
+
+                        return response()->json($feedback);
+                    }
+                }
+            }
+
+            if (strtolower($table) === "income") {
+                $_table = new Income();
+                $fields = [
+                    "date", "name", "nominal", "description"
+                ];
+
+                foreach ($fields as $field) {
+                    ${$field} = $request->$field;
+                    $data += ["{$field}" => "${$field}"];
+                }
+
+                $_data = DB::table($_table->BASETABLE)
+                    ->where('id', '=', $id)
+                    ->update($data);
+
+                if ($_data){
+                    $nominal = $request->nominal;
+                    $date = $request->date;
+                    $check_acc = $this->accountancy('update','debit', $id, $date, $nominal);
+                    if ($check_acc){
+                        $feedback = [
+                            "message" => "Accountancy Updated successfully",
+                            "status" => $_global_class->STATUS_SUCCESS,
+                        ];
+
+                        return response()->json($feedback);
+                    } else {
+                        $feedback = [
+                            "message" => "There is something error. Please try again later. [Accountancy]",
+                            "status" => $_global_class->STATUS_ERROR,
+                        ];
+
+                        return response()->json($feedback);
+                    }
+                }
+            }
+
             foreach ($fields as $field) {
                 ${$field} = $request->$field;
                 $data += ["{$field}" => "${$field}"];
@@ -1471,6 +1996,272 @@ class DesktopController extends Controller
             return response()->json($feedback);
 
         }
+    }
+
+    public function accountancy($STATUS, $PART, $ID_ACTIVITY, $DATE, $NOMINAL){
+        /**
+         * STATUS   => ADD / UPDATE / DESTROY
+         * PART     => DEBIT / CREDIT
+         */
+
+        $_global_class = new GlobalClass();
+        $_table = new Accountancy();
+//
+//
+//        $acc_id = $this->accountancy_get_id_by_activity($ID_ACTIVITY);
+//        $acc_date = $this->accountancy_get_date_by_activity($ID_ACTIVITY);
+//        $acc_saldo_before = $_global_class->removeMoneySeparator($this->accountancy_check_saldo_before($acc_id));
+//        $acc_nominal_temp = $_global_class->removeMoneySeparator($NOMINAL);
+
+        $data_acc = array();
+        $data_acc += ["date" => $DATE];
+        if (strtolower($PART) === "debit"){
+            $data_acc += ["debit" => $NOMINAL];
+            $data_acc += ["credit" => '-'];
+//            $acc_saldo_now = $_global_class->addMoneySeparator(((int)$acc_saldo_before + (int)$acc_nominal_temp), 0);
+//            $data_acc += ["saldo" => $acc_saldo_now];
+//
+//            $data = [
+//                'id' => $acc_id,
+//                'date' => $acc_date,
+//                'saldo' => $acc_saldo_before,
+//                'nominal' => $acc_nominal_temp,
+//                'now' => $acc_saldo_now
+//            ];
+//
+//            return response()->json($data);
+        } else {
+            $data_acc += ["debit" => '-'];
+            $data_acc += ["credit" => $NOMINAL];
+
+/*//            $acc_saldo_now = (int)$acc_saldo_before - (int)$acc_nominal_temp;
+//            $data_acc += ['saldo' => $_global_class->addMoneySeparator($acc_saldo_now, 0)];*/
+        }
+        $data_acc += ["is_active" => $_table->STATUS_ACTIVE];
+
+        if (strtolower($STATUS) === "add"){
+            $generate_id = $_global_class->generateID($_table->NAME);
+            $data_acc += ["id" => $generate_id];
+            $data_acc += ["saldo" => "-"];
+            $data_acc += ["id_activity" => $ID_ACTIVITY];
+
+            $check_insert = DB::table($_table->BASETABLE)->insert($data_acc);
+
+            if($check_insert){
+//                return true;
+                $status_balance_check = $this->balance_check($DATE, $PART, $NOMINAL);
+                return $status_balance_check;
+                /**
+                 * CHECK BALANCE BY DATE
+                 */
+
+            } else {
+                return false;
+            }
+        }
+
+        if (strtolower($STATUS) === "update") {
+            $check_update = DB::table($_table->BASETABLE)
+                ->where('id_activity', '=', $ID_ACTIVITY)
+                ->update($data_acc);
+
+            if($check_update){
+//                return true;
+                $status_balance_check = $this->balance_check($DATE, $PART, $NOMINAL);
+                return $status_balance_check;
+//                $check_update_after_id = $this->accountancy_update_saldo_after_update_nominal($acc_id, $acc_date, $acc_saldo_before);
+//                if ($check_update_after_id){
+//                    return true;
+//                } else {
+//                    return false;
+//                }
+            } else {
+                return false;
+            }
+        }
+    }
+
+    function balance_check($DATE, $STATUS, $NOMINAL){
+        /**
+         * CHECK BALANCE BY DATE
+         *
+         * $DATE => date
+         * $STATUS => debit / credit
+         * $NOMINAL => new nominal
+         */
+
+        $_global_class = new GlobalClass();
+        $_table = new Balance();
+        $saldo_after = 0;
+        $balance = DB::table($_table->BASETABLE)
+            ->where('date', '=', $DATE)
+            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+            ->first();
+
+        if (!empty($balance)){
+            $saldo_before = $balance->nominal;
+
+            if (strtolower($STATUS) === "debit"){
+                $saldo_after = $_global_class->removeMoneySeparator($saldo_before) + $_global_class->removeMoneySeparator($NOMINAL);
+            }
+
+            if (strtolower($STATUS) === "credit"){
+                $saldo_after = $_global_class->removeMoneySeparator($saldo_before) - $_global_class->removeMoneySeparator($NOMINAL);
+            }
+
+            $status_update = $this->balance_update($DATE, $saldo_after);
+            return $status_update;
+        } else {
+            $saldo_before = $this->balance_get_saldo_date_before($DATE);
+            if (!$saldo_before){
+                $saldo_before = 0;
+            }
+
+            if (strtolower($STATUS) === "debit"){
+                $saldo_after = $saldo_before + $_global_class->removeMoneySeparator($NOMINAL);
+            }
+
+            if (strtolower($STATUS) === "credit"){
+                $saldo_after = $saldo_before - $_global_class->removeMoneySeparator($NOMINAL);
+            }
+
+            $status_add = $this->balance_add($DATE, $saldo_after);
+            return $status_add;
+        }
+    }
+
+    function balance_get_saldo_date_before($DATE){
+        $_table = new Balance();
+        $balance = DB::table($_table->BASETABLE)
+            ->where('date', '<', $DATE)
+            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+            ->orderBy('date', 'DESC')
+            ->first();
+
+        if (!empty($balance)){
+            return $balance->nominal;
+        } else {
+            return false;
+        }
+    }
+
+    function balance_add($DATE, $NOMINAL){
+        $_global_class = new GlobalClass();
+        $_table = new Balance();
+        $data_bal = array();
+        $data_bal += ["date" => $DATE];
+        $data_bal += ["nominal" => $_global_class->addMoneySeparator($NOMINAL, 0)];
+        $generate_id = $_global_class->generateID($_table->NAME);
+        $data_bal += ["id" => $generate_id];
+        $data_bal += ["is_active" => $_table->STATUS_ACTIVE];
+        $check_insert = DB::table($_table->BASETABLE)->insert($data_bal);
+        if($check_insert){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function balance_update($DATE, $NOMINAL){
+        $_global_class = new GlobalClass();
+        $_table = new Balance();
+        $data_bal = array();
+        $data_bal += ["nominal" => $_global_class->addMoneySeparator($NOMINAL, 0)];
+
+        $check_update = DB::table($_table->BASETABLE)
+            ->where('date', '=', $DATE)
+            ->update($data_bal);
+
+        if($check_update){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function accountancy_get_id_by_activity($ID){
+        $_table = new Accountancy();
+
+        $_data = DB::table($_table->BASETABLE)
+            ->where('id_activity', '=', $ID)
+            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+            ->first();
+
+        if (!empty($_data)){
+            return $_data->id;
+        } else {
+            return false;
+        }
+    }
+
+    function accountancy_get_date_by_activity($ID){
+        $_table = new Accountancy();
+
+        $_data = DB::table($_table->BASETABLE)
+            ->where('id_activity', '=', $ID)
+            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+            ->first();
+
+        if (!empty($_data)){
+            return $_data->date;
+        } else {
+            return false;
+        }
+    }
+
+    function accountancy_check_saldo_before($ID){
+        $_table = new Accountancy();
+
+        $_data = DB::table($_table->BASETABLE)
+            ->where('id', '<', $ID)
+            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+            ->orderBy('id', 'DESC')
+            ->orderBy('date', 'ASC')
+            ->first();
+
+        if (!empty($_data)){
+            return $_data->saldo;
+        } else {
+            return false;
+        }
+    }
+
+    function accountancy_update_saldo_after_update_nominal($ID, $DATE, $SALDO){
+        $_global_class = new GlobalClass();
+        $_table = new Accountancy();
+        $_datas = DB::table($_table->BASETABLE)
+            ->where('id', '>', $ID)
+            ->where('date', '>', $DATE)
+            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+            ->get();
+
+        if (count($_datas) > 0) {
+            foreach ($_datas as $datas => $data) {
+                $data_id = $data->id;
+                $data_debit = $data->debit;
+                $data_credit = $data->credit;
+
+                if ($data_credit === "-"){
+                    $new_saldo = $_global_class->removeMoneySeparator($SALDO) + $_global_class->removeMoneySeparator($data_debit);
+                    $data_acc = array();
+                    $data_acc += ["saldo" => $new_saldo];
+                    $check_update = DB::table($_table->BASETABLE)
+                        ->where('id', '=', $data_id)
+                        ->update($data_acc);
+                }
+
+                if ($data_debit === "-"){
+                    $new_saldo = $_global_class->removeMoneySeparator($SALDO) - $_global_class->removeMoneySeparator($data_debit);
+                    $data_acc = array();
+                    $data_acc += ["saldo" => $new_saldo];
+                    $check_update = DB::table($_table->BASETABLE)
+                        ->where('id', '=', $data_id)
+                        ->update($data_acc);
+                }
+            }
+        }
+
+        return true;
     }
 
     function in_array_r($needle, $haystack, $strict = false) {

@@ -23,6 +23,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::get('/test_get', 'API\TestController@get');
 Route::post('/test_post', 'API\TestController@post');
 
+Route::get('/acsb', 'API\DesktopController@accountancy_check_saldo_before');
+Route::get('/acid', 'API\DesktopController@accountancy_get_id_by_activity');
+Route::get('/acc', 'API\DesktopController@accountancy');
+
 /**
  * START DESKTOP
  */
