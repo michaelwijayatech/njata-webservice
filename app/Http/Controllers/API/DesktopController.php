@@ -1361,6 +1361,7 @@ class DesktopController extends Controller
             if (strtolower($table) === "gaji_harian") {
                 $_table = new Employee();
                 $_year = date("Y");
+                $_month = date("m");
                 $start_date = $request->start_date;
                 $end_date = $request->end_date;
                 $_potongan_bpjs = $request->potongan_bpjs;
@@ -1401,8 +1402,9 @@ class DesktopController extends Controller
 
                     $_table = new Chop();
                     $_chops = DB::table($_table->BASETABLE)
-                        ->where('date', '>=', $start_date)
-                        ->where('date', '<=', $end_date)
+//                        ->where('date', '>=', $start_date)
+//                        ->where('date', '<=', $end_date)
+                        ->whereBetween('date', [$start_date, $end_date])
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
                     if (count($_chops) > 0) {
