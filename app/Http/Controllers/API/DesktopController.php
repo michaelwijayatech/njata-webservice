@@ -855,6 +855,15 @@ class DesktopController extends Controller
                         ->where('id_employee', '=', $id_employee)
                         ->where('date', '=', $date)
                         ->first();
+                } elseif (strtolower($id) === "advance_attendance_by_date") {
+                    $_table = new Attendance();
+                    $date = $request->date;
+
+                    $_data = DB::table($_table->BASETABLE)
+                        ->join('employee', 'employee.id', '=', 'attendance.id_employee')
+                        ->where('attendance.date', '=', $date)
+                        ->select('attendance.id', 'attendance.date', 'attendance.status', 'employee.first_name', 'employee.last_name')
+                        ->get();
                 }
             }
 
@@ -998,6 +1007,85 @@ class DesktopController extends Controller
                                 array_push($_data, $temp);
                             }
 
+                        }
+                    }
+                } elseif (strtolower($id) === "carton_by_date"){
+                    $_date = $request->date;
+                    $_ghs = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    if (count($_ghs) > 0) {
+                        foreach ($_ghs as $ghs => $gh) {
+                            $gh_id = $gh->id;
+                            $gh_name = $gh->name;
+
+                            $_table = new Carton();
+                            $cartons = DB::table($_table->BASETABLE)
+                                ->where('id_group', '=', $gh_id)
+                                ->where('date', '=', $_date)
+                                ->first();
+
+                            if (!empty($cartons)) {
+                                $temp = array(
+                                    "id" => $cartons->id,
+                                    "id_group" => $gh_id,
+                                    "group_name" => $gh_name,
+                                    "carton" => $cartons->carton
+                                );
+
+                                array_push($_data, $temp);
+                            } else {
+                                $temp = array(
+                                    "id" => "",
+                                    "id_group" => $gh_id,
+                                    "group_name" => $gh_name,
+                                    "carton" => "-"
+                                );
+
+                                array_push($_data, $temp);
+                            }
+
+                        }
+                    }
+                } elseif (strtolower($id) === "carton_by_date_all"){
+                    $_date = $request->date;
+                    $_ghs = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    if (count($_ghs) > 0) {
+                        foreach ($_ghs as $ghs => $gh) {
+                            $gh_id = $gh->id;
+                            $gh_name = $gh->name;
+
+                            $_table = new Carton();
+                            $cartons = DB::table($_table->BASETABLE)
+                                ->where('id_group', '=', $gh_id)
+                                ->where('date', '=', $_date)
+                                ->get();
+
+                            if (count($cartons) > 0) {
+                                foreach ($cartons as $carton => $cart) {
+                                    $temp = array(
+                                        "id" => $cart->id,
+                                        "id_group" => $gh_id,
+                                        "group_name" => $gh_name,
+                                        "carton" => $cart->carton
+                                    );
+
+                                    array_push($_data, $temp);
+                                }
+                            } else {
+                                $temp = array(
+                                    "id" => "",
+                                    "id_group" => $gh_id,
+                                    "group_name" => $gh_name,
+                                    "carton" => "-"
+                                );
+
+                                array_push($_data, $temp);
+                            }
                         }
                     }
                 } else {
@@ -1849,6 +1937,52 @@ class DesktopController extends Controller
                 }
             }
 
+            if (strtolower($table) === "carton_by_date") {
+                $_table = new Carton();
+                $id = $request->id;
+                $carton = $request->carton;
+                $_date = $request->date;
+
+                $fields = [
+                    "carton"
+                ];
+
+                $cartons = DB::table($_table->BASETABLE)
+                    ->where('id_group' , '=', $id)
+                    ->where('date', '=', $_date)
+                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                    ->first();
+
+                if (!empty($cartons)){
+                    $id = $cartons->id;
+                } else {
+                    $generate_id = $_global_class->generateID($_table->NAME);
+                    $data += ["id" => $generate_id];
+                    $data += ["id_group" => $id];
+                    $data += ["date" => $_date];
+                    $data += ["carton" => $carton];
+                    $data += ["is_active" => $_table->STATUS_ACTIVE];
+
+                    $check_insert = DB::table($_table->BASETABLE)->insert($data);
+
+                    if($check_insert){
+                        $feedback = [
+                            "message" => $table . " Inserted successfully",
+                            "status" => $_global_class->STATUS_SUCCESS,
+                        ];
+
+                        return response()->json($feedback);
+                    } else {
+                        $feedback = [
+                            "message" => "There is something error. Please try again later.",
+                            "status" => $_global_class->STATUS_ERROR,
+                        ];
+
+                        return response()->json($feedback);
+                    }
+                }
+            }
+
             if (strtolower($table) === "account") {
                 $_table = new Account();
                 $fields = [
@@ -1982,6 +2116,14 @@ class DesktopController extends Controller
                 if (!empty($chops)){
                     $id = $chops->id;
                 }
+            }
+
+            if (strtolower($table) === "attendance") {
+                $_table = new Attendance();
+            }
+
+            if (strtolower($table) === "carton") {
+                $_table = new Carton();
             }
 
             $_data = DB::table($_table->BASETABLE)
