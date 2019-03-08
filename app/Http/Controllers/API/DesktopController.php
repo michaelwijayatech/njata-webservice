@@ -1423,9 +1423,8 @@ class DesktopController extends Controller
 
                     $_table = new Holiday();
                     $_holiday = DB::table($_table->BASETABLE)
-//                        ->where('date', '>=', $start_date)
-//                        ->where('date', '<=', $end_date)
-                        ->whereBetween('date', [$start_date, $end_date])
+                        ->where('date', '>=', $start_date)
+                        ->where('date', '<=', $end_date)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->count();
 
