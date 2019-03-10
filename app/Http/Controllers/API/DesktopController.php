@@ -1579,11 +1579,11 @@ class DesktopController extends Controller
                             //UPAH HAID
                             $_table = new Haid();
                             if ($_start_date[1] !== $_end_date[1]){
-                                $_haids = DB::select(DB::raw("SELECT COUNT(`id`)
-                                                        FROM $_table->BASETABLE
-                                                        WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
-                                                        AND `id_employee` = '$empl_id'
-                                                        AND `is_active` = '$_table->STATUS_ACTIVE'"));
+
+                                $_haids = DB::select(DB::raw("SELECT COUNT(`id`) FROM $_table->BASETABLE
+                                                            WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
+                                                            AND id_employee = '$empl_id' 
+                                                            AND is_active = $_table->STATUS_ACTIVE"));
                             } else {
                                 $_haids = DB::table($_table->BASETABLE)
                                     ->where('id_employee', '=', $empl_id)
