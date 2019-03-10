@@ -1496,10 +1496,16 @@ class DesktopController extends Controller
                                                             AND id_employee = '$empl_id' 
                                                             AND is_active = $_table->STATUS_ACTIVE"));
                             } else {
-                                $_atts = DB::select(DB::raw("SELECT * FROM attendance
-                                                            WHERE (`date` >= '$start_date' AND `date` <= '$end_date')
-                                                            AND id_employee = '$empl_id' 
-                                                            AND is_active = $_table->STATUS_ACTIVE"));
+                                $_atts = DB::table($_table->BASETABLE)
+                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+                                ->where('id_employee', '=', $empl_id)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->get();
                             }
                             if (count($_atts) > 0) {
                                 foreach ($_atts as $atts => $att) {
