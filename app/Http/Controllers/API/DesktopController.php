@@ -1403,22 +1403,21 @@ class DesktopController extends Controller
                     }
 
                     $_table = new Chop();
-                    $_chops = DB::table($_table->BASETABLE)
-//                        ->where('date', '>=', $start_date)
-//                        ->where('date', '<=', $end_date)
-//                        ->whereBetween('date', [$start_date, $end_date])
-//
-//                          AND SUBSTR(`date`,4,2) = '$_month'
-//                          AND SUBSTR(`date`,7,4) = '$_year'
-//
-                        ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
-                        ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
-                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
-                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
-                        ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
-                        ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
-                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                        ->get();
+                    if ($_start_date[1] !== $_end_date[1]){
+                        $_chops = DB::select(DB::raw("SELECT * FROM '$_table->BASETABLE'
+                                                            WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
+                                                            AND is_active = $_table->STATUS_ACTIVE"));
+                    } else {
+                        $_chops = DB::table($_table->BASETABLE)
+                            ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+                            ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+                            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                            ->get();
+                    }
                     if (count($_chops) > 0) {
                         foreach ($_chops as $chops => $chop) {
                             $chop_number = $chop->number;
