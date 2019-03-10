@@ -1581,17 +1581,36 @@ class DesktopController extends Controller
                             $ctr_haid = 0;
                             if ($_start_date[1] !== $_end_date[1]){
 
-                                $_haids = DB::select(DB::raw("SELECT COUNT(`id`) as total FROM $_table->BASETABLE
-                                                            WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
-                                                            AND id_employee = '$empl_id' 
-                                                            AND is_active = $_table->STATUS_ACTIVE"));
+                                $_haids = DB::table($_table->BASETABLE)
+                                    ->where('id_employee', '=', $empl_id)
+                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                    ->orderBy('date', 'DESC')
+                                    ->first();
+                                if (!empty($_haids)){
+                                    $_h_date = $_haids->date;
 
-                                foreach ($_haids as $haids => $haid) {
-                                    $ctr_haid = $haid->total;
-                                }
+                                    /**
+                                     * CHECK YEAR
+                                     */
+                                    if ((explode('-',$_h_date)[2] === $_start_date[2]) AND (explode('-',$_h_date)[2] === $_end_date[2]) ) {
+                                        /**
+                                         * CHECK FIRST MONTH
+                                         */
+                                        if (explode('-',$_h_date)[1] === $_start_date[1]){
+                                            if (explode('-',$_h_date)[0] >= $start_date[0]){
+                                                $_haid += $_std_haid;
+                                            }
+                                        }
 
-                                if ($ctr_haid > 0){
-                                    $_haid += $_std_haid;
+                                        /**
+                                         * CHECK SECOND MONTH
+                                         */
+                                        if (explode('-',$_h_date)[1] === $_end_date[1]){
+                                            if (explode('-',$_h_date)[0] >= $_end_date[0]){
+                                                $_haid += $_std_haid;
+                                            }
+                                        }
+                                    }
                                 }
 
                             } else {
