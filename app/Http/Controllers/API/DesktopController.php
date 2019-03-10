@@ -1152,6 +1152,8 @@ class DesktopController extends Controller
                 $start_date = $request->start_date;
                 $end_date = $request->end_date;
                 $_potongan_bpjs = $request->potongan_bpjs;
+                $_start_date = explode('-', $start_date);
+                $_end_date = explode('-', $end_date);
 
                 $_data = [];
                 $cartons = null;
@@ -1182,12 +1184,24 @@ class DesktopController extends Controller
                         foreach ($_ghs as $ghs => $gh) {
                             $gh_id = $gh->id;
 
-                            $_carton = DB::table('carton')
-                                ->where('id_group', $gh_id)
-                                ->where('date', '>=', $start_date)
-                                ->where('date', '<=', $end_date)
-                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                ->sum('carton');
+                            $_table = new Carton();
+                            if ($_start_date[1] !== $_end_date[1]) {
+                                $_carton = DB::select(DB::raw("SELECT SUM(carton) FROM $_table->BASETABLE
+                                                            WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
+                                                            AND id_group = '$gh_id'
+                                                            AND is_active = $_table->STATUS_ACTIVE"));
+                            } else {
+                                $_carton = DB::table('carton')
+                                    ->where('id_group', $gh_id)
+                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                    ->sum('carton');
+                            }
 
                             $_table = new Holiday();
                             $_holiday = DB::table($_table->BASETABLE)
