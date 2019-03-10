@@ -1592,29 +1592,36 @@ class DesktopController extends Controller
                                     ->first();
                                 if (!empty($_haids)){
                                     $_h_date = $_haids->date;
+                                    $_haid_date = date('Y-m-d', strtotime($_h_date));
 
-                                    /**
-                                     * CHECK YEAR
-                                     */
-                                    if ((explode('-',$_h_date)[2] === $_start_date[2]) AND (explode('-',$_h_date)[2] === $_end_date[2]) ) {
-                                        /**
-                                         * CHECK FIRST MONTH
-                                         */
-                                        if ((string)explode('-',$_h_date)[1] === (string)$_start_date[1]){
-                                            if ((string)explode('-',$_h_date)[0] >= (string)$start_date[0]){
-                                                $_haid += $_std_haid;
-                                            }
-                                        }
+                                    $_haid_start = date('Y-m-d', strtotime($start_date));
+                                    $_haid_end = date('Y-m-d', strtotime($end_date));
 
-                                        /**
-                                         * CHECK SECOND MONTH
-                                         */
-                                        if ((string)explode('-',$_h_date)[1] === (string)$_end_date[1]){
-                                            if ((string)explode('-',$_h_date)[0] <= (string)$_end_date[0]){
-                                                $_haid += $_std_haid;
-                                            }
-                                        }
+                                    if (($_haid_date >= $_haid_start) && ($_haid_date <= $_haid_end)) {
+                                        $_haid += $_std_haid;
                                     }
+//                                    /**
+//                                     * CHECK YEAR
+//                                     */
+//                                    if ((explode('-',$_h_date)[2] === $_start_date[2]) AND (explode('-',$_h_date)[2] === $_end_date[2]) ) {
+//                                        /**
+//                                         * CHECK FIRST MONTH
+//                                         */
+//                                        if ((string)explode('-',$_h_date)[1] === (string)$_start_date[1]){
+//                                            if ((string)explode('-',$_h_date)[0] >= (string)$start_date[0]){
+//                                                $_haid += $_std_haid;
+//                                            }
+//                                        }
+//
+//                                        /**
+//                                         * CHECK SECOND MONTH
+//                                         */
+//                                        if ((string)explode('-',$_h_date)[1] === (string)$_end_date[1]){
+//                                            if ((string)explode('-',$_h_date)[0] <= (string)$_end_date[0]){
+//                                                $_haid += $_std_haid;
+//                                            }
+//                                        }
+//                                    }
                                 }
 
                             } else {

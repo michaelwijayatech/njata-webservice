@@ -42,6 +42,111 @@ class TestController extends Controller
     }
 
     public function get(){
+        $data = [];
+        $_global_class = new GlobalClass();
+        $id = 'all';
+        $_table = new Employee();
+        $_year = date("Y");
+        $_month = date("m");
+        $start_date = '25-02-2019';
+        $end_date = '02-03-2019';
+        $_start_date = explode('-', $start_date);
+        $_end_date = explode('-', $end_date);
+        $_potongan_bpjs = false;
+
+        $_data = [];
+        $_chop_date_arr = [];
+        $_pokok = 0;
+        $_premi = 0;
+        $_haid = 0;
+        $_tot = 0;
+        $_pot_bpjs = 0;
+        $_std_harian = 0;
+        $_std_haid = 0;
+        $_masuk = 0;
+        $_setengah_hari = 0;
+        $_ijin = 0;
+        $_tidak_masuk = 0;
+
+        $_stat_harian_atas = $_table->STATUS_HARIAN_ATAS;
+        $_stat_harian_bawah = $_table->STATUS_HARIAN_BAWAH;
+
+        $ctr = 0;
+
+        if (strtolower($id) === "all") {
+            $_table = new Employee();
+            $_empls = DB::table($_table->BASETABLE)
+                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                ->where('status', '=', $_table->STATUS_HARIAN_ATAS)
+                ->orWhere('status', '=', $_table->STATUS_HARIAN_BAWAH)
+                ->get();
+            if (count($_empls) > 0) {
+                foreach ($_empls as $empls => $empl) {
+                    $empl_id = $empl->id;
+                    $empl_name = $empl->first_name . ' ' . $empl->last_name;
+
+                    $_haids = DB::table('haid')
+                        ->where('id_employee', '=', $empl_id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->orderBy('date', 'DESC')
+                        ->first();
+                    $_h_date_res = [];
+                    if (!empty($_haids)) {
+                        $_h_date = explode("-", $_haids->date);
+
+                        $_haid_date = date('Y-m-d', strtotime($_haids->date));
+
+                        $_haid_start = date('Y-m-d', strtotime($start_date));
+                        $_haid_end = date('Y-m-d', strtotime($end_date));
+
+                        $_h_date_res = [];
+                        array_push($_h_date_res, $_haids->date);
+                        array_push($_h_date_res, $_haid_date);
+                        array_push($_h_date_res, $_haid_start);
+                        array_push($_h_date_res, $_haid_end);
+
+//                        if (((string)$_h_date[2] === (string)$_start_date[2]) or ((string)$_h_date[2] === (string)$_end_date[2])){
+//                            if ((string)$_h_date[1] === (string)$_start_date[1]) {
+//                                if ((int)$_h_date[0] >= (int)$_start_date[0]){
+//                                    $_h_date_res = $_h_date[0] .  " Start : " . $_h_date[0] . ' - ' . $_h_date[1] . ' - ' . $_h_date[2];
+//                                } else {
+//                                    $_h_date_res = ["no"];
+//                                }
+//                            } else if ((string)$_h_date[1] === (string)$_end_date[1]) {
+//                                if ((int)$_h_date[0] <= (int)$_start_date[0]){
+//                                    $_h_date_res = $_h_date[0] .  " End : " . $_h_date[0] . ' - ' . $_h_date[1] . ' - ' . $_h_date[2];
+//                                } else {
+//                                    $_h_date_res = ["no"];
+//                                }
+//                            } else {
+//                                $_h_date_res = ["no"];
+//                            }
+//                        } else {
+//                            $_h_date_res = ["no"];
+//                        }
+                        if (($_haid_date >= $_haid_start) && ($_haid_date <= $_haid_end)){
+                            $_h_date_res =  "is between";
+                        }else{
+                            $_h_date_res = "no";
+                        }
+                    }
+                    $temp = array(
+                        "id_employee" => $empl_id,
+                        "employee_name" => $empl_name,
+                        "date" => $_h_date_res,
+//                        "haids" => $_haids,
+                    );
+
+                    array_push($_data, $temp);
+                }
+            }
+
+
+            return response()->json($_data);
+        }
+    }
+
+    public function get2(){
         $_global_class = new GlobalClass();
         $id = 'all';
         $_table = new Employee();
@@ -242,6 +347,7 @@ class TestController extends Controller
                     //UPAH HAID
                     $_table = new Haid();
                     $ctr_haid = 0;
+                    $_h_date = 0;
                     if ($_start_date[1] !== $_end_date[1]){
 
                         $_haids = DB::table($_table->BASETABLE)
@@ -249,18 +355,19 @@ class TestController extends Controller
                             ->where('is_active', '=', $_table->STATUS_ACTIVE)
                             ->orderBy('date', 'DESC')
                             ->first();
+
                         if (!empty($_haids)){
-                            $_h_date = $_haids->date;
+                            $_h_date = explode('-',$_haids->date);
 
                             /**
                              * CHECK YEAR
                              */
-                            if ((explode('-',$_h_date)[2] === $_start_date[2]) AND (explode('-',$_h_date)[2] === $_end_date[2]) ) {
+                            if (($_h_date[2] === $_start_date[2]) OR ($_h_date[2] === $_end_date[2]) ) {
                                 /**
                                  * CHECK FIRST MONTH
                                  */
-                                if (explode('-',$_h_date)[1] === $_start_date[1]){
-                                    if (explode('-',$_h_date)[0] >= $start_date[0]){
+                                if ($_h_date[1] === $_start_date[1]){
+                                    if ($_h_date[0] >= $start_date[0]){
                                         $_haid += $_std_haid;
                                     }
                                 }
@@ -268,8 +375,8 @@ class TestController extends Controller
                                 /**
                                  * CHECK SECOND MONTH
                                  */
-                                if (explode('-',$_h_date)[1] === $_end_date[1]){
-                                    if (explode('-',$_h_date)[0] >= $_end_date[0]){
+                                if ($_h_date[1] === $_end_date[1]){
+                                    if ($_h_date[0] >= $_end_date[0]){
                                         $_haid += $_std_haid;
                                     }
                                 }
@@ -313,6 +420,7 @@ class TestController extends Controller
                         "std_cuti" => $_std_haid,
                         "rajang" => count($_chop_date_arr),
                         "_rajang" => $_chop_date_arr,
+                        "_haid_date" => $_h_date,
                     );
 
                     array_push($_data, $temp);
