@@ -1434,7 +1434,7 @@ class DesktopController extends Controller
 
                     $_table = new Holiday();
                     if ($_start_date[1] !== $_end_date[1]){
-                        $_holiday = DB::select(DB::raw("SELECT COUNT(id)
+                        $_holiday = DB::select(DB::raw("SELECT COUNT(`id`)
                                                         FROM $_table->BASETABLE
                                                         WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
                                                         AND is_active = $_table->STATUS_ACTIVE"));
@@ -1579,7 +1579,7 @@ class DesktopController extends Controller
                             //UPAH HAID
                             $_table = new Haid();
                             if ($_start_date[1] !== $_end_date[1]){
-                                $_haids = DB::select(DB::raw("SELECT COUNT(id)
+                                $_haids = DB::select(DB::raw("SELECT COUNT(`id`)
                                                         FROM $_table->BASETABLE
                                                         WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
                                                         AND is_active = $_table->STATUS_ACTIVE"));
