@@ -1478,17 +1478,28 @@ class DesktopController extends Controller
 
 
                             if ($_start_date[1] !== $_end_date[1]){
-                                $_atts = DB::table($_table->BASETABLE)
-                                    ->where('id_employee', '=', $empl_id)
-                                    ->where(\DB::raw('(`date` >= '.$start_date.' OR `date` <= '.$end_date.')'))
-                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                    ->get();
+//                                $_atts = DB::table($_table->BASETABLE)
+//                                    ->where('id_employee', '=', $empl_id)
+//                                    ->where(\DB::raw('(`date` >= '.$start_date.' OR `date` <= '.$end_date.')'))
+//                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+//                                    ->get();
+
+//                                $_atts = DB::select(DB::raw("SELECT * FROM attendance
+//                                                            WHERE id_employee = '$_emp_id'
+//                                                            AND SUBSTR(`date`,1,2) = '$_date'
+//                                                            AND SUBSTR(`date`,4,2) = '$_month'
+//                                                            AND SUBSTR(`date`,7,4) = '$_year'
+//                                                            AND is_active = '1'"));
+
+                                $_atts = DB::select(DB::raw("SELECT * FROM attendance
+                                                            WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
+                                                            AND id_employee = '$empl_id' 
+                                                            AND is_active = $_table->STATUS_ACTIVE"));
                             } else {
-                                $_atts = DB::table($_table->BASETABLE)
-                                    ->where('id_employee', '=', $empl_id)
-                                    ->where(\DB::raw('(`date` >= '.$start_date.' AND `date` <= '.$end_date.')'))
-                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                    ->get();
+                                $_atts = DB::select(DB::raw("SELECT * FROM attendance
+                                                            WHERE (`date` >= '$start_date' AND `date` <= '$end_date')
+                                                            AND id_employee = '$empl_id' 
+                                                            AND is_active = $_table->STATUS_ACTIVE"));
                             }
                             if (count($_atts) > 0) {
                                 foreach ($_atts as $atts => $att) {
