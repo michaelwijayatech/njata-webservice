@@ -1476,17 +1476,19 @@ class DesktopController extends Controller
 //                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
 //                                ->get();
 
-                            $_atts = DB::table($_table->BASETABLE)
-                                ->where('id_employee', '=', $empl_id)
-                                ->where('date', '>=', $start_date)
-                                ->where('date', '<=', $end_date)
-                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                ->get();
+
                             if ($_start_date[1] !== $_end_date[1]){
                                 $_atts = DB::table($_table->BASETABLE)
                                     ->where('id_employee', '=', $empl_id)
                                     ->where('date', '>=', $start_date)
                                     ->orWhere('date', '<=', $end_date)
+                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                    ->get();
+                            } else {
+                                $_atts = DB::table($_table->BASETABLE)
+                                    ->where('id_employee', '=', $empl_id)
+                                    ->where('date', '>=', $start_date)
+                                    ->where('date', '<=', $end_date)
                                     ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                     ->get();
                             }
