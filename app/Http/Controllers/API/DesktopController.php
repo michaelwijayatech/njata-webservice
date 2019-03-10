@@ -1610,7 +1610,7 @@ class DesktopController extends Controller
                                          * CHECK SECOND MONTH
                                          */
                                         if (explode('-',$_h_date)[1] === $_end_date[1]){
-                                            if (explode('-',$_h_date)[0] >= $_end_date[0]){
+                                            if (explode('-',$_h_date)[0] <= $_end_date[0]){
                                                 $_haid += $_std_haid;
                                             }
                                         }
