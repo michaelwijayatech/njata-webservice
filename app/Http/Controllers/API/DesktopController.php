@@ -1600,8 +1600,8 @@ class DesktopController extends Controller
                                         /**
                                          * CHECK FIRST MONTH
                                          */
-                                        if (explode('-',$_h_date)[1] === $_start_date[1]){
-                                            if (explode('-',$_h_date)[0] >= $start_date[0]){
+                                        if ((string)explode('-',$_h_date)[1] === (string)$_start_date[1]){
+                                            if ((string)explode('-',$_h_date)[0] >= (string)$start_date[0]){
                                                 $_haid += $_std_haid;
                                             }
                                         }
@@ -1609,8 +1609,8 @@ class DesktopController extends Controller
                                         /**
                                          * CHECK SECOND MONTH
                                          */
-                                        if (explode('-',$_h_date)[1] === $_end_date[1]){
-                                            if (explode('-',$_h_date)[0] <= $_end_date[0]){
+                                        if ((string)explode('-',$_h_date)[1] === (string)$_end_date[1]){
+                                            if ((string)explode('-',$_h_date)[0] <= (string)$_end_date[0]){
                                                 $_haid += $_std_haid;
                                             }
                                         }
