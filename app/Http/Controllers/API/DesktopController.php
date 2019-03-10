@@ -1480,13 +1480,13 @@ class DesktopController extends Controller
                             if ($_start_date[1] !== $_end_date[1]){
                                 $_atts = DB::table($_table->BASETABLE)
                                     ->where('id_employee', '=', $empl_id)
-                                    ->where(\DB::raw('(`date` >= $start_date OR `date` <= $end_date)'))
+                                    ->where(\DB::raw('(`date` >= '.$start_date.' OR `date` <= '.$end_date.')'))
                                     ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                     ->get();
                             } else {
                                 $_atts = DB::table($_table->BASETABLE)
                                     ->where('id_employee', '=', $empl_id)
-                                    ->where(\DB::raw('(`date` >= $start_date AND `date` <= $end_date)'))
+                                    ->where(\DB::raw('(`date` >= '.$start_date.' AND `date` <= '.$end_date.')'))
                                     ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                     ->get();
                             }
