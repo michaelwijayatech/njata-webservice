@@ -1364,6 +1364,8 @@ class DesktopController extends Controller
                 $_month = date("m");
                 $start_date = $request->start_date;
                 $end_date = $request->end_date;
+                $_start_date = explode('-', $start_date);
+                $_end_date = explode('-', $end_date);
                 $_potongan_bpjs = $request->potongan_bpjs;
 
                 $_data = [];
@@ -1404,7 +1406,17 @@ class DesktopController extends Controller
                     $_chops = DB::table($_table->BASETABLE)
 //                        ->where('date', '>=', $start_date)
 //                        ->where('date', '<=', $end_date)
-                        ->whereBetween('date', [$start_date, $end_date])
+//                        ->whereBetween('date', [$start_date, $end_date])
+//
+//                          AND SUBSTR(`date`,4,2) = '$_month'
+//                          AND SUBSTR(`date`,7,4) = '$_year'
+//
+                        ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+                        ->orWhere(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                        ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                        ->orWhere(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[2])
+                        ->orWhere(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
                     if (count($_chops) > 0) {
