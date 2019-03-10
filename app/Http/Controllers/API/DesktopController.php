@@ -1434,7 +1434,7 @@ class DesktopController extends Controller
 
                     $_table = new Holiday();
                     if ($_start_date[1] !== $_end_date[1]){
-                        $_holidays = DB::select(DB::raw("SELECT COUNT(`id`)
+                        $_holidays = DB::select(DB::raw("SELECT COUNT(`id`) as total
                                                         FROM $_table->BASETABLE
                                                         WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
                                                         AND is_active = $_table->STATUS_ACTIVE"));
