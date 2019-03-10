@@ -1404,7 +1404,7 @@ class DesktopController extends Controller
 
                     $_table = new Chop();
                     if ($_start_date[1] !== $_end_date[1]){
-                        $_chops = DB::select(DB::raw("SELECT * FROM '$_table->BASETABLE'
+                        $_chops = DB::select(DB::raw("SELECT * FROM $_table->BASETABLE
                                                             WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
                                                             AND is_active = $_table->STATUS_ACTIVE"));
                     } else {
