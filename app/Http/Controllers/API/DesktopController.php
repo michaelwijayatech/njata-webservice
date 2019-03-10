@@ -1578,12 +1578,22 @@ class DesktopController extends Controller
 
                             //UPAH HAID
                             $_table = new Haid();
+                            $ctr_haid = 0;
                             if ($_start_date[1] !== $_end_date[1]){
 
-                                $_haids = DB::select(DB::raw("SELECT COUNT(`id`) FROM $_table->BASETABLE
+                                $_haids = DB::select(DB::raw("SELECT COUNT(`id`) as total FROM $_table->BASETABLE
                                                             WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
                                                             AND id_employee = '$empl_id' 
                                                             AND is_active = $_table->STATUS_ACTIVE"));
+
+                                foreach ($_haids as $haids => $haid) {
+                                    $ctr_haid = $haid->total;
+                                }
+
+                                if ($ctr_haid > 0){
+                                    $_haid += $_std_haid;
+                                }
+
                             } else {
                                 $_haids = DB::table($_table->BASETABLE)
                                     ->where('id_employee', '=', $empl_id)
@@ -1595,10 +1605,11 @@ class DesktopController extends Controller
                                     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
                                     ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                     ->count();
+                                if ($_haids > 0){
+                                    $_haid += $_std_haid;
+                                }
                             }
-                            if ($_haids > 0){
-                                $_haid += $_std_haid;
-                            }
+
 
                             if ($_potongan_bpjs){
                                 $_pot_bpjs += $empl_pot_bpjs;

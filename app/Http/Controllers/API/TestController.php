@@ -2,16 +2,35 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Model\Haid;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class TestController extends Controller
 {
     public function get(){
-        $data = [
-            'id' => '01',
-            'name' => 'test',
-        ];
+//        $data = [
+//            'id' => '01',
+//            'name' => 'test',
+//        ];
+
+        $data = [];
+
+        $start_date = '25-02-2019';
+        $end_date = '09-03-2019';
+        $empl_id = 'EMPLO20190204101805';
+
+        $_table = new Haid();
+        $_haids = DB::select(DB::raw("SELECT `id` as total FROM $_table->BASETABLE
+                                    WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
+                                    AND id_employee = '$empl_id' 
+                                    AND is_active = $_table->STATUS_ACTIVE"));
+
+
+        foreach ($_haids as $haids => $haid) {
+            array_push($data, $haid->total);
+        }
 
         return response()->json($data);
     }
