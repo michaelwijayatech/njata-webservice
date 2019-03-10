@@ -1579,68 +1579,55 @@ class DesktopController extends Controller
                             //UPAH HAID
                             $_table = new Haid();
                             $ctr_haid = 0;
-                            $_haids = DB::table($_table->BASETABLE)
-                                ->where('id_employee', '=', $empl_id)
-                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
-                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
-                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
-                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
-                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
-                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
-                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                ->count();
-                            if ($_haids > 0){
-                                $_haid += $_std_haid;
+                            if ($_start_date[1] !== $_end_date[1]){
+
+                                $_haids = DB::table($_table->BASETABLE)
+                                    ->where('id_employee', '=', $empl_id)
+                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                    ->orderBy('date', 'DESC')
+                                    ->first();
+                                if (!empty($_haids)){
+                                    $_h_date = $_haids->date;
+
+                                    /**
+                                     * CHECK YEAR
+                                     */
+                                    if ((explode('-',$_h_date)[2] === $_start_date[2]) AND (explode('-',$_h_date)[2] === $_end_date[2]) ) {
+                                        /**
+                                         * CHECK FIRST MONTH
+                                         */
+                                        if (explode('-',$_h_date)[1] === $_start_date[1]){
+                                            if (explode('-',$_h_date)[0] >= $start_date[0]){
+                                                $_haid += $_std_haid;
+                                            }
+                                        }
+
+                                        /**
+                                         * CHECK SECOND MONTH
+                                         */
+                                        if (explode('-',$_h_date)[1] === $_end_date[1]){
+                                            if (explode('-',$_h_date)[0] >= $_end_date[0]){
+                                                $_haid += $_std_haid;
+                                            }
+                                        }
+                                    }
+                                }
+
+                            } else {
+                                $_haids = DB::table($_table->BASETABLE)
+                                    ->where('id_employee', '=', $empl_id)
+                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                    ->count();
+                                if ($_haids > 0){
+                                    $_haid += $_std_haid;
+                                }
                             }
-//                            if ($_start_date[1] !== $_end_date[1]){
-//
-//                                $_haids = DB::table($_table->BASETABLE)
-//                                    ->where('id_employee', '=', $empl_id)
-//                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
-//                                    ->orderBy('date', 'DESC')
-//                                    ->first();
-//                                if (!empty($_haids)){
-//                                    $_h_date = $_haids->date;
-//
-//                                    /**
-//                                     * CHECK YEAR
-//                                     */
-//                                    if ((explode('-',$_h_date)[2] === $_start_date[2]) AND (explode('-',$_h_date)[2] === $_end_date[2]) ) {
-//                                        /**
-//                                         * CHECK FIRST MONTH
-//                                         */
-//                                        if (explode('-',$_h_date)[1] === $_start_date[1]){
-//                                            if (explode('-',$_h_date)[0] >= $start_date[0]){
-//                                                $_haid += $_std_haid;
-//                                            }
-//                                        }
-//
-//                                        /**
-//                                         * CHECK SECOND MONTH
-//                                         */
-//                                        if (explode('-',$_h_date)[1] === $_end_date[1]){
-//                                            if (explode('-',$_h_date)[0] >= $_end_date[0]){
-//                                                $_haid += $_std_haid;
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//
-//                            } else {
-//                                $_haids = DB::table($_table->BASETABLE)
-//                                    ->where('id_employee', '=', $empl_id)
-//                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
-//                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
-//                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
-//                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
-//                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
-//                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
-//                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
-//                                    ->count();
-//                                if ($_haids > 0){
-//                                    $_haid += $_std_haid;
-//                                }
-//                            }
 
 
                             if ($_potongan_bpjs){
