@@ -1462,19 +1462,34 @@ class DesktopController extends Controller
                             $empl_pot_bpjs = $_global_class->removeMoneySeparator($empl->potongan_bpjs);
 
                             $_table = new Attendance();
+//                            $_atts = DB::table($_table->BASETABLE)
+////                                ->where('date', '>=', $start_date)
+////                                ->where('date', '<=', $end_date)
+////                                ->whereBetween('date', [$start_date, $end_date])
+//                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+//                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+//                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+//                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+//                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+//                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+//                                ->where('id_employee', '=', $empl_id)
+//                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+//                                ->get();
+
                             $_atts = DB::table($_table->BASETABLE)
-//                                ->where('date', '>=', $start_date)
-//                                ->where('date', '<=', $end_date)
-//                                ->whereBetween('date', [$start_date, $end_date])
-                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
-                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
-                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
-                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
-                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
-                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
                                 ->where('id_employee', '=', $empl_id)
+                                ->where('date', '>=', $start_date)
+                                ->where('date', '<=', $end_date)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->get();
+                            if ($_start_date[1] !== $_end_date[1]){
+                                $_atts = DB::table($_table->BASETABLE)
+                                    ->where('id_employee', '=', $empl_id)
+                                    ->where('date', '>=', $start_date)
+                                    ->orWhere('date', '<=', $end_date)
+                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                    ->get();
+                            }
                             if (count($_atts) > 0) {
                                 foreach ($_atts as $atts => $att) {
                                     $att_stat = $att->status;
@@ -1544,8 +1559,14 @@ class DesktopController extends Controller
                             $_table = new Haid();
                             $_haids = DB::table($_table->BASETABLE)
                                 ->where('id_employee', '=', $empl_id)
-                                ->where('date', '>=', $start_date)
-                                ->where('date', '<=', $end_date)
+//                                ->where('date', '>=', $start_date)
+//                                ->where('date', '<=', $end_date)
+                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->count();
                             if ($_haids > 0){
