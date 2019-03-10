@@ -1186,10 +1186,14 @@ class DesktopController extends Controller
 
                             $_table = new Carton();
                             if ($_start_date[1] !== $_end_date[1]) {
-                                $_carton = DB::select(DB::raw("SELECT SUM(carton) FROM $_table->BASETABLE
+                                $_cartons = DB::select(DB::raw("SELECT SUM(carton) as total FROM $_table->BASETABLE
                                                             WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
                                                             AND id_group = '$gh_id'
                                                             AND is_active = $_table->STATUS_ACTIVE"));
+
+                                foreach ($_cartons as $cartons => $carton) {
+                                    $_carton = $carton->total;
+                                }
                             } else {
                                 $_carton = DB::table('carton')
                                     ->where('id_group', $gh_id)
