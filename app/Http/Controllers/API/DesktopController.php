@@ -1442,15 +1442,15 @@ class DesktopController extends Controller
                         }
                     }
 
+                    $_chops = [];
                     $_table = new Chop();
-                    if ($_start_date[1] !== $_end_date[1]){
-                        $_chops = DB::select(DB::raw("SELECT * FROM $_table->BASETABLE
-                                                            WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
-                                                            AND is_active = $_table->STATUS_ACTIVE"));
-                    } else {
-                        $_chops = DB::table($_table->BASETABLE)
-                            ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
-                            ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+                    $_chops_temps = DB::table($_table->BASETABLE)
+                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_month)
+                        ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                    if ($_start_date[1] !== $_end_date[1]) {
+                        $_chops_temps = DB::table($_table->BASETABLE)
                             ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
                             ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
                             ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
@@ -1458,41 +1458,103 @@ class DesktopController extends Controller
                             ->where('is_active', '=', $_table->STATUS_ACTIVE)
                             ->get();
                     }
+                    if (count($_chops_temps) > 0) {
+                        foreach ($_chops_temps as $_chops_temp => $_chopstemp) {
+                            $_chopst_date = $_chopstemp->date;
+                            $_chops_date = date('Y-m-d', strtotime($_chopst_date));
+
+                            $_chops_start = date('Y-m-d', strtotime($start_date));
+                            $_chops_end = date('Y-m-d', strtotime($end_date));
+
+                            if (($_chops_date >= $_chops_start) && ($_chops_date <= $_chops_end)) {
+                                $temp1 = array(
+                                    "id" => $_chopstemp->id,
+                                    "date" => $_chopstemp->date,
+                                    "number" => $_chopstemp->number,
+                                );
+
+                                array_push($_chops, $temp1);
+                            }
+                        }
+                    }
+//                    if ($_start_date[1] !== $_end_date[1]){
+//                        $_chops = DB::select(DB::raw("SELECT * FROM $_table->BASETABLE
+//                                                            WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
+//                                                            AND is_active = $_table->STATUS_ACTIVE"));
+//                    } else {
+//                        $_chops = DB::table($_table->BASETABLE)
+//                            ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+//                            ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+//                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+//                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+//                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+//                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+//                            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+//                            ->get();
+//                    }
                     if (count($_chops) > 0) {
                         foreach ($_chops as $chops => $chop) {
-                            $chop_number = $chop->number;
+                            $chop_number = $chop['number'];
                             if ($chop_number === (string)$_table->NUMBER_SINGAPORE){
-                                $chop_date = $chop->date;
+                                $chop_date = $chop['date'];
                                 array_push($_chop_date_arr, $chop_date);
                                 array_push($_chop_date_arr, $chop_date);
                             } else {
-                                $chop_date = $chop->date;
+                                $chop_date = $chop['date'];
                                 array_push($_chop_date_arr, $chop_date);
                             }
                         }
                     }
 
+                    $_holiday = 0;
                     $_table = new Holiday();
-                    if ($_start_date[1] !== $_end_date[1]){
-                        $_holidays = DB::select(DB::raw("SELECT COUNT(`id`) as total
-                                                        FROM $_table->BASETABLE
-                                                        WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
-                                                        AND is_active = $_table->STATUS_ACTIVE"));
-
-                        foreach ($_holidays as $holidays => $holiday) {
-                            $_holiday = $holiday->total;
-                        }
-                    } else {
-                        $_holiday = DB::table($_table->BASETABLE)
-                            ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
-                            ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+                    $_holiday_temps = DB::table($_table->BASETABLE)
+                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_month)
+                        ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                    if ($_start_date[1] !== $_end_date[1]) {
+                        $_holiday_temps = DB::table($_table->BASETABLE)
                             ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
                             ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
                             ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
                             ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
                             ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                            ->count();
+                            ->get();
                     }
+                    if (count($_holiday_temps) > 0) {
+                        foreach ($_holiday_temps as $_holiday_temp => $_holidaytemp) {
+                            $_holst_date = $_holidaytemp->date;
+                            $_hols_date = date('Y-m-d', strtotime($_holst_date));
+
+                            $_hols_start = date('Y-m-d', strtotime($start_date));
+                            $_hols_end = date('Y-m-d', strtotime($end_date));
+
+                            if (($_hols_date >= $_hols_start) && ($_hols_date <= $_hols_end)) {
+                                $_holiday++;
+                            }
+                        }
+                    }
+//                    if ($_start_date[1] !== $_end_date[1]){
+//                        $_holidays = DB::select(DB::raw("SELECT COUNT(`id`) as total
+//                                                        FROM $_table->BASETABLE
+//                                                        WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
+//                                                        AND is_active = $_table->STATUS_ACTIVE"));
+//
+//                        foreach ($_holidays as $holidays => $holiday) {
+//                            $_holiday = $holiday->total;
+//                        }
+//                    } else {
+//                        $_holiday = DB::table($_table->BASETABLE)
+//                            ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+//                            ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+//                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+//                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+//                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+//                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+//                            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+//                            ->count();
+//                    }
 
                     $_table = new Employee();
                     $_empls = DB::table($_table->BASETABLE)
