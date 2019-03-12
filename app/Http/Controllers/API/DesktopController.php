@@ -1586,7 +1586,7 @@ class DesktopController extends Controller
                             if (count($_atts) > 0) {
                                 foreach ($_atts as $atts => $att) {
                                     $att_stat = $att['status'];
-                                    $att_date = $att->date;
+                                    $att_date = $att['date'];
                                     if ($att_stat === (string)$_table->STATUS_MASUK){
                                         $_pokok += $_std_harian;
                                         $_masuk += 1;
