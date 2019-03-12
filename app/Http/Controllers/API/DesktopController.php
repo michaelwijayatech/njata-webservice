@@ -1328,7 +1328,7 @@ class DesktopController extends Controller
                             $_haids = [];
                             $_table = new Haid();
                             $_haids_temps = DB::table($_table->BASETABLE)
-                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_month)
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_month)
                                 ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->get();
@@ -1417,18 +1417,62 @@ class DesktopController extends Controller
                                 foreach ($_gds as $gds => $gd) {
                                     $gd_id_empl = $gd->id_employee;
 
-                                    $_atts = DB::table('attendance')
+//                                    $_atts = DB::table('attendance')
+//                                        ->join('employee', 'employee.id', '=', 'attendance.id_employee')
+//                                        ->where('attendance.date', '>=', $start_date)
+//                                        ->where('attendance.date', '<=', $end_date)
+//                                        ->where('attendance.id_employee', '=', $gd_id_empl)
+//                                        ->select('employee.id', 'employee.first_name', 'employee.last_name', 'attendance.id', 'attendance.status', 'employee.start_date')
+//                                        ->get();
+
+                                    $_atts = [];
+                                    $_table = new Attendance();
+                                    $_atts_temps = DB::table($_table->BASETABLE)
                                         ->join('employee', 'employee.id', '=', 'attendance.id_employee')
-                                        ->where('attendance.date', '>=', $start_date)
-                                        ->where('attendance.date', '<=', $end_date)
+                                        ->where(\DB::raw('SUBSTR(attendance.`date`,4,2)'), '=', $_month)
+                                        ->where(\DB::raw('SUBSTR(attendance.`date`,7,4)'), '=', $_year)
                                         ->where('attendance.id_employee', '=', $gd_id_empl)
                                         ->select('employee.id', 'employee.first_name', 'employee.last_name', 'attendance.id', 'attendance.status', 'employee.start_date')
                                         ->get();
+                                    if ($_start_date[1] !== $_end_date[1]) {
+                                        $_atts_temps = DB::table($_table->BASETABLE)
+                                            ->join('employee', 'employee.id', '=', 'attendance.id_employee')
+                                            ->where(\DB::raw('SUBSTR(attendance.`date`,4,2)'), '>=', $_start_date[1])
+                                            ->where(\DB::raw('SUBSTR(attendance.`date`,4,2)'), '<=', $_end_date[1])
+                                            ->where(\DB::raw('SUBSTR(attendance.`date`,7,4)'), '=', $_start_date[2])
+                                            ->where(\DB::raw('SUBSTR(attendance.`date`,7,4)'), '=', $_end_date[2])
+                                            ->where('attendance.id_employee', '=', $gd_id_empl)
+                                            ->select('employee.id as employee_id', 'employee.first_name', 'employee.last_name', 'attendance.id as attendance_id', 'attendance.status', 'employee.start_date')
+                                            ->get();
+                                    }
+
+                                    if (count($_atts_temps) > 0) {
+                                        foreach ($_atts_temps as $_atts_temp => $_attstemp) {
+                                            $_attst_date = $_attstemp->date;
+                                            $_atts_date = date('Y-m-d', strtotime($_attst_date));
+
+                                            $_atts_start = date('Y-m-d', strtotime($start_date));
+                                            $_atts_end = date('Y-m-d', strtotime($end_date));
+
+                                            if (($_atts_date >= $_atts_start) && ($_atts_date <= $_atts_end)) {
+                                                $temp1 = array(
+                                                    "employee_id" => $_attstemp->employee_id,
+                                                    "employee_first_name" => $_attstemp->first_name,
+                                                    "employee_last_name" => $_attstemp->last_name,
+                                                    "employee_start_date" => $_attstemp->start_date,
+                                                    "attendance_id" => $_attstemp->attendance_id,
+                                                    "attendance_status" => $_attstemp->status,
+                                                );
+
+                                                array_push($_atts, $temp1);
+                                            }
+                                        }
+                                    }
 
                                     if (count($_atts) > 0) {
                                         foreach ($_atts as $atts => $att) {
-                                            $att_stat = $att->status;
-                                            $empl_name = $att->first_name . ' ' . $att->last_name;
+                                            $att_stat = $att['attendance_status'];
+                                            $empl_name = $att['employee_first_name'] . ' ' . $att['employee_last_name'];
 
                                             if ($att_stat === '3') {
                                                 $ijin = $ijin + 1;
