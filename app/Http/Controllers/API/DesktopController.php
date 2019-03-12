@@ -1246,26 +1246,56 @@ class DesktopController extends Controller
 //                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
 //                                ->count();
 
-                            $_table = new Holiday();
-                            if ($_start_date[1] !== $_end_date[1]){
-                                $_holidays = DB::select(DB::raw("SELECT COUNT(`id`) as total
-                                                        FROM $_table->BASETABLE
-                                                        WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
-                                                        AND is_active = $_table->STATUS_ACTIVE"));
+//                            $_table = new Holiday();
+//                            if ($_start_date[1] !== $_end_date[1]){
+//                                $_holidays = DB::select(DB::raw("SELECT COUNT(`id`) as total
+//                                                        FROM $_table->BASETABLE
+//                                                        WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
+//                                                        AND is_active = $_table->STATUS_ACTIVE"));
+//
+//                                foreach ($_holidays as $holidays => $holiday) {
+//                                    $_holiday = $holiday->total;
+//                                }
+//                            } else {
+//                                $_holiday = DB::table($_table->BASETABLE)
+//                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+//                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+//                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+//                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+//                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+//                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+//                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+//                                    ->count();
+//                            }
 
-                                foreach ($_holidays as $holidays => $holiday) {
-                                    $_holiday = $holiday->total;
-                                }
-                            } else {
-                                $_holiday = DB::table($_table->BASETABLE)
-                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
-                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+                            $_holiday = 0;
+                            $_table = new Holiday();
+                            $_holiday_temps = DB::table($_table->BASETABLE)
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_month)
+                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->get();
+                            if ($_start_date[1] !== $_end_date[1]) {
+                                $_holiday_temps = DB::table($_table->BASETABLE)
                                     ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
                                     ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
                                     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
                                     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
                                     ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                    ->count();
+                                    ->get();
+                            }
+                            if (count($_holiday_temps) > 0) {
+                                foreach ($_holiday_temps as $_holiday_temp => $_holidaytemp) {
+                                    $_holst_date = $_holidaytemp->date;
+                                    $_hols_date = date('Y-m-d', strtotime($_holst_date));
+
+                                    $_hols_start = date('Y-m-d', strtotime($start_date));
+                                    $_hols_end = date('Y-m-d', strtotime($end_date));
+
+                                    if (($_hols_date >= $_hols_start) && ($_hols_date <= $_hols_end)) {
+                                        $_holiday++;
+                                    }
+                                }
                             }
 
                             $_year = date("Y");
@@ -1289,16 +1319,51 @@ class DesktopController extends Controller
                                 }
                             }
 
-                            $_haids = DB::table('haid')
-                                ->where('date', '>=', $start_date)
-                                ->where('date', '<=', $end_date)
+//                            $_haids = DB::table('haid')
+//                                ->where('date', '>=', $start_date)
+//                                ->where('date', '<=', $end_date)
+//                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+//                                ->get();
+
+                            $_haids = [];
+                            $_table = new Haid();
+                            $_haids_temps = DB::table($_table->BASETABLE)
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_month)
+                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->get();
+                            if ($_start_date[1] !== $_end_date[1]) {
+                                $_haids_temps = DB::table($_table->BASETABLE)
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                    ->get();
+                            }
+                            if (count($_haids_temps) > 0) {
+                                foreach ($_haids_temps as $_haids_temp => $_haidstemp) {
+                                    $_haidst_date = $_haidstemp->date;
+                                    $_haids_date = date('Y-m-d', strtotime($_haidst_date));
+
+                                    $_haids_start = date('Y-m-d', strtotime($start_date));
+                                    $_haids_end = date('Y-m-d', strtotime($end_date));
+
+                                    if (($_haids_date >= $_haids_start) && ($_haids_date <= $_haids_end)) {
+                                        $temp1 = array(
+                                            "id" => $_haidstemp->id,
+                                            "id_employee" => $_haidstemp->id_employee,
+                                        );
+
+                                        array_push($_haids, $temp1);
+                                    }
+                                }
+                            }
 
                             if (count($_haids) > 0) {
                                 foreach ($_haids as $_haid => $hid) {
                                     $_checkgroup = DB::table('group_detail')
-                                        ->where('id_employee', '=', $hid->id_employee)
+                                        ->where('id_employee', '=', $hid['id_employee'])
                                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                         ->first();
 
@@ -1307,7 +1372,7 @@ class DesktopController extends Controller
                                             $haid = $haid + 1;
 
                                             $_employees = DB::table('employee')
-                                                ->where('id', '=', $hid->id_employee)
+                                                ->where('id', '=', $hid['id_employee'])
                                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                                 ->first();
 
