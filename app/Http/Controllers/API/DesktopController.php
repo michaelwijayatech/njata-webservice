@@ -1189,14 +1189,14 @@ class DesktopController extends Controller
                             $_carton = 0;
                             $_table = new Carton();
                             $_cartons_temps = DB::table($_table->BASETABLE)
-                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_month)
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_month)
                                 ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->get();
                             if ($_start_date[1] !== $_end_date[1]) {
                                 $_cartons_temps = DB::table($_table->BASETABLE)
-                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
-                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_start_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_end_date[1])
                                     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
                                     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
                                     ->where('is_active', '=', $_table->STATUS_ACTIVE)
@@ -1475,14 +1475,14 @@ class DesktopController extends Controller
                     $_chops = [];
                     $_table = new Chop();
                     $_chops_temps = DB::table($_table->BASETABLE)
-                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_month)
+                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_month)
                         ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
                     if ($_start_date[1] !== $_end_date[1]) {
                         $_chops_temps = DB::table($_table->BASETABLE)
-                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
-                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_start_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_end_date[1])
                             ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
                             ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
                             ->where('is_active', '=', $_table->STATUS_ACTIVE)
@@ -1539,14 +1539,14 @@ class DesktopController extends Controller
                     $_holiday = 0;
                     $_table = new Holiday();
                     $_holiday_temps = DB::table($_table->BASETABLE)
-                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_month)
+                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_month)
                         ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
                     if ($_start_date[1] !== $_end_date[1]) {
                         $_holiday_temps = DB::table($_table->BASETABLE)
-                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
-                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_start_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_end_date[1])
                             ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
                             ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
                             ->where('is_active', '=', $_table->STATUS_ACTIVE)
@@ -1604,15 +1604,15 @@ class DesktopController extends Controller
                             $_atts = [];
                             $_table = new Attendance();
                             $_atts_temps = DB::table($_table->BASETABLE)
-                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_month)
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_month)
                                 ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
                                 ->where('id_employee', '=', $empl_id)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->get();
                             if ($_start_date[1] !== $_end_date[1]) {
                                 $_atts_temps = DB::table($_table->BASETABLE)
-                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
-                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_start_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_end_date[1])
                                     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
                                     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
                                     ->where('id_employee', '=', $empl_id)
