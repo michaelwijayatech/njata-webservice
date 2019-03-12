@@ -1207,12 +1207,34 @@ class DesktopController extends Controller
                                     ->sum('carton');
                             }
 
+//                            $_table = new Holiday();
+//                            $_holiday = DB::table($_table->BASETABLE)
+//                                ->where('date', '>=', $start_date)
+//                                ->where('date', '<=', $end_date)
+//                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+//                                ->count();
+
                             $_table = new Holiday();
-                            $_holiday = DB::table($_table->BASETABLE)
-                                ->where('date', '>=', $start_date)
-                                ->where('date', '<=', $end_date)
-                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                ->count();
+                            if ($_start_date[1] !== $_end_date[1]){
+                                $_holidays = DB::select(DB::raw("SELECT COUNT(`id`) as total
+                                                        FROM $_table->BASETABLE
+                                                        WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
+                                                        AND is_active = $_table->STATUS_ACTIVE"));
+
+                                foreach ($_holidays as $holidays => $holiday) {
+                                    $_holiday = $holiday->total;
+                                }
+                            } else {
+                                $_holiday = DB::table($_table->BASETABLE)
+                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                    ->count();
+                            }
 
                             $_year = date("Y");
                             $_table = new Standard();
@@ -1487,7 +1509,35 @@ class DesktopController extends Controller
                             $empl_start_work_date = $empl->start_date;
                             $empl_pot_bpjs = $_global_class->removeMoneySeparator($empl->potongan_bpjs);
 
+                            $_atts = [];
                             $_table = new Attendance();
+                            $_atts_temps = DB::table($_table->BASETABLE)
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_month)
+                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
+                                ->where('id_employee', '=', $empl_id)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->get();
+                            if (count($_atts_temps) > 0) {
+                                foreach ($_atts_temps as $_atts_temp => $_attstemp) {
+                                    $_attst_date = $_attstemp->date;
+                                    $_atts_date = date('Y-m-d', strtotime($_attst_date));
+
+                                    $_atts_start = date('Y-m-d', strtotime($start_date));
+                                    $_atts_end = date('Y-m-d', strtotime($end_date));
+
+                                    if (($_atts_date >= $_atts_start) && ($_atts_date <= $_atts_end)) {
+                                        $temp1 = array(
+                                            "att_id" => $_attstemp->id,
+                                            "date" => $_attstemp->date,
+                                            "status" => $_attstemp->status,
+                                        );
+
+                                        array_push($_atts, $temp1);
+                                    }
+                                }
+                            }
+
+
 //                            $_atts = DB::table($_table->BASETABLE)
 ////                                ->where('date', '>=', $start_date)
 ////                                ->where('date', '<=', $end_date)
@@ -1503,7 +1553,7 @@ class DesktopController extends Controller
 //                                ->get();
 
 
-                            if ($_start_date[1] !== $_end_date[1]){
+//                            if ($_start_date[1] !== $_end_date[1]){
 //                                $_atts = DB::table($_table->BASETABLE)
 //                                    ->where('id_employee', '=', $empl_id)
 //                                    ->where(\DB::raw('(`date` >= '.$start_date.' OR `date` <= '.$end_date.')'))
@@ -1517,22 +1567,22 @@ class DesktopController extends Controller
 //                                                            AND SUBSTR(`date`,7,4) = '$_year'
 //                                                            AND is_active = '1'"));
 
-                                $_atts = DB::select(DB::raw("SELECT * FROM $_table->BASETABLE
-                                                            WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
-                                                            AND id_employee = '$empl_id' 
-                                                            AND is_active = $_table->STATUS_ACTIVE"));
-                            } else {
-                                $_atts = DB::table($_table->BASETABLE)
-                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
-                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
-                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
-                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
-                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
-                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
-                                ->where('id_employee', '=', $empl_id)
-                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                ->get();
-                            }
+//                                $_atts = DB::select(DB::raw("SELECT * FROM $_table->BASETABLE
+//                                                            WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
+//                                                            AND id_employee = '$empl_id'
+//                                                            AND is_active = $_table->STATUS_ACTIVE"));
+//                            } else {
+//                                $_atts = DB::table($_table->BASETABLE)
+//                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+//                                ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+//                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+//                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+//                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+//                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+//                                ->where('id_employee', '=', $empl_id)
+//                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+//                                ->get();
+//                            }
                             if (count($_atts) > 0) {
                                 foreach ($_atts as $atts => $att) {
                                     $att_stat = $att->status;
@@ -1600,24 +1650,40 @@ class DesktopController extends Controller
 
                             //UPAH HAID
                             $_table = new Haid();
+                            $_haids = DB::table($_table->BASETABLE)
+                                ->where('id_employee', '=', $empl_id)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->orderBy('date', 'DESC')
+                                ->first();
+                            if (!empty($_haids)) {
+                                $_h_date = $_haids->date;
+                                $_haid_date = date('Y-m-d', strtotime($_h_date));
+
+                                $_haid_start = date('Y-m-d', strtotime($start_date));
+                                $_haid_end = date('Y-m-d', strtotime($end_date));
+
+                                if (($_haid_date >= $_haid_start) && ($_haid_date <= $_haid_end)) {
+                                    $_haid += $_std_haid;
+                                }
+                            }
                             $ctr_haid = 0;
-                            if ($_start_date[1] !== $_end_date[1]){
+//                            if ($_start_date[1] !== $_end_date[1]){
 
-                                $_haids = DB::table($_table->BASETABLE)
-                                    ->where('id_employee', '=', $empl_id)
-                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                    ->orderBy('date', 'DESC')
-                                    ->first();
-                                if (!empty($_haids)){
-                                    $_h_date = $_haids->date;
-                                    $_haid_date = date('Y-m-d', strtotime($_h_date));
-
-                                    $_haid_start = date('Y-m-d', strtotime($start_date));
-                                    $_haid_end = date('Y-m-d', strtotime($end_date));
-
-                                    if (($_haid_date >= $_haid_start) && ($_haid_date <= $_haid_end)) {
-                                        $_haid += $_std_haid;
-                                    }
+//                                $_haids = DB::table($_table->BASETABLE)
+//                                    ->where('id_employee', '=', $empl_id)
+//                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+//                                    ->orderBy('date', 'DESC')
+//                                    ->first();
+//                                if (!empty($_haids)){
+//                                    $_h_date = $_haids->date;
+//                                    $_haid_date = date('Y-m-d', strtotime($_h_date));
+//
+//                                    $_haid_start = date('Y-m-d', strtotime($start_date));
+//                                    $_haid_end = date('Y-m-d', strtotime($end_date));
+//
+//                                    if (($_haid_date >= $_haid_start) && ($_haid_date <= $_haid_end)) {
+//                                        $_haid += $_std_haid;
+//                                    }
 //                                    /**
 //                                     * CHECK YEAR
 //                                     */
@@ -1640,23 +1706,23 @@ class DesktopController extends Controller
 //                                            }
 //                                        }
 //                                    }
-                                }
+//                                }
 
-                            } else {
-                                $_haids = DB::table($_table->BASETABLE)
-                                    ->where('id_employee', '=', $empl_id)
-                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
-                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
-                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
-                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
-                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
-                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
-                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                    ->count();
-                                if ($_haids > 0){
-                                    $_haid += $_std_haid;
-                                }
-                            }
+//                            } else {
+//                                $_haids = DB::table($_table->BASETABLE)
+//                                    ->where('id_employee', '=', $empl_id)
+//                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+//                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+//                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+//                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+//                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+//                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+//                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+//                                    ->count();
+//                                if ($_haids > 0){
+//                                    $_haid += $_std_haid;
+//                                }
+//                            }
 
 
                             if ($_potongan_bpjs){
