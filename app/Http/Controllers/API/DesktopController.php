@@ -1432,7 +1432,7 @@ class DesktopController extends Controller
                                         ->where(\DB::raw('SUBSTR(attendance.`date`,4,2)'), '=', $_month)
                                         ->where(\DB::raw('SUBSTR(attendance.`date`,7,4)'), '=', $_year)
                                         ->where('attendance.id_employee', '=', $gd_id_empl)
-                                        ->select('employee.id', 'employee.first_name', 'employee.last_name', 'attendance.id', 'attendance.status', 'employee.start_date')
+                                        ->select('attendance.date', 'employee.id', 'employee.first_name', 'employee.last_name', 'attendance.id', 'attendance.status', 'employee.start_date')
                                         ->get();
                                     if ($_start_date[1] !== $_end_date[1]) {
                                         $_atts_temps = DB::table($_table->BASETABLE)
@@ -1442,7 +1442,7 @@ class DesktopController extends Controller
                                             ->where(\DB::raw('SUBSTR(attendance.`date`,7,4)'), '=', $_start_date[2])
                                             ->where(\DB::raw('SUBSTR(attendance.`date`,7,4)'), '=', $_end_date[2])
                                             ->where('attendance.id_employee', '=', $gd_id_empl)
-                                            ->select('employee.id as employee_id', 'employee.first_name', 'employee.last_name', 'attendance.id as attendance_id', 'attendance.status', 'employee.start_date')
+                                            ->select('attendance.date', 'employee.id as employee_id', 'employee.first_name', 'employee.last_name', 'attendance.id as attendance_id', 'attendance.status', 'employee.start_date')
                                             ->get();
                                     }
 
