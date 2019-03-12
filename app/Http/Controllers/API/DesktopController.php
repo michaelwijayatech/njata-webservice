@@ -1517,6 +1517,16 @@ class DesktopController extends Controller
                                 ->where('id_employee', '=', $empl_id)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->get();
+                            if ($_start_date[1] !== $_end_date[1]) {
+                                $_atts_temps = DB::table($_table->BASETABLE)
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+                                    ->where('id_employee', '=', $empl_id)
+                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                    ->get();
+                            }
                             if (count($_atts_temps) > 0) {
                                 foreach ($_atts_temps as $_atts_temp => $_attstemp) {
                                     $_attst_date = $_attstemp->date;
