@@ -1184,28 +1184,56 @@ class DesktopController extends Controller
                         foreach ($_ghs as $ghs => $gh) {
                             $gh_id = $gh->id;
 
+                            $_carton = 0;
                             $_table = new Carton();
+                            $_cartons_temps = DB::table($_table->BASETABLE)
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_month)
+                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
+                                ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                ->get();
                             if ($_start_date[1] !== $_end_date[1]) {
-                                $_cartons = DB::select(DB::raw("SELECT SUM(carton) as total FROM $_table->BASETABLE
-                                                            WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
-                                                            AND id_group = '$gh_id'
-                                                            AND is_active = $_table->STATUS_ACTIVE"));
-
-                                foreach ($_cartons as $cartons => $carton) {
-                                    $_carton = $carton->total;
-                                }
-                            } else {
-                                $_carton = DB::table('carton')
-                                    ->where('id_group', $gh_id)
-                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
-                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+                                $_cartons_temps = DB::table($_table->BASETABLE)
                                     ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
                                     ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
                                     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
                                     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
                                     ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                    ->sum('carton');
+                                    ->get();
                             }
+                            if (count($_cartons_temps) > 0) {
+                                foreach ($_cartons_temps as $_cartons_temp => $_cartonstemp) {
+                                    $_cartonst_date = $_cartonstemp->date;
+                                    $_cartons_date = date('Y-m-d', strtotime($_cartonst_date));
+
+                                    $_cartons_start = date('Y-m-d', strtotime($start_date));
+                                    $_cartons_end = date('Y-m-d', strtotime($end_date));
+
+                                    if (($_cartons_date >= $_cartons_start) && ($_cartons_date <= $_cartons_end)) {
+                                        $_carton += (int)$_cartonstemp->carton;
+                                    }
+                                }
+                            }
+//                            if ($_start_date[1] !== $_end_date[1]) {
+//                                $_cartons = DB::select(DB::raw("SELECT SUM(carton) as total FROM $_table->BASETABLE
+//                                                            WHERE (`date` >= '$start_date' OR `date` <= '$end_date')
+//                                                            AND id_group = '$gh_id'
+//                                                            AND is_active = $_table->STATUS_ACTIVE"));
+//
+//                                foreach ($_cartons as $cartons => $carton) {
+//                                    $_carton = $carton->total;
+//                                }
+//                            } else {
+//                                $_carton = DB::table('carton')
+//                                    ->where('id_group', $gh_id)
+//                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '>=', $_start_date[0])
+//                                    ->where(\DB::raw('SUBSTR(`date`,1,2)'), '<=', $_end_date[0])
+//                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+//                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+//                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+//                                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+//                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+//                                    ->sum('carton');
+//                            }
 
 //                            $_table = new Holiday();
 //                            $_holiday = DB::table($_table->BASETABLE)
