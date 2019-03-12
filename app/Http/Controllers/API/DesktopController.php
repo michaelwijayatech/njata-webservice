@@ -1191,14 +1191,16 @@ class DesktopController extends Controller
                             $_cartons_temps = DB::table($_table->BASETABLE)
                                 ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_month)
                                 ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
+                                ->where('id_group', $gh_id)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->get();
                             if ($_start_date[1] !== $_end_date[1]) {
                                 $_cartons_temps = DB::table($_table->BASETABLE)
-                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_start_date[1])
-                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_end_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
                                     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
                                     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+                                    ->where('id_group', $gh_id)
                                     ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                     ->get();
                             }
