@@ -1151,6 +1151,8 @@ class DesktopController extends Controller
                 $_table = new GroupHeader();
                 $start_date = $request->start_date;
                 $end_date = $request->end_date;
+                $_year = date("Y");
+                $_month = date("m");
                 $_potongan_bpjs = $request->potongan_bpjs;
                 $_start_date = explode('-', $start_date);
                 $_end_date = explode('-', $end_date);
