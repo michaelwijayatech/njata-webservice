@@ -1189,7 +1189,7 @@ class DesktopController extends Controller
                             $_carton = 0;
                             $_table = new Carton();
                             $_cartons_temps = DB::table($_table->BASETABLE)
-                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_month)
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_start_date[1])
                                 ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
                                 ->where('id_group', $gh_id)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
@@ -1271,7 +1271,7 @@ class DesktopController extends Controller
                             $_holiday = 0;
                             $_table = new Holiday();
                             $_holiday_temps = DB::table($_table->BASETABLE)
-                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_month)
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_start_date[1])
                                 ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->get();
@@ -1328,7 +1328,7 @@ class DesktopController extends Controller
                             $_haids = [];
                             $_table = new Haid();
                             $_haids_temps = DB::table($_table->BASETABLE)
-                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_month)
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_start_date[1])
                                 ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
                                 ->get();
@@ -1429,7 +1429,7 @@ class DesktopController extends Controller
                                     $_table = new Attendance();
                                     $_atts_temps = DB::table($_table->BASETABLE)
                                         ->join('employee', 'employee.id', '=', 'attendance.id_employee')
-                                        ->where(\DB::raw('SUBSTR(attendance.`date`,4,2)'), '=', $_month)
+                                        ->where(\DB::raw('SUBSTR(attendance.`date`,4,2)'), '=', $_start_date[1])
                                         ->where(\DB::raw('SUBSTR(attendance.`date`,7,4)'), '=', $_year)
                                         ->where('attendance.id_employee', '=', $gd_id_empl)
                                         ->select('attendance.date', 'employee.id as employee_id', 'employee.first_name', 'employee.last_name', 'attendance.id as attendance_id', 'attendance.status', 'employee.start_date')
