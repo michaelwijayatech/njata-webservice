@@ -21,6 +21,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
  * TEST FOR GET AND POST
  */
 Route::get('/test_get', 'API\TestController@get');
+Route::post('/test_pdf', 'API\TestController@pdf');
 Route::post('/test_post', 'API\TestController@post');
 
 Route::get('/acsb', 'API\DesktopController@accountancy_check_saldo_before');
@@ -40,6 +41,7 @@ Route::post('/add_data', 'API\DesktopController@add_data');
 Route::post('/load_data', 'API\DesktopController@load_data');
 Route::post('/update_data', 'API\DesktopController@update_data');
 Route::post('/destroy_data', 'API\DesktopController@destroy_data');
+Route::post('/print_data', 'API\DesktopController@print_data');
 
 
 Route::post('/administrator_load_data', 'API\DesktopController@administrator_load_data');

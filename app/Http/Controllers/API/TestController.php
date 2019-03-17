@@ -9,9 +9,11 @@ use App\Model\Employee;
 use App\Model\Haid;
 use App\Model\Holiday;
 use App\Model\Standard;
+use Codedge\Fpdf\Fpdf\Fpdf;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
 
 class TestController extends Controller
 {
@@ -458,4 +460,155 @@ class TestController extends Controller
 
         return response()->json($data);
     }
+
+    // Simple table
+    public function BasicTable($header, $data)
+    {
+        // Header
+        foreach($header as $col)
+//            $fpdf->Cell(40,7,$col,1);
+        $this->Ln();
+        // Data
+        foreach($data as $row)
+        {
+            foreach($row as $col)
+                $this->Cell(40,6,$col,1);
+            $this->Ln();
+        }
+    }
+
+    public function pdf(){
+        date_default_timezone_set("Asia/Jakarta");
+        $_global_class = new GlobalClass();
+        $_table = null;
+        $_date_now = date("d-m-Y");
+        $postdata = file_get_contents("php://input");
+        if (isset($postdata)) {
+            $request = json_decode($postdata);
+            $table = $request->table;
+            if (strtolower($table) === "gaji_harian") {
+                $start_date = $request->start_date;
+                $end_date = $request->end_date;
+                $potongan_bpjs = $request->potongan_bpjs;
+                $libur = null;
+                $rajang = null;
+                $_datas = $request->datas;
+
+                $_total_pokok = 0;
+                $_total_premi = 0;
+                $_total_haid = 0;
+                $_total_bpjs = 0;
+                $_total_final = 0;
+
+                $fpdf = new Fpdf('L','mm','A4');
+                $fpdf->AddPage();
+                $fpdf->SetFont('Arial', 'B', 12);
+                $fpdf->Cell(0, 0, 'Gaji Harian');
+                $fpdf->Ln(2);
+                $fpdf->SetFont('Arial', '', 10);
+                $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date);
+                $fpdf->Ln(10);
+
+                $fpdf->SetFont('Arial', 'B', 10);
+                $fpdf->Cell(50,7,'Name',1);
+                $fpdf->Cell(25,7,'M | S | I | T',1, 0, 'C');
+                $fpdf->Cell(30,7,'Pokok',1, 0, 'C');
+                $fpdf->Cell(30,7,'Premi',1, 0, 'C');
+                $fpdf->Cell(30,7,'Haid',1, 0, 'C');
+                $fpdf->Cell(30,7,'BPJS',1, 0, 'C');
+                $fpdf->Cell(30,7,'Total',1, 0, 'C');
+                $fpdf->Cell(50,7,'Name',1);
+                $fpdf->Ln();
+
+                $fpdf->SetFont('Arial', '', 10);
+
+                $datas = explode("@", $_datas);
+                for($i=0; $i<count($datas)-1;$i++){
+                    $fpdf->Cell(50,5, explode("#", $datas[$i])[1],1);
+                    $fpdf->Cell(25,5, explode("#", $datas[$i])[2],1, 0, 'C');
+                    $fpdf->Cell(30,5, explode("#", $datas[$i])[4],1, 0, 'R');
+                    $fpdf->Cell(30,5, explode("#", $datas[$i])[5],1,0, 'R');
+                    $fpdf->Cell(30,5, explode("#", $datas[$i])[6],1, 0, 'R');
+                    $fpdf->Cell(30,5, explode("#", $datas[$i])[7],1, 0, 'R');
+                    $fpdf->Cell(30,5, explode("#", $datas[$i])[10],1,0, 'R');
+                    $fpdf->Cell(50,5, explode("#", $datas[$i])[1],1);
+                    $fpdf->Ln();
+
+                    $_total_pokok += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[4]);
+                    $_total_premi += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[5]);
+                    $_total_haid += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[6]);
+                    $_total_bpjs += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[7]);
+                    $_total_final += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[10]);
+                }
+                $fpdf->Cell(50,5, "",1);
+                $fpdf->Cell(25,5, "",1, 0, 'C');
+                $fpdf->Cell(30,5, $_global_class->addMoneySeparator($_total_pokok, 0),1, 0, 'R');
+                $fpdf->Cell(30,5, $_global_class->addMoneySeparator($_total_premi, 0),1,0, 'R');
+                $fpdf->Cell(30,5, $_global_class->addMoneySeparator($_total_haid, 0),1, 0, 'R');
+                $fpdf->Cell(30,5, $_global_class->addMoneySeparator($_total_bpjs, 0),1, 0, 'R');
+                $fpdf->Cell(30,5, $_global_class->addMoneySeparator($_total_final, 0),1,0, 'R');
+                $fpdf->Cell(50,5, "",1);
+                $fpdf->Ln();
+                $target_path = base_path('public/pdf/');
+                $file_name = $_date_now . '_gaji_harian.pdf';
+                $file_path = $target_path . $file_name;
+                $fpdf->Output($file_path, 'F');
+
+                $feedback = [
+                    "message" => $file_name,
+                    "status" => $_global_class->STATUS_SUCCESS,
+                ];
+
+                return response()->json($feedback);
+            }
+        }
+    }
+
+    public function pdf1(){
+        $start_date = '04-03-2019';
+        $end_date = '09-03-2019';
+        $libur = '1';
+        $rajang = '2';
+
+        $fpdf = new Fpdf('L','mm','A4');
+        $fpdf->AddPage();
+        $fpdf->SetFont('Arial', 'B', 12);
+        $fpdf->Cell(0, 0, 'Gaji Harian');
+        $fpdf->Ln(2);
+        $fpdf->SetFont('Arial', '', 10);
+        $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' | Libur : ' . $libur . ' | Rajang : ' . $rajang);
+        $fpdf->Ln(10);
+        $header = array('Name', 'Capital', 'Area (sq km)', 'Pop. (thousands)');
+//        foreach($header as $cool)
+        $fpdf->SetFont('Arial', 'B', 10);
+        $fpdf->Cell(50,7,'Name',1);
+        $fpdf->Cell(25,7,'M | S | I | T',1, 0, 'C');
+        $fpdf->Cell(30,7,'Pokok',1, 0, 'C');
+        $fpdf->Cell(30,7,'Premi',1, 0, 'C');
+        $fpdf->Cell(30,7,'Haid',1, 0, 'C');
+        $fpdf->Cell(30,7,'BPJS',1, 0, 'C');
+        $fpdf->Cell(30,7,'Total',1, 0, 'C');
+        $fpdf->Cell(50,7,'Name',1);
+        $fpdf->Ln();
+        $fpdf->SetFont('Arial', '', 10);
+        $fpdf->Cell(50,7,'Faulina Diah Setyani',1);
+        $fpdf->Cell(25,7,'6 | 0 | 0 | 0',1, 0, 'C');
+        $fpdf->Cell(30,7,'903.600',1, 0, 'R');
+        $fpdf->Cell(30,7,'903.600',1,0, 'R');
+        $fpdf->Cell(30,7,'903.600',1, 0, 'R');
+        $fpdf->Cell(30,7,'903.600',1, 0, 'R');
+        $fpdf->Cell(30,7,'9.903.600',1,0, 'R');
+        $fpdf->Cell(50,7,'Faulina Diah Setyani',1);
+        $fpdf->Output();
+        exit;
+////        return response()->file($fpdf->Output());
+//        $filename = $fpdf->Output();
+//        $path = storage_path($filename);
+//
+//        return Response::make(file_get_contents($path), 200, [
+//            'Content-Type' => 'application/pdf',
+//            'Content-Disposition' => 'inline; filename="'.$filename.'"'
+//        ]);
+    }
+
 }

@@ -107,6 +107,7 @@ class ComposerStaticInitbe8c83f102eb035422e07963de4c9dc0
         'C' => 
         array (
             'Cron\\' => 5,
+            'Codedge\\Fpdf\\' => 13,
         ),
         'A' => 
         array (
@@ -293,6 +294,10 @@ class ComposerStaticInitbe8c83f102eb035422e07963de4c9dc0
         array (
             0 => __DIR__ . '/..' . '/mtdowling/cron-expression/src/Cron',
         ),
+        'Codedge\\Fpdf\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/codedge/laravel-fpdf/src',
+        ),
         'App\\' => 
         array (
             0 => __DIR__ . '/../..' . '/app',
@@ -352,6 +357,7 @@ class ComposerStaticInitbe8c83f102eb035422e07963de4c9dc0
         'App\\Model\\Accountancy' => __DIR__ . '/../..' . '/app/Model/Accountancy.php',
         'App\\Model\\Administrator' => __DIR__ . '/../..' . '/app/Model/Administrator.php',
         'App\\Model\\Attendance' => __DIR__ . '/../..' . '/app/Model/Attendance.php',
+        'App\\Model\\Balance' => __DIR__ . '/../..' . '/app/Model/Balance.php',
         'App\\Model\\Carton' => __DIR__ . '/../..' . '/app/Model/Carton.php',
         'App\\Model\\Chop' => __DIR__ . '/../..' . '/app/Model/Chop.php',
         'App\\Model\\Company' => __DIR__ . '/../..' . '/app/Model/Company.php',
@@ -386,6 +392,9 @@ class ComposerStaticInitbe8c83f102eb035422e07963de4c9dc0
         'Carbon\\Exceptions\\InvalidDateException' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Exceptions/InvalidDateException.php',
         'Carbon\\Laravel\\ServiceProvider' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Laravel/ServiceProvider.php',
         'Carbon\\Translator' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Translator.php',
+        'Codedge\\Fpdf\\Facades\\Fpdf' => __DIR__ . '/..' . '/codedge/laravel-fpdf/src/Facades/Fpdf.php',
+        'Codedge\\Fpdf\\FpdfServiceProvider' => __DIR__ . '/..' . '/codedge/laravel-fpdf/src/FpdfServiceProvider.php',
+        'Codedge\\Fpdf\\Fpdf\\Fpdf' => __DIR__ . '/..' . '/codedge/laravel-fpdf/src/Fpdf/Fpdf.php',
         'Cron\\AbstractField' => __DIR__ . '/..' . '/mtdowling/cron-expression/src/Cron/AbstractField.php',
         'Cron\\CronExpression' => __DIR__ . '/..' . '/mtdowling/cron-expression/src/Cron/CronExpression.php',
         'Cron\\DayOfMonthField' => __DIR__ . '/..' . '/mtdowling/cron-expression/src/Cron/DayOfMonthField.php',
