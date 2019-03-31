@@ -234,6 +234,8 @@ class DesktopController extends Controller
                     $status = $_table->STATUS_TIDAK_MASUK;
                 } elseif(strtolower($status) === "ijin"){
                     $status = $_table->STATUS_IJIN;
+                } elseif(strtolower($status) === "sakit"){
+                    $status = $_table->STATUS_SAKIT;
                 }
 
                 $_date = $request->date;
@@ -816,6 +818,8 @@ class DesktopController extends Controller
                                 $status = "Borongan";
                             } elseif ($emp->status === 3) {
                                 $status = "Harian Bawah";
+                            } elseif ($emp->status === 4) {
+                                $status = "Bulanan";
                             }
 
                             $_is_att = DB::select(DB::raw("SELECT * FROM attendance
@@ -1165,6 +1169,9 @@ class DesktopController extends Controller
                 $ijin = 0;
                 $ijin_name = null;
                 $ijin_name_arr = [];
+                $sakit = 0;
+                $sakit_name = null;
+                $sakit_name_arr = [];
                 $tidak_masuk = 0;
                 $tidak_masuk_name = null;
                 $tidak_masuk_name_arr = [];
@@ -1483,6 +1490,14 @@ class DesktopController extends Controller
                                                     $ijin_name .= $empl_name . '@!#';
                                                 }
                                             }
+                                            if ($att_stat === '5') {
+                                                $sakit = $sakit + 1;
+
+                                                if (!in_array($empl_name, $sakit_name_arr)) {
+                                                    array_push($sakit_name_arr, $empl_name);
+                                                    $sakit_name .= $empl_name . '@!#';
+                                                }
+                                            }
                                         }
                                     }
 
@@ -1508,7 +1523,8 @@ class DesktopController extends Controller
                             $total_carton = (int)$_carton * $upah_borongan;
                             $total_haid = $haid * $cuti_haid;
                             $total_ijin = $ijin * $upah_harian;
-                            $_total = ($total_carton + $total_haid + $total_ijin + $_upah_libur) - $potongan_bpjs;
+                            $total_sakit = $sakit * $upah_harian;
+                            $_total = ($total_carton + $total_haid + $total_ijin + $total_sakit + $_upah_libur) - $potongan_bpjs;
 
                             $temp = array(
                                 "id_group" => $gh_id,
@@ -1708,12 +1724,13 @@ class DesktopController extends Controller
                         foreach ($_empls as $empls => $empl) {
                             $empl_id = $empl->id;
                             $empl_name = $empl->first_name . ' ' . $empl->last_name;
+                            $empl_gender = $empl->gender;
                             $empl_premi = $_global_class->removeMoneySeparator($empl->premi);
                             $empl_stat = $empl->status;
                             $empl_start_work_date = $empl->start_date;
                             $empl_pot_bpjs = $_global_class->removeMoneySeparator($empl->potongan_bpjs);
 
-                            $_atts = [];
+                            $_temp_atts = [];
                             $_table = new Attendance();
                             $_atts_temps = DB::table($_table->BASETABLE)
                                 ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_start_date[1])
@@ -1746,9 +1763,10 @@ class DesktopController extends Controller
                                             "status" => $_attstemp->status,
                                         );
 
-                                        array_push($_atts, $temp1);
+                                        array_push($_temp_atts, $temp1);
                                     }
                                 }
+                                $_atts = $_global_class->_array_sort($_temp_atts, "date");
                             }
 
 
@@ -1824,6 +1842,11 @@ class DesktopController extends Controller
                                         }
                                     }
                                     if ($att_stat === (string)$_table->STATUS_IJIN){
+                                        $_pokok += $_std_harian;
+                                        $_premi += 0;
+                                        $_ijin += 1;
+                                    }
+                                    if ($att_stat === (string)$_table->STATUS_SAKIT){
                                         $_pokok += $_std_harian;
                                         $_premi += 0;
                                         $_ijin += 1;
@@ -1948,6 +1971,7 @@ class DesktopController extends Controller
                             $temp = array(
                                 "id_employee" => $empl_id,
                                 "employee_name" => $empl_name,
+                                "gender" => $empl_gender,
                                 "pokok" => $_pokok,
                                 "haid" => $_haid,
                                 "premi" => $_premi,
@@ -1959,6 +1983,7 @@ class DesktopController extends Controller
                                 "std_cuti" => $_std_haid,
                                 "rajang" => count($_chop_date_arr),
                                 "_rajang" => $_chop_date_arr,
+                                "_attendance" => $_atts
                             );
 
                             array_push($_data, $temp);
@@ -2119,6 +2144,8 @@ class DesktopController extends Controller
                     $status = $_table->STATUS_HARIAN_BAWAH;
                 } else if(strtolower($status) === "harian_atas"){
                     $status = $_table->STATUS_HARIAN_ATAS;
+                } else if(strtolower($status) === "bulanan"){
+                    $status = $_table->STATUS_BULANAN;
                 }
                 $data += ["status" => $status];
             }
@@ -2299,6 +2326,8 @@ class DesktopController extends Controller
                     $status = $_table->STATUS_TIDAK_MASUK;
                 } elseif(strtolower($status) === "ijin"){
                     $status = $_table->STATUS_IJIN;
+                } elseif(strtolower($status) === "sakit"){
+                    $status = $_table->STATUS_SAKIT;
                 }
 
                 $data += ["status" => $status];
@@ -2571,6 +2600,7 @@ class DesktopController extends Controller
                 $libur = null;
                 $rajang = null;
                 $_datas = $request->datas;
+                $_days = $request->days;
 
                 $_total_pokok = 0;
                 $_total_premi = 0;
@@ -2578,7 +2608,7 @@ class DesktopController extends Controller
                 $_total_bpjs = 0;
                 $_total_final = 0;
 
-                $fpdf = new Fpdf('L','mm','A4');
+                $fpdf = new Fpdf('L','mm',array(210,330));
                 $fpdf->AddPage();
                 $fpdf->SetFont('Arial', 'B', 12);
                 $fpdf->Cell(0, 0, 'Gaji Harian');
@@ -2589,7 +2619,11 @@ class DesktopController extends Controller
 
                 $fpdf->SetFont('Arial', 'B', 10);
                 $fpdf->Cell(50,7,'Name',1);
-                $fpdf->Cell(25,7,'M | S | I | T',1, 0, 'C');
+                $days = explode("#", $_days);
+                for($i=0; $i<count($days)-1;$i++) {
+                    $fpdf->Cell(10,7, explode("-",$days[$i])[0],1, 0, 'C');
+                }
+//                $fpdf->Cell(25,7,'M | S | I | T',1, 0, 'C');
                 $fpdf->Cell(30,7,'Pokok',1, 0, 'C');
                 $fpdf->Cell(30,7,'Premi',1, 0, 'C');
                 $fpdf->Cell(30,7,'Haid',1, 0, 'C');
@@ -2603,23 +2637,54 @@ class DesktopController extends Controller
                 $datas = explode("@", $_datas);
                 for($i=0; $i<count($datas)-1;$i++){
                     $fpdf->Cell(50,5, explode("#", $datas[$i])[1],1);
-                    $fpdf->Cell(25,5, explode("#", $datas[$i])[2],1, 0, 'C');
-                    $fpdf->Cell(30,5, explode("#", $datas[$i])[4],1, 0, 'R');
-                    $fpdf->Cell(30,5, explode("#", $datas[$i])[5],1,0, 'R');
-                    $fpdf->Cell(30,5, explode("#", $datas[$i])[6],1, 0, 'R');
-                    $fpdf->Cell(30,5, explode("#", $datas[$i])[7],1, 0, 'R');
-                    $fpdf->Cell(30,5, explode("#", $datas[$i])[10],1,0, 'R');
+                    $tot_days = count($days)-1;
+                    if ($tot_days === 6){
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[5],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[6],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[7],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[8],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[9],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[10],1, 0, 'C');
+                    } else if ($tot_days === 5){
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[5],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[6],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[7],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[8],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[9],1, 0, 'C');
+                    } else if ($tot_days === 4){
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[5],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[6],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[7],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[8],1, 0, 'C');
+                    } else if ($tot_days === 3){
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[5],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[6],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[7],1, 0, 'C');
+                    } else if ($tot_days === 2){
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[5],1, 0, 'C');
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[6],1, 0, 'C');
+                    } else if ($tot_days === 1){
+                        $fpdf->Cell(10,5, explode("#", $datas[$i])[5],1, 0, 'C');
+                    }
+                    $fpdf->Cell(30,5, explode("#", $datas[$i])[$tot_days + 5],1, 0, 'R');
+                    $fpdf->Cell(30,5, explode("#", $datas[$i])[$tot_days + 6],1,0, 'R');
+                    $fpdf->Cell(30,5, explode("#", $datas[$i])[$tot_days + 7],1, 0, 'R');
+                    $fpdf->Cell(30,5, explode("#", $datas[$i])[$tot_days + 8],1, 0, 'R');
+                    $fpdf->Cell(30,5, explode("#", $datas[$i])[$tot_days + 11],1,0, 'R');
                     $fpdf->Cell(50,5, explode("#", $datas[$i])[1],1);
                     $fpdf->Ln();
 
-                    $_total_pokok += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[4]);
-                    $_total_premi += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[5]);
-                    $_total_haid += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[6]);
-                    $_total_bpjs += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[7]);
-                    $_total_final += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[10]);
+                    $_total_pokok += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[$tot_days + 5]);
+                    $_total_premi += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[$tot_days + 6]);
+                    $_total_haid += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[$tot_days + 7]);
+                    $_total_bpjs += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[$tot_days + 8]);
+                    $_total_final += $_global_class->removeMoneySeparator(explode("#", $datas[$i])[$tot_days + 11]);
                 }
-                $fpdf->Cell(50,5, "",1);
-                $fpdf->Cell(25,5, "",1, 0, 'C');
+
+                $fpdf->SetFont('Arial', 'B', 10);
+
+                $tot_space = ($tot_days * 10) + 50;
+                $fpdf->Cell($tot_space,5, "Total",1);
                 $fpdf->Cell(30,5, $_global_class->addMoneySeparator($_total_pokok, 0),1, 0, 'R');
                 $fpdf->Cell(30,5, $_global_class->addMoneySeparator($_total_premi, 0),1,0, 'R');
                 $fpdf->Cell(30,5, $_global_class->addMoneySeparator($_total_haid, 0),1, 0, 'R');
@@ -2627,8 +2692,436 @@ class DesktopController extends Controller
                 $fpdf->Cell(30,5, $_global_class->addMoneySeparator($_total_final, 0),1,0, 'R');
                 $fpdf->Cell(50,5, "",1);
                 $fpdf->Ln();
+
+                $_total_pokok_premi = $_total_pokok + $_total_premi;
+                $fpdf->Cell($tot_space,5, "",1);
+                $fpdf->Cell(60,5, $_global_class->addMoneySeparator($_total_pokok_premi, 0),1, 0, 'C');
+                $fpdf->Cell(140,5, "",1);
+                $fpdf->Ln();
+
                 $target_path = base_path('public/pdf/');
                 $file_name = $_date_now . '_gaji_harian.pdf';
+                $file_path = $target_path . $file_name;
+                $fpdf->Output($file_path, 'F');
+
+                $feedback = [
+                    "message" => $file_name,
+                    "status" => $_global_class->STATUS_SUCCESS,
+                ];
+
+                return response()->json($feedback);
+            }
+
+            if (strtolower($table) === "gaji_harian_tt") {
+                $start_date = $request->start_date;
+                $end_date = $request->end_date;
+                $potongan_bpjs = $request->potongan_bpjs;
+                $libur = null;
+                $rajang = null;
+                $_datas = $request->datas;
+                $_days = $request->days;
+
+                $_total_pokok = 0;
+                $_total_premi = 0;
+                $_total_haid = 0;
+                $_total_bpjs = 0;
+                $_total_final = 0;
+
+                $fpdf = new Fpdf('L','mm',array(210,330));
+                $fpdf->SetMargins(4,5,4);
+                $fpdf->AddPage();
+                $fpdf->SetFont('Arial', 'B', 12);
+                $fpdf->Cell(0, 0, 'Gaji Harian');
+                $fpdf->Ln(2);
+                $fpdf->SetFont('Arial', '', 10);
+                $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date);
+                $fpdf->Ln(10);
+
+                $days = explode("#", $_days);
+                $tot_days = count($days)-1;
+
+                $fpdf->SetFont('Arial', 'B', 10);
+                $fpdf->Cell(8,16,'NO.',1,0,'C');
+                $fpdf->Cell(40,16,'NAMA',1,0,'C');
+                $fpdf->Cell(8,16,'L',1,0,'C');
+                $fpdf->Cell(8,16,'P',1,0,'C');
+                $fpdf->SetFont('Arial', 'B', 7);
+                if ($tot_days >= 5){
+                    $fpdf->Cell($tot_days*8,8,'Tgl. Pendapatan hari masuk kerja',1,0,'C');
+                } else {
+                    $fpdf->Cell(5*8,8,'Tgl. Pendapatan hari masuk kerja',1,0,'C');
+                }
+                $fpdf->SetFont('Arial', 'B', 10);
+                $fpdf->Cell(20,16,'Jumlah',1,0,'C');
+                $fpdf->Cell(75,8,'PENERIMAAN',1,0,'C');
+                $fpdf->Cell(30,16,'JUMLAH','LTR',0,'C');
+                $fpdf->SetFont('Arial', 'B', 7);
+                $fpdf->Cell(15,16,'POTONGAN',1,0,'C');
+                $fpdf->SetFont('Arial', 'B', 8);
+                $fpdf->Cell(20,8,'JUMLAH ','LTR',0,'C');
+                $fpdf->SetFont('Arial', 'B', 10);
+                $fpdf->Cell(10,16,'NO.',1,0,'C');
+                $fpdf->Cell(40,16,'TANDA TANGAN',1,0,'C');
+                $fpdf->Ln();
+
+                $fpdf->Cell(8+40+8+8,5,' ',0,0,'C');
+                $days = explode("#", $_days);
+                for($i=0; $i<count($days)-1;$i++) {
+                    if ($tot_days >= 5) {
+                        $fpdf->Cell(8,-8, explode("-",$days[$i])[0],1, 0, 'C');
+                    } else {
+                        $fpdf->Cell(((5*8) / $tot_days),-8, explode("-",$days[$i])[0],1, 0, 'C');
+                    }
+                }
+                $fpdf->SetFont('Arial', 'B', 8);
+                $fpdf->Cell(20,-8,' ',0,0,'C');
+                $fpdf->Cell(30,-8,'Upah Pokok',1,0,'C');
+                $fpdf->Cell(15,-8,'Tunjangan',1,0,'C');
+                $fpdf->Cell(30,-8,'Premi',1,0,'C');
+                $fpdf->Cell(30,-8,'PENERIMAAN','T',0,'C');
+                $fpdf->Cell(15,-8,' ',0,0,'C');
+                $fpdf->Cell(20,-10,'BERSIH','T',0,'C');
+                $fpdf->Ln();
+                if ($tot_days >= 5) {
+                    $fpdf->Cell(8+40+8+8+((count($days)-1) * 8)+20+30+15+30+30+15,8,' ',0,0,'C');
+                } else {
+                    $fpdf->Cell(8+40+8+8+(5 * 8)+20+30+15+30+30+15,8,' ',0,0,'C');
+                }
+                $fpdf->Cell(20,4,'PENDAPATAN',0,0,'C');
+                $fpdf->Ln(10);
+
+                $fpdf->SetFont('Arial', '', 10);
+
+                $counter = 1;
+                $datas = explode("@", $_datas);
+                for($i=0; $i<count($datas)-1;$i++) {
+
+                    if ($counter === 16) {
+                        $fpdf->SetFont('Arial', 'B', 10);
+                        $fpdf->Cell(8, 16, 'NO.', 1, 0, 'C');
+                        $fpdf->Cell(40, 16, 'NAMA', 1, 0, 'C');
+                        $fpdf->Cell(8, 16, 'L', 1, 0, 'C');
+                        $fpdf->Cell(8, 16, 'P', 1, 0, 'C');
+                        $fpdf->SetFont('Arial', 'B', 7);
+                        if ($tot_days >= 5) {
+                            $fpdf->Cell($tot_days * 8, 8, 'Tgl. Pendapatan hari masuk kerja', 1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(5 * 8, 8, 'Tgl. Pendapatan hari masuk kerja', 1, 0, 'C');
+                        }
+                        $fpdf->SetFont('Arial', 'B', 10);
+                        $fpdf->Cell(20, 16, 'Jumlah', 1, 0, 'C');
+                        $fpdf->Cell(75, 8, 'PENERIMAAN', 1, 0, 'C');
+                        $fpdf->Cell(30, 16, 'JUMLAH', 'LTR', 0, 'C');
+                        $fpdf->SetFont('Arial', 'B', 7);
+                        $fpdf->Cell(15, 16, 'POTONGAN', 1, 0, 'C');
+                        $fpdf->SetFont('Arial', 'B', 8);
+                        $fpdf->Cell(20, 8, 'JUMLAH ', 'LTR', 0, 'C');
+                        $fpdf->SetFont('Arial', 'B', 10);
+                        $fpdf->Cell(10, 16, 'NO.', 1, 0, 'C');
+                        $fpdf->Cell(40, 16, 'TANDA TANGAN', 1, 0, 'C');
+                        $fpdf->Ln();
+
+                        $fpdf->Cell(8 + 40 + 8 + 8, 5, ' ', 0, 0, 'C');
+                        $days = explode("#", $_days);
+                        for ($j = 0; $j < count($days) - 1; $j++) {
+                            if ($tot_days >= 5) {
+                                $fpdf->Cell(8, -8, explode("-", $days[$j])[0], 1, 0, 'C');
+                            } else {
+                                $fpdf->Cell(((5 * 8) / $tot_days), -8, explode("-", $days[$j])[0], 1, 0, 'C');
+                            }
+                        }
+                        $fpdf->SetFont('Arial', 'B', 8);
+                        $fpdf->Cell(20, -8, ' ', 0, 0, 'C');
+                        $fpdf->Cell(30, -8, 'Upah Pokok', 1, 0, 'C');
+                        $fpdf->Cell(15, -8, 'Tunjangan', 1, 0, 'C');
+                        $fpdf->Cell(30, -8, 'Premi', 1, 0, 'C');
+                        $fpdf->Cell(30, -8, 'PENERIMAAN', 'T', 0, 'C');
+                        $fpdf->Cell(15, -8, ' ', 0, 0, 'C');
+                        $fpdf->Cell(20, -10, 'BERSIH', 'T', 0, 'C');
+                        $fpdf->Ln();
+                        if ($tot_days >= 5) {
+                            $fpdf->Cell(8 + 40 + 8 + 8 + ((count($days) - 1) * 8) + 20 + 30 + 15 + 30 + 30 + 15, 8, ' ', 0, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8 + 40 + 8 + 8 + (5 * 8) + 20 + 30 + 15 + 30 + 30 + 15, 8, ' ', 0, 0, 'C');
+                        }
+                        $fpdf->Cell(20, 4, 'PENDAPATAN', 0, 0, 'C');
+                        $fpdf->Ln(10);
+
+                        $counter = 16;
+
+                    }
+                    $fpdf->SetFont('Arial', '', 10);
+                    $fpdf->Cell(8, 10, $counter, 1);
+                    $fpdf->Cell(40, 10, explode("#", $datas[$i])[1], 1);
+                    if (explode("#", $datas[$i])[2] === 'L'){
+                        $fpdf->Cell(8, 10, explode("#", $datas[$i])[2], 1,0,'C');
+                        $fpdf->Cell(8, 10, ' ', 1);
+                    } else {
+                        $fpdf->Cell(8, 10, ' ', 1);
+                        $fpdf->Cell(8, 10, explode("#", $datas[$i])[2], 1,0,'C');
+                    }
+
+                    $total_days = 0;
+                    $tot_days = count($days)-1;
+                    if ($tot_days === 6){
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[5],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[6],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[7],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[8],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[9],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[10],1, 0, 'C');
+                        if (explode("#", $datas[$i])[5] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[5] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[5] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[5] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[6] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[6] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[6] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[6] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[7] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[7] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[7] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[7] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[8] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[8] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[8] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[8] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[9] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[9] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[9] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[9] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[10] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[10] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[10] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[10] === 's'){
+                            $total_days += 1;
+                        }
+                    } else if ($tot_days === 5){
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[5],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[6],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[7],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[8],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[9],1, 0, 'C');
+
+                        if (explode("#", $datas[$i])[5] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[5] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[5] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[5] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[6] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[6] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[6] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[6] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[7] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[7] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[7] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[7] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[8] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[8] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[8] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[8] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[9] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[9] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[9] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[9] === 's'){
+                            $total_days += 1;
+                        }
+                    } else if ($tot_days === 4){
+                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[5],1, 0, 'C');
+                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[6],1, 0, 'C');
+                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[7],1, 0, 'C');
+                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[8],1, 0, 'C');
+
+                        if (explode("#", $datas[$i])[5] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[5] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[5] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[5] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[6] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[6] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[6] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[6] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[7] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[7] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[7] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[7] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[8] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[8] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[8] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[8] === 's'){
+                            $total_days += 1;
+                        }
+                    } else if ($tot_days === 3){
+                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[5],1, 0, 'C');
+                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[6],1, 0, 'C');
+                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[7],1, 0, 'C');
+
+                        if (explode("#", $datas[$i])[5] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[5] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[5] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[5] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[6] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[6] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[6] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[6] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[7] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[7] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[7] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[7] === 's'){
+                            $total_days += 1;
+                        }
+                    } else if ($tot_days === 2){
+                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[5],1, 0, 'C');
+                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[6],1, 0, 'C');
+
+                        if (explode("#", $datas[$i])[5] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[5] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[5] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[5] === 's'){
+                            $total_days += 1;
+                        }
+
+                        if (explode("#", $datas[$i])[6] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[6] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[6] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[6] === 's'){
+                            $total_days += 1;
+                        }
+                    } else if ($tot_days === 1){
+                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[5],1, 0, 'C');
+
+                        if (explode("#", $datas[$i])[5] === '1') {
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[5] === '0.5'){
+                            $total_days += 0.5;
+                        } elseif (explode("#", $datas[$i])[5] === 'i'){
+                            $total_days += 1;
+                        } elseif (explode("#", $datas[$i])[5] === 's'){
+                            $total_days += 1;
+                        }
+                    }
+
+                    $fpdf->Cell(20, 10, $total_days, 1, 0, 'C');
+                    $fpdf->Cell(30,10, explode("#", $datas[$i])[$tot_days + 5],1, 0, 'R');
+                    $fpdf->Cell(15, 10, ' ', 1, 0, 'C');
+                    $fpdf->Cell(30, 10, explode("#", $datas[$i])[$tot_days + 6], 1, 0, 'R');
+
+                    $_total_pokok = $_global_class->removeMoneySeparator(explode("#", $datas[$i])[$tot_days + 5]);
+                    $_total_premi = $_global_class->removeMoneySeparator(explode("#", $datas[$i])[$tot_days + 6]);
+                    $_total_terima =  $_total_pokok + $_total_premi;
+
+                    $fpdf->Cell(30,10, $_global_class->addMoneySeparator($_total_terima, 0),1, 0, 'R');
+                    $fpdf->Cell(15, 10, ' ', 1, 0, 'C');
+                    $fpdf->Cell(20, 10, ' ', '1', 0, 'C');
+                    $fpdf->Cell(10, 10, $counter, 1, 0, 'C');
+                    $fpdf->Cell(40, 10, ' ', 1, 0, 'C');
+
+                    $fpdf->Ln();
+                    $counter++;
+                }
+
+                $target_path = base_path('public/pdf/');
+                $file_name = $_date_now . '_gaji_harian_tt.pdf';
                 $file_path = $target_path . $file_name;
                 $fpdf->Output($file_path, 'F');
 
@@ -3310,6 +3803,8 @@ class DesktopController extends Controller
                 $status = $_employee->STATUS_HARIAN_ATAS;
             } else if(strtolower($status) === "harian_bawah"){
                 $status = $_employee->STATUS_HARIAN_BAWAH;
+            } else if(strtolower($status) === "bulanan"){
+                $status = $_employee->STATUS_BULANAN;
             } else {
                 $status = $_employee->STATUS_BORONGAN;
             }

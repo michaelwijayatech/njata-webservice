@@ -18,6 +18,7 @@ class Employee extends Model
     public $STATUS_HARIAN_ATAS = 1;
     public $STATUS_HARIAN_BAWAH = 3;
     public $STATUS_BORONGAN = 2;
+    public $STATUS_BULANAN = 4;
 
     public $STATUS_INACTIVE = 0;
     public $STATUS_ACTIVE = 1;

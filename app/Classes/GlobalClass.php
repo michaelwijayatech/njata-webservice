@@ -142,6 +142,20 @@ class GlobalClass
 //        return $_date1->diff($_date2)->m + ($_date1->diff($_date2)->y*12);
         return (int)abs((strtotime($_date1) - strtotime($_date2))/(60*60*24*30));
     }
+
+    public function _array_sort($ARRAY, $KEY){
+        foreach ($ARRAY as $k=>$v){
+            $b[] = strtolower($v[$KEY]);
+        }
+
+        asort($b);
+
+        foreach ($b as $k=>$v) {
+            $c[] = $ARRAY[$k];
+        }
+
+        return $c;
+    }
 }
 
 ?>

@@ -19,6 +19,7 @@ class Attendance extends Model
     public $STATUS_SETENGAH_HARI = 2;
     public $STATUS_IJIN = 3;
     public $STATUS_CUTI = 4;
+    public $STATUS_SAKIT = 5;
 
     public $STATUS_INACTIVE = 0;
     public $STATUS_ACTIVE = 1;
