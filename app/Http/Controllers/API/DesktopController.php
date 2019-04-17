@@ -41,6 +41,8 @@ class DesktopController extends Controller
         $_administrator = new Administrator();
         $_global_class = new GlobalClass();
 
+        $temp = array();
+
         $postdata = file_get_contents("php://input");
         if (isset($postdata)) {
             $request = json_decode($postdata);
@@ -54,8 +56,10 @@ class DesktopController extends Controller
             if (!empty($data_user)) {
                 if($_global_class->checkPassword($password, $data_user->password)){
                     if($data_user->is_active === $_administrator->STATUS_ACTIVE){
+                        array_push($data_user->id, $temp);
+                        array_push($data_user->role, $temp);
                         $feedback = [
-                            "message" => $data_user,
+                            "message" => $temp,
                             "status" => $_global_class->STATUS_SUCCESS,
                         ];
 
