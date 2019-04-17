@@ -56,8 +56,8 @@ class DesktopController extends Controller
             if (!empty($data_user)) {
                 if($_global_class->checkPassword($password, $data_user->password)){
                     if($data_user->is_active === $_administrator->STATUS_ACTIVE){
-                        array_push($data_user->id, $temp);
-                        array_push($data_user->role, $temp);
+                        array_push($temp, $data_user->id);
+                        array_push($temp, $data_user->role);
                         $feedback = [
                             "message" => $temp,
                             "status" => $_global_class->STATUS_SUCCESS,
