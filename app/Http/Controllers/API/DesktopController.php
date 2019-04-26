@@ -2556,6 +2556,10 @@ class DesktopController extends Controller
                 $_table = new Supplier();
             }
 
+            if (strtolower($table) === "holiday") {
+                $_table = new Holiday();
+            }
+
             $data = ["is_active" => $_table->STATUS_INACTIVE];
             $_data = DB::table($_table->BASETABLE)
                 ->where('id', '=', $id)
