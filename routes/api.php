@@ -40,6 +40,7 @@ Route::post('/signin', 'API\DesktopController@signin');
 Route::post('/add_data', 'API\DesktopController@add_data');
 Route::post('/load_data', 'API\DesktopController@load_data');
 Route::post('/update_data', 'API\DesktopController@update_data');
+Route::post('/delete_data', 'API\DesktopController@delete_data');
 Route::post('/destroy_data', 'API\DesktopController@destroy_data');
 Route::post('/print_data', 'API\DesktopController@print_data');
 
