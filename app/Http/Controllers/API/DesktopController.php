@@ -2618,6 +2618,10 @@ class DesktopController extends Controller
                 $_table = new Carton();
             }
 
+            if (strtolower($table) === "holiday") {
+                $_table = new Holiday();
+            }
+
             $_data = DB::table($_table->BASETABLE)
                 ->where('id', '=', $id)
                 ->delete();
