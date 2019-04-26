@@ -2529,6 +2529,35 @@ class DesktopController extends Controller
         }
     }
 
+    public function delete_data(){
+        date_default_timezone_set("Asia/Jakarta");
+        $_global_class = new GlobalClass();
+        $_table = null;
+
+        $postdata = file_get_contents("php://input");
+        if (isset($postdata)) {
+            $request = json_decode($postdata);
+            $table = $request->table;
+            $id = $request->id;
+
+            if (strtolower($table) === "distributor") {
+                $_table = new Distributor();
+            }
+
+            $data = ["is_active" => $_table->STATUS_INACTIVE];
+            $_data = DB::table($_table->BASETABLE)
+                ->where('id', '=', $id)
+                ->update($data);
+
+            $feedback = [
+                "message" => $table . ' Delete Successfully.',
+                "status" => $_global_class->STATUS_SUCCESS,
+            ];
+
+            return response()->json($feedback);
+        }
+    }
+
     public function destroy_data(){
         date_default_timezone_set("Asia/Jakarta");
         $_global_class = new GlobalClass();
