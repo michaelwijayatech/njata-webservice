@@ -2544,6 +2544,18 @@ class DesktopController extends Controller
                 $_table = new Distributor();
             }
 
+            if (strtolower($table) === "contact") {
+                $_table = new Contact();
+            }
+
+            if (strtolower($table) === "product") {
+                $_table = new Product();
+            }
+
+            if (strtolower($table) === "supplier") {
+                $_table = new Supplier();
+            }
+
             $data = ["is_active" => $_table->STATUS_INACTIVE];
             $_data = DB::table($_table->BASETABLE)
                 ->where('id', '=', $id)
