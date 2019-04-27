@@ -3494,6 +3494,24 @@ class DesktopController extends Controller
         return true;
     }
 
+    public function sendPushNotification(){
+//        require_once './../../../../vendor/autoload.php';
+//        require_once base_path('vendor/autoload.php');
+        $interestDetails = ['unique identifier', 'ExponentPushToken[WlrQxYJavPHrNsW4sznFZn]'];
+
+        // You can quickly bootup an expo instance
+        $expo = \ExponentPhpSDK\Expo::normalSetup();
+
+        // Subscribe the recipient to the server
+        $expo->subscribe($interestDetails[0], $interestDetails[1]);
+
+        // Build the notification data
+        $notification = ['title' => 'Title from Server!', 'body' => 'Hello World!'];
+
+        // Notify an interest with a notification
+        $expo->notify($interestDetails[0], $notification);
+    }
+
     //region ADMINISTRATOR
     public function administrator_load_data(){
         $_administrator = new Administrator();

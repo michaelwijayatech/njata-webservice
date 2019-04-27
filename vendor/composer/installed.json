@@ -1,5 +1,49 @@
 [
     {
+        "name": "alymosul/exponent-server-sdk-php",
+        "version": "v1.1.2",
+        "version_normalized": "1.1.2.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/Alymosul/exponent-server-sdk-php.git",
+            "reference": "c3fec550e2c0c0e6dea94866a122c93d97915f03"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/Alymosul/exponent-server-sdk-php/zipball/c3fec550e2c0c0e6dea94866a122c93d97915f03",
+            "reference": "c3fec550e2c0c0e6dea94866a122c93d97915f03",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=7.0"
+        },
+        "time": "2019-01-18T13:18:59+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "ExponentPhpSDK\\": "lib"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Aly Suleiman",
+                "email": "alymosul@gmail.com"
+            }
+        ],
+        "description": "Server-side library for working with Expo push notifications using PHP",
+        "keywords": [
+            "expo",
+            "exponent",
+            "notifications",
+            "push"
+        ]
+    },
+    {
         "name": "codedge/laravel-fpdf",
         "version": "1.2.3",
         "version_normalized": "1.2.3.0",

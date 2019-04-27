@@ -92,6 +92,7 @@ class ComposerStaticInitbe8c83f102eb035422e07963de4c9dc0
         ),
         'E' => 
         array (
+            'ExponentPhpSDK\\' => 15,
             'Egulias\\EmailValidator\\' => 23,
         ),
         'D' => 
@@ -257,6 +258,10 @@ class ComposerStaticInitbe8c83f102eb035422e07963de4c9dc0
         'Faker\\' => 
         array (
             0 => __DIR__ . '/..' . '/fzaninotto/faker/src/Faker',
+        ),
+        'ExponentPhpSDK\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/alymosul/exponent-server-sdk-php/lib',
         ),
         'Egulias\\EmailValidator\\' => 
         array (
@@ -793,6 +798,12 @@ class ComposerStaticInitbe8c83f102eb035422e07963de4c9dc0
         'Egulias\\EmailValidator\\Warning\\TLD' => __DIR__ . '/..' . '/egulias/email-validator/EmailValidator/Warning/TLD.php',
         'Egulias\\EmailValidator\\Warning\\Warning' => __DIR__ . '/..' . '/egulias/email-validator/EmailValidator/Warning/Warning.php',
         'Error' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/Error.php',
+        'ExponentPhpSDK\\Exceptions\\ExpoException' => __DIR__ . '/..' . '/alymosul/exponent-server-sdk-php/lib/Exceptions/ExpoException.php',
+        'ExponentPhpSDK\\Exceptions\\ExpoRegistrarException' => __DIR__ . '/..' . '/alymosul/exponent-server-sdk-php/lib/Exceptions/ExpoRegistrarException.php',
+        'ExponentPhpSDK\\Expo' => __DIR__ . '/..' . '/alymosul/exponent-server-sdk-php/lib/Expo.php',
+        'ExponentPhpSDK\\ExpoRegistrar' => __DIR__ . '/..' . '/alymosul/exponent-server-sdk-php/lib/ExpoRegistrar.php',
+        'ExponentPhpSDK\\ExpoRepository' => __DIR__ . '/..' . '/alymosul/exponent-server-sdk-php/lib/ExpoRepository.php',
+        'ExponentPhpSDK\\Repositories\\ExpoFileDriver' => __DIR__ . '/..' . '/alymosul/exponent-server-sdk-php/lib/Repositories/ExpoFileDriver.php',
         'Faker\\Calculator\\Iban' => __DIR__ . '/..' . '/fzaninotto/faker/src/Faker/Calculator/Iban.php',
         'Faker\\Calculator\\Inn' => __DIR__ . '/..' . '/fzaninotto/faker/src/Faker/Calculator/Inn.php',
         'Faker\\Calculator\\Luhn' => __DIR__ . '/..' . '/fzaninotto/faker/src/Faker/Calculator/Luhn.php',

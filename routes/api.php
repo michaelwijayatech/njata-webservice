@@ -35,6 +35,8 @@ Route::get('/acc', 'API\DesktopController@accountancy');
 Route::post('/uploadFile', 'API\DesktopController@uploadFile');
 
 Route::post('/signin', 'API\DesktopController@signin');
+Route::get('/test_push', 'API\DesktopController@sendPushNotification');
+
 
 
 Route::post('/add_data', 'API\DesktopController@add_data');
