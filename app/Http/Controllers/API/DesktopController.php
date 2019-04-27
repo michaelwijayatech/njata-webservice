@@ -2127,6 +2127,13 @@ class DesktopController extends Controller
                 ];
             }
 
+            if (strtolower($table) === "administrator_push_token") {
+                $_table = new Administrator();
+                $fields = [
+                    "push_token"
+                ];
+            }
+
             if (strtolower($table) === "employee") {
                 $_table = new Employee();
                 $fields = [
