@@ -1903,7 +1903,7 @@ class DesktopController extends Controller
                                 $_haid_start = date('Y-m-d', strtotime($start_date));
                                 $_haid_end = date('Y-m-d', strtotime($end_date));
 
-                                if (($_haid_date >= $_haid_start) && ($_haid_date <= $_haid_end)) {
+                                if (($_haid_date >= $_haid_start) || ($_haid_date <= $_haid_end)) {
                                     $_haid += $_std_haid;
                                 }
                             }
@@ -2640,6 +2640,30 @@ class DesktopController extends Controller
 
             return response()->json($feedback);
 
+        }
+    }
+
+    public function test_strtotime(){
+        $v1 = '03-05-2019';
+        $v2 = '03-05-2019';
+        $v3 = '03-05-2019';
+
+        $h1 = strtotime($v1); //date('Y-m-d', strtotime($v1));
+        $h2 = strtotime($v2); //date('Y-m-d', strtotime($v2));
+        $h3 = strtotime($v3); //date('Y-m-d', strtotime($v3));
+
+        echo "V1 : " . strtotime($v1);
+        echo "<br/>";
+        echo "V2 : " . strtotime($v2);
+        echo "<br/>";
+        echo "V3 : " . strtotime($v3);
+        echo "<br/>";
+        echo "H1 : " . date('Y-m-d', strtotime($v1));
+        echo "<br/>";
+        if (($h1 >= $h2) || ($h1 <= $h3)) {
+            echo "HH : " . "OKAY";
+        } else {
+            echo "HH : " . "NO OKAY";
         }
     }
 
