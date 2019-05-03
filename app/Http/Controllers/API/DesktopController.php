@@ -1898,10 +1898,10 @@ class DesktopController extends Controller
                                 ->first();
                             if (!empty($_haids)) {
                                 $_h_date = $_haids->date;
-                                $_haid_date = date('Y-m-d', strtotime($_h_date));
+                                $_haid_date = strtotime($_h_date); //date('Y-m-d', strtotime($_h_date));
 
-                                $_haid_start = date('Y-m-d', strtotime($start_date));
-                                $_haid_end = date('Y-m-d', strtotime($end_date));
+                                $_haid_start = strtotime($start_date); //date('Y-m-d', strtotime($start_date));
+                                $_haid_end = strtotime($end_date); //date('Y-m-d', strtotime($end_date));
 
                                 if (($_haid_date > $_haid_start) && ($_haid_date < $_haid_end)) {
                                     $_haid += $_std_haid;
@@ -2674,7 +2674,7 @@ class DesktopController extends Controller
             ->where('is_active', '=', $_table->STATUS_ACTIVE)
             ->orderBy('date', 'DESC')
             ->first();
-        echo $_haids;
+//        echo $_haids;
         if (!empty($_haids)) {
             $_h_date = $_haids->date;
             $_haid_date = date('Y-m-d', strtotime($v1));
@@ -2683,9 +2683,52 @@ class DesktopController extends Controller
             $_haid_end = date('Y-m-d', strtotime($v3));
 
             if (($_haid_date >= $_haid_start) && ($_haid_date <= $_haid_end)) {
+                echo "<br/>";
                 echo "HH : " . "OKAY";
+                echo "<br/>";
+                echo "V1 : " . $_haid_date;
+                echo "<br/>";
+                echo "V2 : " . $_haid_start;
+                echo "<br/>";
+                echo "V3 : " . $_haid_end;
+                echo "<br/>";
             }else {
+                echo "<br/>";
                 echo "HH : " . "NO OKAY";
+                echo "<br/>";
+                echo "V1 : " . $_haid_date;
+                echo "<br/>";
+                echo "V2 : " . $_haid_start;
+                echo "<br/>";
+                echo "V3 : " . $_haid_end;
+                echo "<br/>";
+            }
+
+            $_haid_date = strtotime($v1);
+
+            $_haid_start = strtotime($v2);
+            $_haid_end = strtotime($v3);
+
+            if (($_haid_date >= $_haid_start) && ($_haid_date <= $_haid_end)) {
+                echo "<br/>";
+                echo "HH : " . "OKAY";
+                echo "<br/>";
+                echo "V1 : " . $_haid_date;
+                echo "<br/>";
+                echo "V2 : " . $_haid_start;
+                echo "<br/>";
+                echo "V3 : " . $_haid_end;
+                echo "<br/>";
+            }else {
+                echo "<br/>";
+                echo "HH : " . "NO OKAY";
+                echo "<br/>";
+                echo "V1 : " . $_haid_date;
+                echo "<br/>";
+                echo "V2 : " . $_haid_start;
+                echo "<br/>";
+                echo "V3 : " . $_haid_end;
+                echo "<br/>";
             }
         }
     }
