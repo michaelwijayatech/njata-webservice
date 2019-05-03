@@ -1903,7 +1903,9 @@ class DesktopController extends Controller
                                 $_haid_start = date('Y-m-d', strtotime($start_date));
                                 $_haid_end = date('Y-m-d', strtotime($end_date));
 
-                                if (($_haid_date >= $_haid_start) && ($_haid_date <= $_haid_end)) {
+                                if (($_haid_date > $_haid_start) && ($_haid_date < $_haid_end)) {
+                                    $_haid += $_std_haid;
+                                } elseif (($_haid_date === $_haid_start) && ($_haid_date === $_haid_end)) {
                                     $_haid += $_std_haid;
                                 }
                             }
@@ -2647,23 +2649,44 @@ class DesktopController extends Controller
         $v1 = '03-05-2019';
         $v2 = '03-05-2019';
         $v3 = '03-05-2019';
+//
+//        $h1 = strtotime($v1); //date('Y-m-d', strtotime($v1));
+//        $h2 = strtotime($v2); //date('Y-m-d', strtotime($v2));
+//        $h3 = strtotime($v3); //date('Y-m-d', strtotime($v3));
+//
+//        echo "V1 : " . strtotime($v1);
+//        echo "<br/>";
+//        echo "V2 : " . strtotime($v2);
+//        echo "<br/>";
+//        echo "V3 : " . strtotime($v3);
+//        echo "<br/>";
+//        echo "H1 : " . date('Y-m-d', strtotime($v1));
+//        echo "<br/>";
+//        if (($h1 >= $h2) || ($h1 <= $h3)) {
+//            echo "HH : " . "OKAY";
+//        } else {
+//            echo "HH : " . "NO OKAY";
+//        }
 
-        $h1 = strtotime($v1); //date('Y-m-d', strtotime($v1));
-        $h2 = strtotime($v2); //date('Y-m-d', strtotime($v2));
-        $h3 = strtotime($v3); //date('Y-m-d', strtotime($v3));
+        $_table = new Haid();
+        $_haids = DB::table($_table->BASETABLE)
+            ->where('id_employee', '=', 'EMPLO20190204102424')
+            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+            ->orderBy('date', 'DESC')
+            ->first();
+        echo $_haids;
+        if (!empty($_haids)) {
+            $_h_date = $_haids->date;
+            $_haid_date = date('Y-m-d', strtotime($v1));
 
-        echo "V1 : " . strtotime($v1);
-        echo "<br/>";
-        echo "V2 : " . strtotime($v2);
-        echo "<br/>";
-        echo "V3 : " . strtotime($v3);
-        echo "<br/>";
-        echo "H1 : " . date('Y-m-d', strtotime($v1));
-        echo "<br/>";
-        if (($h1 >= $h2) || ($h1 <= $h3)) {
-            echo "HH : " . "OKAY";
-        } else {
-            echo "HH : " . "NO OKAY";
+            $_haid_start = date('Y-m-d', strtotime($v2));
+            $_haid_end = date('Y-m-d', strtotime($v3));
+
+            if (($_haid_date >= $_haid_start) && ($_haid_date <= $_haid_end)) {
+                echo "HH : " . "OKAY";
+            }else {
+                echo "HH : " . "NO OKAY";
+            }
         }
     }
 
