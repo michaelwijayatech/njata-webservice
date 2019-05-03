@@ -1806,7 +1806,7 @@ class DesktopController extends Controller
                             $_haids = DB::table($_table->BASETABLE)
                                 ->where('id_employee', '=', $empl_id)
                                 ->where('is_active', '=', $_table->STATUS_ACTIVE)
-                                ->orderBy('date', 'DESC')
+                                ->orderBy('id', 'DESC')
                                 ->first();
                             if (!empty($_haids)) {
                                 $_h_date = $_haids->date;
