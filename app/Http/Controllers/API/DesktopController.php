@@ -1975,6 +1975,7 @@ class DesktopController extends Controller
                             $_tot = ($_pokok + $_premi + $_haid) - $_pot_bpjs;
 
                             $temp = array(
+                                "hd" => $_haids->date,
                                 "id_employee" => $empl_id,
                                 "employee_name" => $empl_name,
                                 "gender" => $empl_gender,
