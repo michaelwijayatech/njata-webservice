@@ -1903,7 +1903,7 @@ class DesktopController extends Controller
                                 $_haid_start = date('Y-m-d', strtotime($start_date));
                                 $_haid_end = date('Y-m-d', strtotime($end_date));
 
-                                if (($_haid_date >= $_haid_start) || ($_haid_date <= $_haid_end)) {
+                                if (($_haid_date >= $_haid_start) && ($_haid_date <= $_haid_end)) {
                                     $_haid += $_std_haid;
                                 }
                             }
