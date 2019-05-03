@@ -1898,10 +1898,10 @@ class DesktopController extends Controller
                                 ->first();
                             if (!empty($_haids)) {
                                 $_h_date = $_haids->date;
-                                $_haid_date = date('d-m-Y', strtotime($_h_date));
+                                $_haid_date = date('Y-m-d', strtotime($_h_date));
 
-                                $_haid_start = date('d-m-Y', strtotime($start_date));
-                                $_haid_end = date('d-m-Y', strtotime($end_date));
+                                $_haid_start = date('Y-m-d', strtotime($start_date));
+                                $_haid_end = date('Y-m-d', strtotime($end_date));
 
                                 if (($_haid_date >= $_haid_start) && ($_haid_date <= $_haid_end)) {
                                     $_haid += $_std_haid;
