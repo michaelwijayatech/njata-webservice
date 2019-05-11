@@ -2654,9 +2654,10 @@ class DesktopController extends Controller
                 $datetime1 = new \DateTime(explode("-", $start_date)[2] . '-' . explode("-", $start_date)[1] . '-' . explode("-", $start_date)[0]);
                 $datetime2 = new \DateTime(explode("-", $end_date)[2] . '-' . explode("-", $end_date)[1] . '-' . explode("-", $end_date)[0]);
 //                $__days = strtotime($end_date) - strtotime($start_date);
-                $interval = $datetime1->diff($datetime2);
+//                $interval = $datetime1->diff($datetime2);
+                $diff = $datetime1->diff($datetime2);
 //                $__days = round($__days / (60 * 60 * 24)) + 1;
-                $__days = (int)$interval->format('%a');
+                $__days= intval($diff->format("%d")) + 1;
                 if ($__days === 4) {
                     $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days);
                 } else if ($__days === "4") {
