@@ -2658,13 +2658,13 @@ class DesktopController extends Controller
                 $diff = $datetime1->diff($datetime2);
 //                $__days = round($__days / (60 * 60 * 24)) + 1;
                 $__days= intval($diff->format("%d")) + 1;
-                if ($__days === 4) {
-                    $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days);
-                } else if ($__days === "4") {
-                    $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days . ' string');
-                } else {
-                    $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days . ' else');
-                }
+                $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days);
+//                if ($__days === 4) {
+//                } else if ($__days === "4") {
+//                    $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days . ' string');
+//                } else {
+//                    $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days . ' else');
+//                }
                 $fpdf->Ln(10);
 
                 $days = explode("#", $_days);
@@ -2696,6 +2696,10 @@ class DesktopController extends Controller
 
                 $fpdf->Cell(8+40+8+8,5,' ',0,0,'C');
 //                $days = explode("#", $_days);
+
+                /**
+                 * SET DATE ON HEADER
+                 */
                 if ($__days === 6){
                     if (explode("-",$days[0])[0] > 24){
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
@@ -3070,6 +3074,7 @@ class DesktopController extends Controller
                             $total_days += 1;
                         }
                     } else if ($tot_days === 5){
+                        $fpdf->Cell(8,10, ' ',1, 0, 'C');
                         $fpdf->Cell(8,10, explode("#", $datas[$i])[5],1, 0, 'C');
                         $fpdf->Cell(8,10, explode("#", $datas[$i])[6],1, 0, 'C');
                         $fpdf->Cell(8,10, explode("#", $datas[$i])[7],1, 0, 'C');
@@ -3126,6 +3131,8 @@ class DesktopController extends Controller
                             $total_days += 1;
                         }
                     } else if ($tot_days === 4){
+                        $fpdf->Cell(8,10, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,10, ' ',1, 0, 'C');
                         $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[5],1, 0, 'C');
                         $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[6],1, 0, 'C');
                         $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[7],1, 0, 'C');
