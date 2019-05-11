@@ -2666,7 +2666,7 @@ class DesktopController extends Controller
 //                if ($tot_days >= 5){
 //                    $fpdf->Cell($tot_days*8,8,'Tgl. Pendapatan hari masuk kerja',1,0,'C');
 //                } else {
-                    $fpdf->Cell(5*8,8,'Tgl. Pendapatan hari masuk kerja',1,0,'C');
+                    $fpdf->Cell(6*8,8,'Tgl. Pendapatan hari masuk kerja',1,0,'C');
 //                }
                 $fpdf->SetFont('Arial', 'B', 10);
                 $fpdf->Cell(20,16,'Jumlah',1,0,'C');
