@@ -3039,7 +3039,8 @@ class DesktopController extends Controller
 
                 $target_path = base_path('public/pdf/');
 //                $file_name = $_date_now . '_gaji_harian_tt.pdf';
-                $fname = date("YmdHis") . '_'. rand(1, 9000);
+//                $fname = date("YmdHis") . '_'. rand(1, 9999);
+                $fname = date("YmdHis");
                 $file_name = $fname . '_gaji_harian_tt.pdf';
                 $file_path = $target_path . $file_name;
                 $fpdf->Output($file_path, 'F');
