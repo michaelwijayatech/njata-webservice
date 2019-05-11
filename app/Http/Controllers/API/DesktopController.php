@@ -2689,11 +2689,11 @@ class DesktopController extends Controller
 //                    } else {
 //                        $fpdf->Cell(((5*8) / $tot_days),-8, explode("-",$days[$i])[0],1, 0, 'C');
 //                    }
-                    if ($tot_days === 4) {
+                    if ($tot_days === 3) {
                         if (explode("-", $days[$i])[0] > 4){
                             $fpdf->Cell(8,-8, ' ',1, 0, 'C');
                             $fpdf->Cell(8,-8, ' ',1, 0, 'C');
-                            $fpdf->Cell(8,-8, explode("-",$days[$i])[0],1, 0, 'C');
+                            $fpdf->Cell(8,-8, ' ',1, 0, 'C');
                             $fpdf->Cell(8,-8, explode("-",$days[$i])[0],1, 0, 'C');
                             $fpdf->Cell(8,-8, explode("-",$days[$i])[0],1, 0, 'C');
                             $fpdf->Cell(8,-8, explode("-",$days[$i])[0],1, 0, 'C');
