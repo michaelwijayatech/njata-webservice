@@ -2696,7 +2696,9 @@ class DesktopController extends Controller
                         $fpdf->Cell(8,-8, ' ',1, 0, 'C');
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0], 1, 0, 'C');
                         if (explode("-",$start_date)[0] +1 < 10) {
-                            $fpdf->Cell(8,-8, '0' . explode("-",$start_date)[0] +1,1, 0, 'C');
+                            $res = explode("-",$start_date)[0] +1;
+
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
                         } else {
                             $fpdf->Cell(8,-8, explode("-",$start_date)[0] +1,1, 0, 'C');
                         }
