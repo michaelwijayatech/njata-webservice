@@ -2759,7 +2759,7 @@ class DesktopController extends Controller
                         if ($tot_days >= 5) {
                             $fpdf->Cell(8 + 40 + 8 + 8 + ((count($days) - 1) * 8) + 20 + 30 + 15 + 30 + 30 + 15, 8, ' ', 0, 0, 'C');
                         } else {
-                            $fpdf->Cell(8 + 40 + 8 + 8 + (5 * 8) + 20 + 30 + 15 + 30 + 30 + 15, 8, ' ', 0, 0, 'C');
+                            $fpdf->Cell(8 + 40 + 8 + 8 + (5 * 8) + 20 + 30 + 15 + 30 + 30 + 15, 8, 'q', 0, 0, 'C');
                         }
                         $fpdf->Cell(20, 4, 'PENDAPATAN', 0, 0, 'C');
                         $fpdf->Ln(10);
