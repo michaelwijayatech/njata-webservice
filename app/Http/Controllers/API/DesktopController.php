@@ -2696,6 +2696,96 @@ class DesktopController extends Controller
 
                 $fpdf->Cell(8+40+8+8,5,' ',0,0,'C');
 //                $days = explode("#", $_days);
+                if ($__days === 6){
+                    if (explode("-",$days[0])[0] > 24){
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0]+1,1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0]+2,1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0]+3,1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0]+4,1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0]+5,1, 0, 'C');
+                    } else {
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0], 1, 0, 'C');
+
+                        if (explode("-",$start_date)[0] +1 < 10) {
+                            $res = explode("-",$start_date)[0] +1;
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8,-8, explode("-",$start_date)[0] +1,1, 0, 'C');
+                        }
+
+                        if (explode("-",$start_date)[0] +2 < 10) {
+                            $res = explode("-",$start_date)[0] +2;
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8,-8, explode("-",$start_date)[0] +2,1, 0, 'C');
+                        }
+
+                        if (explode("-",$start_date)[0] +3 < 10) {
+                            $res = explode("-",$start_date)[0] +3;
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8,-8, explode("-",$start_date)[0] +3,1, 0, 'C');
+                        }
+
+                        if (explode("-",$start_date)[0] +4 < 10) {
+                            $res = explode("-",$start_date)[0] +4;
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8,-8, explode("-",$start_date)[0] +4,1, 0, 'C');
+                        }
+
+                        if (explode("-",$start_date)[0] +5 < 10) {
+                            $res = explode("-",$start_date)[0] +5;
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8,-8, explode("-",$start_date)[0] +5,1, 0, 'C');
+                        }
+                    }
+                }
+
+                if ($__days === 5){
+                    if (explode("-",$days[0])[0] > 24){
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0]+1,1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0]+2,1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0]+3,1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0]+4,1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                    } else {
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0], 1, 0, 'C');
+
+                        if (explode("-",$start_date)[0] +1 < 10) {
+                            $res = explode("-",$start_date)[0] +1;
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8,-8, explode("-",$start_date)[0] +1,1, 0, 'C');
+                        }
+
+                        if (explode("-",$start_date)[0] +2 < 10) {
+                            $res = explode("-",$start_date)[0] +2;
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8,-8, explode("-",$start_date)[0] +2,1, 0, 'C');
+                        }
+
+                        if (explode("-",$start_date)[0] +3 < 10) {
+                            $res = explode("-",$start_date)[0] +3;
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8,-8, explode("-",$start_date)[0] +3,1, 0, 'C');
+                        }
+
+                        if (explode("-",$start_date)[0] +4 < 10) {
+                            $res = explode("-",$start_date)[0] +4;
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8,-8, explode("-",$start_date)[0] +4,1, 0, 'C');
+                        }
+                    }
+                }
+
                 if ($__days === 4){
                     if (explode("-",$days[0])[0] > 24){
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
@@ -2729,6 +2819,78 @@ class DesktopController extends Controller
                         } else {
                             $fpdf->Cell(8,-8, explode("-",$start_date)[0] +3,1, 0, 'C');
                         }
+                    }
+                }
+
+                if ($__days === 3){
+                    if (explode("-",$days[0])[0] > 24){
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0]+1,1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0]+2,1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                    } else {
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0], 1, 0, 'C');
+
+                        if (explode("-",$start_date)[0] +1 < 10) {
+                            $res = explode("-",$start_date)[0] +1;
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8,-8, explode("-",$start_date)[0] +1,1, 0, 'C');
+                        }
+
+                        if (explode("-",$start_date)[0] +2 < 10) {
+                            $res = explode("-",$start_date)[0] +2;
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8,-8, explode("-",$start_date)[0] +2,1, 0, 'C');
+                        }
+                    }
+                }
+
+                if ($__days === 2){
+                    if (explode("-",$days[0])[0] > 24){
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0]+1,1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                    } else {
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0], 1, 0, 'C');
+
+                        if (explode("-",$start_date)[0] +1 < 10) {
+                            $res = explode("-",$start_date)[0] +1;
+                            $fpdf->Cell(8,-8, "0" . $res ,1, 0, 'C');
+                        } else {
+                            $fpdf->Cell(8,-8, explode("-",$start_date)[0] +1,1, 0, 'C');
+                        }
+                    }
+                }
+
+                if ($__days === 1){
+                    if (explode("-",$days[0])[0] > 24){
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                    } else {
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0], 1, 0, 'C');
                     }
                 }
 
