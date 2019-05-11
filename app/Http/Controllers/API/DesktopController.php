@@ -1484,7 +1484,8 @@ class DesktopController extends Controller
                                     if (count($_atts) > 0) {
                                         foreach ($_atts as $atts => $att) {
                                             $att_stat = $att['attendance_status'];
-                                            $empl_name = $att['employee_first_name'] . ' ' . $att['employee_last_name'];
+//                                            $empl_name = $att['employee_first_name'] . ' ' . $att['employee_last_name'];
+                                            $empl_name = $att['employee_first_name'];
 
                                             if ($att_stat === '3') {
                                                 $ijin = $ijin + 1;
@@ -2658,7 +2659,7 @@ class DesktopController extends Controller
                 $diff = $datetime1->diff($datetime2);
 //                $__days = round($__days / (60 * 60 * 24)) + 1;
                 $__days= intval($diff->format("%d")) + 1;
-                $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days);
+                $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date);
 //                if ($__days === 4) {
 //                } else if ($__days === "4") {
 //                    $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days . ' string');
