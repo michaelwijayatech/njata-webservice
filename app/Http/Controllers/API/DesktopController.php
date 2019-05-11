@@ -2685,19 +2685,19 @@ class DesktopController extends Controller
                 $days = explode("#", $_days);
                 if (count($days)-1 === 3){
                     if (explode("-",$days[0])[0] > 4){
-                        $fpdf->Cell(8,-8, explode("-",$days[0])[0],1, 0, 'C');
-                        $fpdf->Cell(8,-8, explode("-",$days[1])[0],1, 0, 'C');
-                        $fpdf->Cell(8,-8, explode("-",$days[2])[0],1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
                         $fpdf->Cell(8,-8, ' ',1, 0, 'C');
                         $fpdf->Cell(8,-8, ' ',1, 0, 'C');
                         $fpdf->Cell(8,-8, ' ',1, 0, 'C');
                     } else {
                         $fpdf->Cell(8,-8, ' ',1, 0, 'C');
                         $fpdf->Cell(8,-8, ' ',1, 0, 'C');
-                        $fpdf->Cell(8,-8, ' ',1, 0, 'C');
-                        $fpdf->Cell(8,-8, explode("-",$days[0])[0],1, 0, 'C');
-                        $fpdf->Cell(8,-8, explode("-",$days[1])[0],1, 0, 'C');
-                        $fpdf->Cell(8,-8, explode("-",$days[2])[0],1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0], 1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0] +1,1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0] +2,1, 0, 'C');
+                        $fpdf->Cell(8,-8, explode("-",$start_date)[0] +3,1, 0, 'C');
                     }
                 }
 
