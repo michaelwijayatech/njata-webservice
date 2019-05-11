@@ -3133,10 +3133,10 @@ class DesktopController extends Controller
                     } else if ($tot_days === 4){
                         $fpdf->Cell(8,10, ' ',1, 0, 'C');
                         $fpdf->Cell(8,10, ' ',1, 0, 'C');
-                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[5],1, 0, 'C');
-                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[6],1, 0, 'C');
-                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[7],1, 0, 'C');
-                        $fpdf->Cell(((5 * 8) / $tot_days),10, explode("#", $datas[$i])[8],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[5],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[6],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[7],1, 0, 'C');
+                        $fpdf->Cell(8,10, explode("#", $datas[$i])[8],1, 0, 'C');
 
                         if (explode("#", $datas[$i])[5] === '1') {
                             $total_days += 1;
