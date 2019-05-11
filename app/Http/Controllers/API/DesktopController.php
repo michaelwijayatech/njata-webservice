@@ -2701,7 +2701,7 @@ class DesktopController extends Controller
                  * SET DATE ON HEADER
                  */
                 if ($__days === 6){
-                    if (explode("-",$days[0])[0] > 24){
+                    if (explode("-",$days[0])[0] > 20){
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0]+1,1, 0, 'C');
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0]+2,1, 0, 'C');
@@ -2749,7 +2749,7 @@ class DesktopController extends Controller
                 }
 
                 if ($__days === 5){
-                    if (explode("-",$days[0])[0] > 24){
+                    if (explode("-",$days[0])[0] > 20){
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0]+1,1, 0, 'C');
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0]+2,1, 0, 'C');
@@ -2791,7 +2791,7 @@ class DesktopController extends Controller
                 }
 
                 if ($__days === 4){
-                    if (explode("-",$days[0])[0] > 24){
+                    if (explode("-",$days[0])[0] > 20){
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0]+1,1, 0, 'C');
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0]+2,1, 0, 'C');
@@ -2827,7 +2827,7 @@ class DesktopController extends Controller
                 }
 
                 if ($__days === 3){
-                    if (explode("-",$days[0])[0] > 24){
+                    if (explode("-",$days[0])[0] > 20){
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0]+1,1, 0, 'C');
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0]+2,1, 0, 'C');
@@ -2857,7 +2857,7 @@ class DesktopController extends Controller
                 }
 
                 if ($__days === 2){
-                    if (explode("-",$days[0])[0] > 24){
+                    if (explode("-",$days[0])[0] > 20){
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0]+1,1, 0, 'C');
                         $fpdf->Cell(8,-8, ' ',1, 0, 'C');
@@ -2881,7 +2881,7 @@ class DesktopController extends Controller
                 }
 
                 if ($__days === 1){
-                    if (explode("-",$days[0])[0] > 24){
+                    if (explode("-",$days[0])[0] > 20){
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
                         $fpdf->Cell(8,-8, ' ',1, 0, 'C');
                         $fpdf->Cell(8,-8, ' ',1, 0, 'C');
