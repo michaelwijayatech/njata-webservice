@@ -1484,8 +1484,12 @@ class DesktopController extends Controller
                                     if (count($_atts) > 0) {
                                         foreach ($_atts as $atts => $att) {
                                             $att_stat = $att['attendance_status'];
-//                                            $empl_name = $att['employee_first_name'] . ' ' . $att['employee_last_name'];
-                                            $empl_name = $att['employee_first_name'];
+
+                                            if ($att['employee_first_name'] === $att['employee_last_name']){
+                                                $empl_name = $att['employee_first_name'];
+                                            } else {
+                                                $empl_name = $att['employee_first_name'] . ' ' . $att['employee_last_name'];
+                                            }
 
                                             if ($att_stat === '3') {
                                                 $ijin = $ijin + 1;
@@ -1694,8 +1698,11 @@ class DesktopController extends Controller
                     if (count($_empls) > 0) {
                         foreach ($_empls as $empls => $empl) {
                             $empl_id = $empl->id;
-//                            $empl_name = $empl->first_name . ' ' . $empl->last_name;
-                            $empl_name = $empl->first_name;
+                            if ($empl->first_name === $empl->last_name){
+                                $empl_name = $empl->first_name;
+                            } else {
+                                $empl_name = $empl->first_name . ' ' . $empl->last_name;
+                            }
                             $empl_gender = $empl->gender;
                             $empl_premi = $_global_class->removeMoneySeparator($empl->premi);
                             $empl_stat = $empl->status;
