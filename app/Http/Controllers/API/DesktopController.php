@@ -2683,12 +2683,19 @@ class DesktopController extends Controller
 
                 $fpdf->Cell(8+40+8+8,5,' ',0,0,'C');
                 $days = explode("#", $_days);
-                for($i=0; $i<count($days)-1;$i++) {
-                    if ($tot_days >= 5) {
-                        $fpdf->Cell(8,-8, explode("-",$days[$i])[0],1, 0, 'C');
-                    } else {
-                        $fpdf->Cell(((5*8) / $tot_days),-8, count($days)-1,1, 0, 'C');
-                    }
+                $fpdf->Cell(8,-8, '1',1, 0, 'C');
+                $fpdf->Cell(8,-8, '2',1, 0, 'C');
+                $fpdf->Cell(8,-8, '3',1, 0, 'C');
+                $fpdf->Cell(8,-8, '4',1, 0, 'C');
+                $fpdf->Cell(8,-8, '5',1, 0, 'C');
+                $fpdf->Cell(8,-8, '6',1, 0, 'C');
+
+//                for($i=0; $i<count($days)-1;$i++) {
+//                    if ($tot_days >= 5) {
+//                        $fpdf->Cell(8,-8, explode("-",$days[$i])[0],1, 0, 'C');
+//                    } else {
+//                        $fpdf->Cell(((5*8) / $tot_days),-8, explode("-",$days[$i])[0],1, 0, 'C');
+//                    }
 //                    if ($tot_days === 3) {
 //                        if (explode("-", $days[$i])[0] > 4){
 //                            $fpdf->Cell(8,-8, ' ',1, 0, 'C');
@@ -2700,7 +2707,7 @@ class DesktopController extends Controller
 //                        }
 //                    }
 
-                }
+//                }
                 $fpdf->SetFont('Arial', 'B', 8);
                 $fpdf->Cell(20,-8,' ',0,0,'C');
                 $fpdf->Cell(30,-8,'Upah Pokok',1,0,'C');
