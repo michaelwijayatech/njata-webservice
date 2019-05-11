@@ -2653,7 +2653,11 @@ class DesktopController extends Controller
                 $fpdf->SetFont('Arial', '', 10);
                 $__days = strtotime($end_date) - strtotime($start_date);
                 $__days = round($__days / (60 * 60 * 24)) + 1;
-                $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days);
+                if ($__days === 4) {
+                    $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days);
+                } else {
+                    $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days . ' else');
+                }
                 $fpdf->Ln(10);
 
                 $days = explode("#", $_days);
@@ -2685,7 +2689,7 @@ class DesktopController extends Controller
 
                 $fpdf->Cell(8+40+8+8,5,' ',0,0,'C');
 //                $days = explode("#", $_days);
-                if ($__days === '4'){
+                if ($__days === 4){
                     if (explode("-",$days[0])[0] > 24){
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0]+1,1, 0, 'C');
