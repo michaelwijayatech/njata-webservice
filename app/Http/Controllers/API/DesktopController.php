@@ -2685,7 +2685,7 @@ class DesktopController extends Controller
 
                 $fpdf->Cell(8+40+8+8,5,' ',0,0,'C');
 //                $days = explode("#", $_days);
-                if ($__days === 4){
+                if ($__days === '4'){
                     if (explode("-",$days[0])[0] > 24){
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0],1, 0, 'C');
                         $fpdf->Cell(8,-8, explode("-",$start_date)[0]+1,1, 0, 'C');
