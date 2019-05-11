@@ -1694,7 +1694,8 @@ class DesktopController extends Controller
                     if (count($_empls) > 0) {
                         foreach ($_empls as $empls => $empl) {
                             $empl_id = $empl->id;
-                            $empl_name = $empl->first_name . ' ' . $empl->last_name;
+//                            $empl_name = $empl->first_name . ' ' . $empl->last_name;
+                            $empl_name = $empl->first_name;
                             $empl_gender = $empl->gender;
                             $empl_premi = $_global_class->removeMoneySeparator($empl->premi);
                             $empl_stat = $empl->status;
