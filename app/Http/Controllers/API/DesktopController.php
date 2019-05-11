@@ -2651,8 +2651,12 @@ class DesktopController extends Controller
                 $fpdf->Cell(0, 0, 'Gaji Harian');
                 $fpdf->Ln(2);
                 $fpdf->SetFont('Arial', '', 10);
-                $__days = strtotime($end_date) - strtotime($start_date);
-                $__days = round($__days / (60 * 60 * 24)) + 1;
+                $datetime1 = new \DateTime(explode("-", $start_date)[2] . '-' . explode("-", $start_date)[1] . '-' . explode("-", $start_date)[0]);
+                $datetime2 = new \DateTime(explode("-", $end_date)[2] . '-' . explode("-", $end_date)[1] . '-' . explode("-", $end_date)[0]);
+//                $__days = strtotime($end_date) - strtotime($start_date);
+                $interval = $datetime1->diff($datetime2);
+//                $__days = round($__days / (60 * 60 * 24)) + 1;
+                $__days = $interval->format('%R%a days');
                 if ($__days === 4) {
                     $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days);
                 } else if ($__days === "4") {
