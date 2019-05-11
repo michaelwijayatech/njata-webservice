@@ -2651,7 +2651,7 @@ class DesktopController extends Controller
                 $fpdf->Cell(0, 0, 'Gaji Harian');
                 $fpdf->Ln(2);
                 $fpdf->SetFont('Arial', '', 10);
-                $days = strtotime($start_date) - strtotime($end_date);
+                $days = strtotime($end_date) - strtotime($start_date);
                 $days = round($days / (60 * 60 * 24));
                 $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $days);
                 $fpdf->Ln(10);
