@@ -2657,9 +2657,9 @@ class DesktopController extends Controller
                 $interval = $datetime1->diff($datetime2);
 //                $__days = round($__days / (60 * 60 * 24)) + 1;
                 $__days = $interval->format('%a');
-                if ($__days === 4) {
+                if ((int)$__days === 4) {
                     $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days);
-                } else if ($__days === "4") {
+                } else if ((int)$__days === "4") {
                     $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days . ' string');
                 } else {
                     $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date . ' || ' . $__days . ' else');
