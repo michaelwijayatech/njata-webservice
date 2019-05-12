@@ -1573,6 +1573,8 @@ class DesktopController extends Controller
                 $_year = date("Y");
                 $_data = [];
                 $_date = [];
+                $_start_date = explode('-', $start_date);
+                $_end_date = explode('-', $end_date);
                 $_conv_start_date = date('Y-m-d', strtotime($start_date));
                 $_conv_end_date = date('Y-m-d', strtotime($end_date));
                 if (strtolower($id) === "all") {
@@ -1589,6 +1591,35 @@ class DesktopController extends Controller
                             $_conv_holiday_date = date('Y-m-d', strtotime($holiday->date));
                             if (($_conv_holiday_date >= $_conv_start_date) && ($_conv_holiday_date <= $_conv_end_date)) {
                                 array_push($_date, $_conv_holiday_date);
+                            }
+                        }
+                    }
+
+                    // => GET ALL DATA FROM ATTENDANCE
+                    $_table = new Attendance();
+                    $_attendances = DB::table($_table->BASETABLE)
+                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_start_date[1])
+                        ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                    if ($_start_date[1] !== $_end_date[1]) {
+                        $_attendances = DB::table($_table->BASETABLE)
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+                            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                            ->get();
+                    }
+
+                    // => CHECK IF THERE IS AN ATTENDANCE DATE BETWEEN START AND END DATE
+                    if (count($_attendances) > 0) {
+                        foreach ($_attendances as $_attendance => $attendance) {
+                            $_conv_attendance_date = date('Y-m-d', strtotime($attendance->date));
+                            if (($_conv_attendance_date >= $_conv_start_date) && ($_conv_attendance_date <= $_conv_end_date)) {
+                                if (!in_array($_conv_attendance_date, $_date)){
+                                    array_push($_date, $_conv_attendance_date);
+                                }
                             }
                         }
                     }
