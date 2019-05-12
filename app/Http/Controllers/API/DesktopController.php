@@ -3306,11 +3306,11 @@ class DesktopController extends Controller
                 $fpdf->Cell(15,-8,' ',0,0,'C');
                 $fpdf->Cell(20,-10,'BERSIH','T',0,'C');
                 $fpdf->Ln();
-                if ($tot_days >= 5) {
-                    $fpdf->Cell(8+40+8+8+((count($days)-1) * 8)+20+30+15+30+30+15,8,' ',0,0,'C');
-                } else {
-                    $fpdf->Cell(8+40+8+8+(5 * 8)+20+30+15+30+30+15,8,' ',0,0,'C');
-                }
+//                if ($tot_days >= 5) {
+//                    $fpdf->Cell(8+40+8+8+((count($days)-1) * 8)+20+30+15+30+30+15,8,' ',0,0,'C');
+//                } else {
+//                }
+                $fpdf->Cell(8+40+8+8+(6 * 8)+20+30+15+30+30+15,8,' ',0,0,'C');
                 $fpdf->Cell(20,4,'PENDAPATAN',0,0,'C');
                 $fpdf->Ln(10);
 
