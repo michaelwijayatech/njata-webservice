@@ -1570,12 +1570,35 @@ class DesktopController extends Controller
                 $start_date = $request->start_date;
                 $end_date = $request->end_date;
                 $potongan_bpjs = $request->potongan_bpjs;
+                $_year = date("Y");
                 $_data = [];
+                $_date = [];
+                $_conv_start_date = date('Y-m-d', strtotime($start_date));
+                $_conv_end_date = date('Y-m-d', strtotime($end_date));
                 if (strtolower($id) === "all") {
+                    // => GET ALL DATE FROM HOLIDAY BY YEAR
+                    $_table = new Holiday();
+                    $_holidays = DB::table($_table->BASETABLE)
+                        ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    // => CHECK IF THERE IS AN HOLIDAY BETWEEN START AND END DATE
+                    if (count($_holidays) > 0) {
+                        foreach ($_holidays as $_holiday => $holiday) {
+                            $_conv_holiday_date = date('Y-m-d', strtotime($holiday->date));
+                            if (($_hols_date >= $_hols_start) && ($_hols_date <= $_hols_end)) {
+                                array_push($_date, $_conv_holiday_date);
+                            }
+                        }
+                    }
+
+
                     $temp = array(
                         "start_date" => $start_date,
                         "end_date" => $end_date,
-                        "potongan_bpjs" => $potongan_bpjs
+                        "potongan_bpjs" => $potongan_bpjs,
+                        "_date" => $_date
                     );
 
                     array_push($_data, $temp);
