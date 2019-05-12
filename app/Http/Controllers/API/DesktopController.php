@@ -1728,11 +1728,11 @@ class DesktopController extends Controller
                                         $_masuk += 1;
 //                                        CHECK IF TODAY IS CHOP
                                         if ($employee->status === $_stat_harian_atas){
-                                            $_premi += $employee->premi;
+                                            $_premi += $_global_class->removeMoneySeparator($employee->premi);
                                         }
                                         if ($employee->status === $_stat_harian_bawah){
                                             if (in_array($_date[$i], $_chop_arr)){
-                                                $_premi += $employee->premi;
+                                                $_premi += $_global_class->removeMoneySeparator($employee->premi);
                                             }
                                         }
                                     }
@@ -1752,7 +1752,7 @@ class DesktopController extends Controller
                                         $_pokok += ($_std_harian / 2);
                                         $ctr_temp = 0;
                                         if (in_array($_date[$i], $_chop_arr)){
-                                            $_premi += $employee->premi / 2;
+                                            $_premi += $_global_class->removeMoneySeparator($employee->premi) / 2;
                                         }
 //                                        for ($i = 0; $i < count($_chop_date_arr); $i++) {
 //                                            if ($_chop_date_arr[$i] === $att_date){
