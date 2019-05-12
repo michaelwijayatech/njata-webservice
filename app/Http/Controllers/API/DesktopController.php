@@ -1715,8 +1715,13 @@ class DesktopController extends Controller
                                 "gender" => $employee->gender,
                                 "_attendance" => $temp_arr_attendance,
                                 "libur" => count($_holiday_arr),
-                                "rajang" => $_chop,
-                                "_rajamg" => $_chop_arr
+                                "rajang" => count($_chop_arr),
+                                "_rajamg" => $_chop_arr,
+                                "pokok" => "cms",
+                                "premi" => "cms",
+                                "haid" => "cms",
+                                "potongan_bpjs" => "cms",
+                                "total" => "cms"
                             );
 
                             array_push($_data, $temp);
