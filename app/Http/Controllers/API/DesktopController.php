@@ -1573,6 +1573,16 @@ class DesktopController extends Controller
                 $_year = date("Y");
                 $_data = [];
                 $_date = [];
+                $_pokok = 0;
+                $_premi = 0;
+                $_haid = 0;
+                $_pot_bpjs = 0;
+                $_std_harian = 0;
+                $_std_haid = 0;
+                $_masuk = 0;
+                $_setengah_hari = 0;
+                $_ijin = 0;
+                $_tidak_masuk = 0;
                 $_holiday = 0;
                 $_holiday_arr = [];
                 $_chop = 0;
@@ -1582,6 +1592,23 @@ class DesktopController extends Controller
                 $_conv_start_date = date('Y-m-d', strtotime($start_date));
                 $_conv_end_date = date('Y-m-d', strtotime($end_date));
                 if (strtolower($id) === "all") {
+
+                    // => GET ALL DATA FROM STANDARD BY YEAR
+                    $_table = new Standard();
+                    $_standards = DB::table($_table->BASETABLE)
+                        ->where('year', '=', $_year)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                    if (count($_standards) > 0) {
+                        foreach ($_standards as $_standard => $standard) {
+                            if ($standard->name === "upah_harian"){
+                                $_std_harian = $_global_class->removeMoneySeparator($standard->nominal);
+                            }
+                            if ($standard->name === "cuti_haid"){
+                                $_std_haid = $_global_class->removeMoneySeparator($standard->nominal);
+                            }
+                        }
+                    }
 
                     // => GET ALL DATE FROM HOLIDAY BY YEAR
                     $_table = new Holiday();
@@ -1694,6 +1721,31 @@ class DesktopController extends Controller
                                         "date" => $___attendances->date,
                                         "status" => $___attendances->status,
                                     );
+                                    if ($___attendances->status === (string)$_table->STATUS_IJIN){
+                                        $_pokok += $_std_harian;
+                                        $_premi += 0;
+                                        $_ijin += 1;
+                                    }
+                                    if ($___attendances->status === (string)$_table->STATUS_SAKIT){
+                                        $_pokok += $_std_harian;
+                                        $_premi += 0;
+                                        $_ijin += 1;
+                                    }
+                                    if ($___attendances->status === (string)$_table->STATUS_SETENGAH_HARI){
+                                        $_pokok += ($_std_harian / 2);
+                                        $ctr_temp = 0;
+//                                        for ($i = 0; $i < count($_chop_date_arr); $i++) {
+//                                            if ($_chop_date_arr[$i] === $att_date){
+//                                                $ctr_temp++;
+//                                            }
+//                                        }
+//                                        $_premi += (($empl_premi * $ctr_temp) / 2);
+                                        $_setengah_hari += 1;
+                                    }
+
+                                    if ($___attendances->status === (string)$_table->STATUS_TIDAK_MASUK){
+                                        $_tidak_masuk += 1;
+                                    }
                                 } else {
                                     $arr_attendance = array(
                                         "att_id" => "",
@@ -1722,7 +1774,8 @@ class DesktopController extends Controller
                                 "premi" => "cms",
                                 "haid" => "cms",
                                 "potongan_bpjs" => "cms",
-                                "total" => "cms"
+                                "total" => "cms",
+                                "_date" => $_date
                             );
 
                             array_push($_data, $temp);
