@@ -1573,11 +1573,15 @@ class DesktopController extends Controller
                 $_year = date("Y");
                 $_data = [];
                 $_date = [];
+                $_holiday = 0;
+                $_chop = 0;
+                $_chop_arr = [];
                 $_start_date = explode('-', $start_date);
                 $_end_date = explode('-', $end_date);
                 $_conv_start_date = date('Y-m-d', strtotime($start_date));
                 $_conv_end_date = date('Y-m-d', strtotime($end_date));
                 if (strtolower($id) === "all") {
+
                     // => GET ALL DATE FROM HOLIDAY BY YEAR
                     $_table = new Holiday();
                     $_holidays = DB::table($_table->BASETABLE)
@@ -1590,6 +1594,7 @@ class DesktopController extends Controller
                         foreach ($_holidays as $_holiday => $holiday) {
                             $_conv_holiday_date = date('Y-m-d', strtotime($holiday->date));
                             if (($_conv_holiday_date >= $_conv_start_date) && ($_conv_holiday_date <= $_conv_end_date)) {
+                                $_holiday++;
                                 array_push($_date, $_conv_holiday_date);
                             }
                         }
@@ -1619,6 +1624,42 @@ class DesktopController extends Controller
                             if (($_conv_attendance_date >= $_conv_start_date) && ($_conv_attendance_date <= $_conv_end_date)) {
                                 if (!in_array($_conv_attendance_date, $_date)){
                                     array_push($_date, $_conv_attendance_date);
+                                }
+                            }
+                        }
+                    }
+
+                    // => GET ALL DATA FROM CHOP
+                    $_table = new Chop();
+                    $_chops = DB::table($_table->BASETABLE)
+                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_start_date[1])
+                        ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_year)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                    if ($_start_date[1] !== $_end_date[1]) {
+                        $_chops = DB::table($_table->BASETABLE)
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+                            ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                            ->get();
+                    }
+
+                    // => CHECK IF THERE IS AN CHOPS DATE BETWEEN START AND END DATE
+                    if (count($_chops) > 0) {
+                        foreach ($_chops as $_chop => $chop) {
+                            $_conv_chop_date = date('Y-m-d', strtotime($chop->date));
+                            if (($_conv_chop_date >= $_conv_start_date) && ($_conv_chop_date <= $_conv_end_date)) {
+                                if (!in_array($_conv_chop_date, $_chop_arr)){
+                                    if ($chop->number === (string)$_table->NUMBER_SINGAPORE){
+                                        array_push($_chop_arr, $_conv_chop_date);
+                                        array_push($_chop_arr, $_conv_chop_date);
+                                        $_chop += 2;
+                                    } else {
+                                        array_push($_chop_arr, $_conv_chop_date);
+                                        $_chop++;
+                                    }
                                 }
                             }
                         }
@@ -1662,9 +1703,13 @@ class DesktopController extends Controller
                             }
 
                             $temp = array(
-                                "id" => $employee->id,
-                                "name" => $employee->first_name . ' ' . $employee->last_name,
-                                "_attendance" => $temp_arr_attendance
+                                "id_employee" => $employee->id,
+                                "employee_name" => $employee->first_name . ' ' . $employee->last_name,
+                                "gender" => $employee->gender,
+                                "_attendance" => $temp_arr_attendance,
+                                "libur" => $_holiday,
+                                "rajang" => $_chop,
+                                "_rajamg" => $_chop_arr
                             );
 
                             array_push($_data, $temp);
