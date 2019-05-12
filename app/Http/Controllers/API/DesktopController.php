@@ -1807,6 +1807,7 @@ class DesktopController extends Controller
                                 "employee_name" => $nm,
                                 "gender" => $employee->gender,
                                 "_attendance" => $temp_arr_attendance,
+                                "msit" => $_masuk . ' | ' . $_setengah_hari . ' | ' . $_ijin . ' | ' . $_tidak_masuk,
                                 "libur" => count($_holiday_arr),
                                 "rajang" => count($_chop_arr),
                                 "_rajamg" => $_chop_arr,
