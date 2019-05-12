@@ -1728,18 +1728,18 @@ class DesktopController extends Controller
                                         $_masuk += 1;
 //                                        CHECK IF TODAY IS CHOP
                                         if ($employee->status === $_stat_harian_atas){
-                                            $_premi += $employee->premi;
+                                            $_premi += 1;
                                         }
                                         if ($employee->status === $_stat_harian_bawah){
                                             if (in_array($_date[$i], $_chop_arr)){
-                                                $_premi += $employee->premi;
+                                                $_premi += 1;
                                             }
                                         }
                                     }
                                     if ($___attendances->status === (string)$_table->STATUS_IJIN){
                                         $_pokok += $_std_harian;
                                         if (in_array($_date[$i], $_chop_arr)){
-                                            $_premi += $employee->premi;
+                                            $_premi += 0;
                                         }
                                         $_ijin += 1;
                                     }
