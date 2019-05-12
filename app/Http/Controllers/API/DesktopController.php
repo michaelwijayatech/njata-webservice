@@ -1570,6 +1570,7 @@ class DesktopController extends Controller
                 $start_date = $request->start_date;
                 $end_date = $request->end_date;
                 $potongan_bpjs = $request->potongan_bpjs;
+                $_data = [];
                 if (strtolower($id) === "all") {
                     $temp = array(
                         "start_date" => $start_date,
