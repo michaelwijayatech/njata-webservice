@@ -1794,7 +1794,7 @@ class DesktopController extends Controller
                                 "rajang" => count($_chop_arr),
                                 "_rajamg" => $_chop_arr,
                                 "pokok" => $_pokok,
-                                "premi" => $_premi,
+                                "premi" => $_premi * $employee->premi,
                                 "haid" => "cms",
                                 "potongan_bpjs" => "cms",
                                 "total" => "cms",
