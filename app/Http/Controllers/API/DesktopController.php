@@ -1587,7 +1587,7 @@ class DesktopController extends Controller
                     if (count($_holidays) > 0) {
                         foreach ($_holidays as $_holiday => $holiday) {
                             $_conv_holiday_date = date('Y-m-d', strtotime($holiday->date));
-                            if (($_hols_date >= $_hols_start) && ($_hols_date <= $_hols_end)) {
+                            if (($_conv_holiday_date >= $_conv_start_date) && ($_conv_holiday_date <= $_conv_end_date)) {
                                 array_push($_date, $_conv_holiday_date);
                             }
                         }
