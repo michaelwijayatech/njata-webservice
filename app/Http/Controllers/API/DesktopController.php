@@ -1703,12 +1703,18 @@ class DesktopController extends Controller
                                 array_push($temp_arr_attendance, $arr_attendance);
                             }
 
+                            $nm = "";
+                            if ($employee->first_name === $employee->last_name){
+                                $nm = $employee->first_name;
+                            } else {
+                                $nm = $employee->first_name . ' ' . $employee->last_name;
+                            }
                             $temp = array(
                                 "id_employee" => $employee->id,
-                                "employee_name" => $employee->first_name . ' ' . $employee->last_name,
+                                "employee_name" => $nm,
                                 "gender" => $employee->gender,
                                 "_attendance" => $temp_arr_attendance,
-                                "libur" => $_holiday_arr,
+                                "libur" => count($_holiday_arr),
                                 "rajang" => $_chop,
                                 "_rajamg" => $_chop_arr
                             );
