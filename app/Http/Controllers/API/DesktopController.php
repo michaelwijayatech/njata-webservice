@@ -1664,7 +1664,7 @@ class DesktopController extends Controller
                             $temp = array(
                                 "id" => $employee->id,
                                 "name" => $employee->first_name . ' ' . $employee->last_name,
-                                "attendances" => $temp_arr_attendance
+                                "_attendance" => $temp_arr_attendance
                             );
 
                             array_push($_data, $temp);
