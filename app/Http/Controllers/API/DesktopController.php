@@ -1574,6 +1574,7 @@ class DesktopController extends Controller
                 $_data = [];
                 $_date = [];
                 $_holiday = 0;
+                $_holiday_arr = [];
                 $_chop = 0;
                 $_chop_arr = [];
                 $_start_date = explode('-', $start_date);
@@ -1594,8 +1595,8 @@ class DesktopController extends Controller
                         foreach ($_holidays as $_holiday => $holiday) {
                             $_conv_holiday_date = date('Y-m-d', strtotime($holiday->date));
                             if (($_conv_holiday_date >= $_conv_start_date) && ($_conv_holiday_date <= $_conv_end_date)) {
-                                $_holiday++;
                                 array_push($_date, $_conv_holiday_date);
+                                array_push($_holiday_arr, $_conv_holiday_date);
                             }
                         }
                     }
@@ -1707,7 +1708,7 @@ class DesktopController extends Controller
                                 "employee_name" => $employee->first_name . ' ' . $employee->last_name,
                                 "gender" => $employee->gender,
                                 "_attendance" => $temp_arr_attendance,
-                                "libur" => $_holiday,
+                                "libur" => $_holiday_arr,
                                 "rajang" => $_chop,
                                 "_rajamg" => $_chop_arr
                             );
