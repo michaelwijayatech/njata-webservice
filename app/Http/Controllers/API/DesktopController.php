@@ -2305,6 +2305,10 @@ class DesktopController extends Controller
                     $status = $_table->STATUS_HARIAN_ATAS;
                 } else if(strtolower($status) === "bulanan"){
                     $status = $_table->STATUS_BULANAN;
+                } else if(strtolower($status) === "satpam"){
+                    $status = $_table->STATUS_SATPAM;
+                } else if(strtolower($status) === "supir"){
+                    $status = $_table->STATUS_SUPIR;
                 }
                 $data += ["status" => $status];
             }
@@ -4628,6 +4632,10 @@ class DesktopController extends Controller
                 $status = $_employee->STATUS_HARIAN_BAWAH;
             } else if(strtolower($status) === "bulanan"){
                 $status = $_employee->STATUS_BULANAN;
+            } else if(strtolower($status) === "satpam"){
+                $status = $_employee->STATUS_SATPAM;
+            } else if(strtolower($status) === "supir"){
+                $status = $_employee->STATUS_SUPIR;
             } else {
                 $status = $_employee->STATUS_BORONGAN;
             }
