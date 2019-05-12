@@ -1698,6 +1698,8 @@ class DesktopController extends Controller
 //                    $temp_arr_attendance = [];
                     // => GET ALL EMPLOYEES BY STATUS
                     $_table = new Employee();
+                    $_stat_harian_atas = $_table->STATUS_HARIAN_ATAS;
+                    $_stat_harian_bawah = $_table->STATUS_HARIAN_BAWAH;
                     $_employees = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->where('status', '=', $_table->STATUS_HARIAN_ATAS)
@@ -1721,6 +1723,19 @@ class DesktopController extends Controller
                                         "date" => $___attendances->date,
                                         "status" => $___attendances->status,
                                     );
+                                    if ($___attendances->status === (string)$_table->STATUS_MASUK){
+                                        $_pokok += $_std_harian;
+                                        $_masuk += 1;
+//                                        CHECK IF TODAY IS CHOP
+                                        if ($employee->status === $_stat_harian_atas){
+                                            $_premi += $employee->premi;
+                                        }
+                                        if ($employee->status === $_stat_harian_bawah){
+                                            if (in_array($_date[$i], $_chop_arr)){
+                                                $_premi += $employee->premi;
+                                            }
+                                        }
+                                    }
                                     if ($___attendances->status === (string)$_table->STATUS_IJIN){
                                         $_pokok += $_std_harian;
                                         if (in_array($_date[$i], $_chop_arr)){
