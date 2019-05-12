@@ -1668,7 +1668,7 @@ class DesktopController extends Controller
 
                     sort($_date);
 
-                    $temp_arr_attendance = [];
+//                    $temp_arr_attendance = [];
                     // => GET ALL EMPLOYEES BY STATUS
                     $_table = new Employee();
                     $_employees = DB::table($_table->BASETABLE)
@@ -1678,6 +1678,7 @@ class DesktopController extends Controller
                         ->get();
                     if (count($_employees) > 0) {
                         foreach ($_employees as $_employee => $employee) {
+                            $temp_arr_attendance = [];
                             for ($i=0; $i<count($_date); $i++){
                                 // => GET ALL ATTENDANCE BY DATE
                                 $_temp_date = explode("-", $_date[$i])[2] . '-' . explode("-", $_date[$i])[1] . '-' . explode("-", $_date[$i])[0];
