@@ -1624,6 +1624,9 @@ class DesktopController extends Controller
                         }
                     }
 
+                    sort($_date);
+
+                    $temp_arr_attendance = [];
                     // => GET ALL EMPLOYEES BY STATUS
                     $_table = new Employee();
                     $_employees = DB::table($_table->BASETABLE)
@@ -1633,9 +1636,35 @@ class DesktopController extends Controller
                         ->get();
                     if (count($_employees) > 0) {
                         foreach ($_employees as $_employee => $employee) {
+                            for ($i=0; $i<count($_date); $i++){
+                                // => GET ALL ATTENDANCE BY DATE
+                                $_temp_date = explode("-", $_date[$i])[2] . '-' . explode("-", $_date[$i])[1] . '-' . explode("-", $_date[$i])[0];
+                                $_table = new Attendance();
+                                $___attendances = DB::table($_table->BASETABLE)
+                                    ->where('id_employee', '=', $employee->id)
+                                    ->where('date', '=', $_temp_date)
+                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                    ->first();
+                                if (!empty($___attendances)){
+                                    $arr_attendance = array(
+                                        "att_id" => $___attendances->id,
+                                        "date" => $___attendances->date,
+                                        "status" => $___attendances->status,
+                                    );
+                                } else {
+                                    $arr_attendance = array(
+                                        "att_id" => "",
+                                        "date" => $_temp_date,
+                                        "status" => "",
+                                    );
+                                }
+                                array_push($temp_arr_attendance, $arr_attendance);
+                            }
+
                             $temp = array(
                                 "id" => $employee->id,
-                                "name" => $employee->first_name . ' ' . $employee->last_name
+                                "name" => $employee->first_name . ' ' . $employee->last_name,
+                                "attendances" => $temp_arr_attendance
                             );
 
                             array_push($_data, $temp);
@@ -1647,7 +1676,7 @@ class DesktopController extends Controller
 //                        "start_date" => $start_date,
 //                        "end_date" => $end_date,
 //                        "potongan_bpjs" => $potongan_bpjs,
-//                        "_date" => sort($_date)
+//                        "_date" => $_date
 //                    );
 //
 //                    array_push($_data, $temp);
