@@ -1728,11 +1728,11 @@ class DesktopController extends Controller
                                         $_masuk += 1;
 //                                        CHECK IF TODAY IS CHOP
                                         if ($employee->status === $_stat_harian_atas){
-                                            $_premi += 1;
+                                            $_premi += $employee->premi;
                                         }
                                         if ($employee->status === $_stat_harian_bawah){
                                             if (in_array($_date[$i], $_chop_arr)){
-                                                $_premi += 1;
+                                                $_premi += $employee->premi;
                                             }
                                         }
                                     }
@@ -1794,7 +1794,7 @@ class DesktopController extends Controller
                                 "rajang" => count($_chop_arr),
                                 "_rajamg" => $_chop_arr,
                                 "pokok" => $_pokok,
-                                "premi" => $_premi * $employee->premi,
+                                "premi" => $_premi,
                                 "haid" => "cms",
                                 "potongan_bpjs" => "cms",
                                 "total" => "cms",
