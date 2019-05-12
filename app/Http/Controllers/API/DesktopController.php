@@ -1566,7 +1566,7 @@ class DesktopController extends Controller
             }
 
 
-            if (strtolower($table) === "new_gaji_harian"){
+            if (strtolower($table) === "gaji_harian"){
                 $start_date = $request->start_date;
                 $end_date = $request->end_date;
                 $potongan_bpjs = $request->potongan_bpjs;
@@ -1847,7 +1847,7 @@ class DesktopController extends Controller
             }
 
 
-            if (strtolower($table) === "gaji_harian") {
+            if (strtolower($table) === "old_gaji_harian") {
                 $_table = new Employee();
                 $_year = date("Y");
                 $_month = date("m");
