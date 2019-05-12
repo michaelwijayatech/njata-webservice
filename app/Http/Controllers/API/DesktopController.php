@@ -1723,7 +1723,9 @@ class DesktopController extends Controller
                                     );
                                     if ($___attendances->status === (string)$_table->STATUS_IJIN){
                                         $_pokok += $_std_harian;
-                                        $_premi += 0;
+                                        if (in_array($_date[$i], $_chop_arr)){
+                                            $_premi += $employee->premi;
+                                        }
                                         $_ijin += 1;
                                     }
                                     if ($___attendances->status === (string)$_table->STATUS_SAKIT){
@@ -1734,6 +1736,9 @@ class DesktopController extends Controller
                                     if ($___attendances->status === (string)$_table->STATUS_SETENGAH_HARI){
                                         $_pokok += ($_std_harian / 2);
                                         $ctr_temp = 0;
+                                        if (in_array($_date[$i], $_chop_arr)){
+                                            $_premi += $employee->premi / 2;
+                                        }
 //                                        for ($i = 0; $i < count($_chop_date_arr); $i++) {
 //                                            if ($_chop_date_arr[$i] === $att_date){
 //                                                $ctr_temp++;
@@ -1770,8 +1775,8 @@ class DesktopController extends Controller
                                 "libur" => count($_holiday_arr),
                                 "rajang" => count($_chop_arr),
                                 "_rajamg" => $_chop_arr,
-                                "pokok" => "cms",
-                                "premi" => "cms",
+                                "pokok" => $_pokok,
+                                "premi" => $_premi,
                                 "haid" => "cms",
                                 "potongan_bpjs" => "cms",
                                 "total" => "cms",
