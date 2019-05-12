@@ -1777,6 +1777,20 @@ class DesktopController extends Controller
                                     );
                                 }
                                 array_push($temp_arr_attendance, $arr_attendance);
+
+                                $_table = new Haid();
+                                $_haids = DB::table($_table->BASETABLE)
+                                    ->where('id_employee', '=', $employee->id)
+                                    ->where('date', '=', $_temp_date)
+                                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                                    ->first();
+                                if (!empty($_haids)) {
+                                    $_haid += $_std_haid;
+                                }
+                            }
+
+                            if ($potongan_bpjs){
+                                $_pot_bpjs += $_global_class->removeMoneySeparator($employee->potongan_bpjs);
                             }
 
                             $nm = "";
@@ -1795,8 +1809,8 @@ class DesktopController extends Controller
                                 "_rajamg" => $_chop_arr,
                                 "pokok" => $_pokok,
                                 "premi" => $_premi,
-                                "haid" => "cms",
-                                "potongan_bpjs" => "cms",
+                                "haid" => $_haid,
+                                "potongan_bpjs" => $_pot_bpjs,
                                 "total" => "cms",
                                 "_date" => $_date
                             );
