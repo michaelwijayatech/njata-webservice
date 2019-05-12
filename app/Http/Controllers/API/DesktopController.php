@@ -1767,6 +1767,9 @@ class DesktopController extends Controller
                                         $_tidak_masuk += 1;
                                     }
                                 } else {
+                                    if ($_global_class->checkDifferenceBetweenTwoDate($employee->start_date, date("d-m-Y")) >= 12){
+                                        $_pokok += $_std_harian;
+                                    }
                                     $arr_attendance = array(
                                         "att_id" => "",
                                         "date" => $_temp_date,
