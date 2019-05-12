@@ -1721,6 +1721,36 @@ class DesktopController extends Controller
                                         "date" => $___attendances->date,
                                         "status" => $___attendances->status,
                                     );
+                                    if ($___attendances->status === (string)$_table->STATUS_IJIN){
+                                        $_pokok += $_std_harian;
+                                        if (in_array($_date[$i], $_chop_arr)){
+                                            $_premi += $employee->premi;
+                                        }
+                                        $_ijin += 1;
+                                    }
+                                    if ($___attendances->status === (string)$_table->STATUS_SAKIT){
+                                        $_pokok += $_std_harian;
+                                        $_premi += 0;
+                                        $_ijin += 1;
+                                    }
+                                    if ($___attendances->status === (string)$_table->STATUS_SETENGAH_HARI){
+                                        $_pokok += ($_std_harian / 2);
+                                        $ctr_temp = 0;
+                                        if (in_array($_date[$i], $_chop_arr)){
+                                            $_premi += $employee->premi / 2;
+                                        }
+//                                        for ($i = 0; $i < count($_chop_date_arr); $i++) {
+//                                            if ($_chop_date_arr[$i] === $att_date){
+//                                                $ctr_temp++;
+//                                            }
+//                                        }
+//                                        $_premi += (($empl_premi * $ctr_temp) / 2);
+                                        $_setengah_hari += 1;
+                                    }
+
+                                    if ($___attendances->status === (string)$_table->STATUS_TIDAK_MASUK){
+                                        $_tidak_masuk += 1;
+                                    }
                                 } else {
                                     $arr_attendance = array(
                                         "att_id" => "",
@@ -1729,36 +1759,6 @@ class DesktopController extends Controller
                                     );
                                 }
                                 array_push($temp_arr_attendance, $arr_attendance);
-                                if ($___attendances->status === (string)$_table->STATUS_IJIN){
-                                    $_pokok += $_std_harian;
-                                    if (in_array($_date[$i], $_chop_arr)){
-                                        $_premi += $employee->premi;
-                                    }
-                                    $_ijin += 1;
-                                }
-                                if ($___attendances->status === (string)$_table->STATUS_SAKIT){
-                                    $_pokok += $_std_harian;
-                                    $_premi += 0;
-                                    $_ijin += 1;
-                                }
-                                if ($___attendances->status === (string)$_table->STATUS_SETENGAH_HARI){
-                                    $_pokok += ($_std_harian / 2);
-                                    $ctr_temp = 0;
-                                    if (in_array($_date[$i], $_chop_arr)){
-                                        $_premi += $employee->premi / 2;
-                                    }
-//                                        for ($i = 0; $i < count($_chop_date_arr); $i++) {
-//                                            if ($_chop_date_arr[$i] === $att_date){
-//                                                $ctr_temp++;
-//                                            }
-//                                        }
-//                                        $_premi += (($empl_premi * $ctr_temp) / 2);
-                                    $_setengah_hari += 1;
-                                }
-
-                                if ($___attendances->status === (string)$_table->STATUS_TIDAK_MASUK){
-                                    $_tidak_masuk += 1;
-                                }
                             }
 
                             $nm = "";
@@ -1784,6 +1784,17 @@ class DesktopController extends Controller
                             );
 
                             array_push($_data, $temp);
+
+                            // RESET VARIABLE
+                            $_pokok = 0;
+                            $_premi = 0;
+                            $_haid = 0;
+                            $_tot = 0;
+                            $_pot_bpjs = 0;
+                            $_masuk = 0;
+                            $_setengah_hari = 0;
+                            $_ijin = 0;
+                            $_tidak_masuk = 0;
                         }
                     }
 
