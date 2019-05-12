@@ -1583,6 +1583,7 @@ class DesktopController extends Controller
                 $_setengah_hari = 0;
                 $_ijin = 0;
                 $_tidak_masuk = 0;
+                $_tot = 0;
                 $_holiday = 0;
                 $_holiday_arr = [];
                 $_chop = 0;
@@ -1793,6 +1794,8 @@ class DesktopController extends Controller
                                 $_pot_bpjs += $_global_class->removeMoneySeparator($employee->potongan_bpjs);
                             }
 
+                            $_tot = ($_pokok + $_premi + $_haid) - $_pot_bpjs;
+
                             $nm = "";
                             if ($employee->first_name === $employee->last_name){
                                 $nm = $employee->first_name;
@@ -1811,7 +1814,7 @@ class DesktopController extends Controller
                                 "premi" => $_premi,
                                 "haid" => $_haid,
                                 "potongan_bpjs" => $_pot_bpjs,
-                                "total" => "cms",
+                                "total" => $_tot,
                                 "_date" => $_date
                             );
 
