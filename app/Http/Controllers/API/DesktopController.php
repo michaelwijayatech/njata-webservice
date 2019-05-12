@@ -1624,15 +1624,33 @@ class DesktopController extends Controller
                         }
                     }
 
+                    // => GET ALL EMPLOYEES BY STATUS
+                    $_table = new Employee();
+                    $_employees = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->where('status', '=', $_table->STATUS_HARIAN_ATAS)
+                        ->orWhere('status', '=', $_table->STATUS_HARIAN_BAWAH)
+                        ->get();
+                    if (count($_employees) > 0) {
+                        foreach ($_employees as $_employee => $employee) {
+                            $temp = array(
+                                "id" => $employee->id,
+                                "name" => $employee->first_name . ' ' . $employee->last_name
+                            );
 
-                    $temp = array(
-                        "start_date" => $start_date,
-                        "end_date" => $end_date,
-                        "potongan_bpjs" => $potongan_bpjs,
-                        "_date" => $_date
-                    );
+                            array_push($_data, $temp);
+                        }
+                    }
 
-                    array_push($_data, $temp);
+
+//                    $temp = array(
+//                        "start_date" => $start_date,
+//                        "end_date" => $end_date,
+//                        "potongan_bpjs" => $potongan_bpjs,
+//                        "_date" => sort($_date)
+//                    );
+//
+//                    array_push($_data, $temp);
                 }
             }
 
