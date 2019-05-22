@@ -1500,16 +1500,10 @@ class DesktopController extends Controller
                                             }
                                             if ($att_stat === '5') {
                                                 $sakit = $sakit + 1;
-                                                $ijin = $ijin + 1;
 
                                                 if (!in_array($empl_name, $sakit_name_arr)) {
                                                     array_push($sakit_name_arr, $empl_name);
                                                     $sakit_name .= $empl_name . '@!#';
-                                                }
-
-                                                if (!in_array($empl_name, $ijin_name_arr)) {
-                                                    array_push($ijin_name_arr, $empl_name);
-                                                    $ijin_name .= $empl_name . '@!#';
                                                 }
                                             }
                                         }
@@ -1549,6 +1543,8 @@ class DesktopController extends Controller
                                 "potongan_bpjs" => $potongan_bpjs,
                                 "ijin" => $ijin,
                                 "ijin_name" => $ijin_name,
+                                "sakit" => $sakit,
+                                "sakit_name" => $sakit_name,
                                 "total" => $_total,
                                 "upah_libur" => $_upah_libur,
                                 "info_empl" => $_atts,
