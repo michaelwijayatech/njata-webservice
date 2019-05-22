@@ -346,7 +346,7 @@ class DesktopController extends Controller
             if(strtolower($table) === "sales"){
                 $_table = new Sales();
                 $fields = [
-                    "id_distributor", "nota_number", "total"
+                    "id_distributor", "nota_number", "date", "total"
                 ];
 
                 foreach ($fields as $field) {
@@ -356,7 +356,6 @@ class DesktopController extends Controller
 
                 $generate_id = $_global_class->generateID($_table->NAME);
                 $data += ["id" => $generate_id];
-                $data += ["date" => date("d-m-Y")];
                 $data += ["paid" => "0"];
                 $data += ["is_active" => $_table->STATUS_ACTIVE];
 
