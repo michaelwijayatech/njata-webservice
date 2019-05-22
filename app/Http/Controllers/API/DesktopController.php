@@ -1505,6 +1505,11 @@ class DesktopController extends Controller
                                                     array_push($sakit_name_arr, $empl_name);
                                                     $sakit_name .= $empl_name . '@!#';
                                                 }
+
+                                                if (!in_array($empl_name, $ijin_name_arr)) {
+                                                    array_push($ijin_name_arr, $empl_name);
+                                                    $ijin_name .= $empl_name . '@!#';
+                                                }
                                             }
                                         }
                                     }
