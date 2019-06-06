@@ -801,7 +801,114 @@ class DesktopController extends Controller
                 $_data = [];
                 $_table = new Employee();
 
-                if (strtolower($id) === "all") {
+                if (strtolower($id) === "harian") {
+                    $_employee = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    $_table = new Attendance();
+                    $_date = date("d");
+                    $_month = date("m");
+                    $_year = date("Y");
+
+                    if (count($_employee) > 0) {
+                        foreach ($_employee as $emplo => $emp) {
+                            $_emp_id = $emp->id;
+
+                            if ($emp->status === 1) {
+                                $status = "Harian Atas";
+                            } elseif ($emp->status === 2) {
+                                $status = "Borongan";
+                            } elseif ($emp->status === 3) {
+                                $status = "Harian Bawah";
+                            } elseif ($emp->status === 4) {
+                                $status = "Bulanan";
+                            }
+
+                            $_is_att = DB::select(DB::raw("SELECT * FROM attendance
+                                                            WHERE id_employee = '$_emp_id'
+                                                            AND SUBSTR(`date`,1,2) = '$_date'
+                                                            AND SUBSTR(`date`,4,2) = '$_month'
+                                                            AND SUBSTR(`date`,7,4) = '$_year'
+                                                            AND is_active = '1'"));
+
+                            $att_status = "";
+                            $att_id = "";
+
+                            if (count($_is_att) > 0) {
+                                foreach ($_is_att as $is_att => $att) {
+                                    $att_status = $att->status;
+                                    $att_id = $att->id;
+                                }
+                            }
+
+                            $temp = array(
+                                "id" => $emp->id,
+                                "first_name" => $emp->first_name,
+                                "last_name" => $emp->last_name,
+                                "status" => $status,
+                                "attendance" => $att_status,
+                                "attendance_id" => $att_id
+                            );
+
+                            array_push($_data, $temp);
+                        }
+                    }
+                } elseif (strtolower($id) === "bulanan") {
+                    $_employee = DB::table($_table->BASETABLE)
+                        ->where('status', '=', $_table->STATUS_BULANAN)
+                        ->orWhere('status', '=', $_table->STATUS_SUPIR)
+                        ->orWhere('status', '=', $_table->STATUS_SATPAM)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    $_table = new Attendance();
+                    $_date = date("d");
+                    $_month = date("m");
+                    $_year = date("Y");
+
+                    if (count($_employee) > 0) {
+                        foreach ($_employee as $emplo => $emp) {
+                            $_emp_id = $emp->id;
+
+                            if ($emp->status === 4) {
+                                $status = "Bulanan";
+                            } elseif ($emp->status === 5) {
+                                $status = "Satpam";
+                            } elseif ($emp->status === 6) {
+                                $status = "Supir";
+                            }
+
+                            $_is_att = DB::select(DB::raw("SELECT * FROM attendance
+                                                            WHERE id_employee = '$_emp_id'
+                                                            AND SUBSTR(`date`,1,2) = '$_date'
+                                                            AND SUBSTR(`date`,4,2) = '$_month'
+                                                            AND SUBSTR(`date`,7,4) = '$_year'
+                                                            AND is_active = '1'"));
+
+                            $att_status = "";
+                            $att_id = "";
+
+                            if (count($_is_att) > 0) {
+                                foreach ($_is_att as $is_att => $att) {
+                                    $att_status = $att->status;
+                                    $att_id = $att->id;
+                                }
+                            }
+
+                            $temp = array(
+                                "id" => $emp->id,
+                                "first_name" => $emp->first_name,
+                                "last_name" => $emp->last_name,
+                                "status" => $status,
+                                "attendance" => $att_status,
+                                "attendance_id" => $att_id
+                            );
+
+                            array_push($_data, $temp);
+                        }
+                    }
+                } elseif (strtolower($id) === "borongan") {
                     $_employee = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
