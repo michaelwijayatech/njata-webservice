@@ -226,7 +226,7 @@ class DesktopController extends Controller
             if(strtolower($table) === "attendance"){
                 $_table = new Attendance();
                 $fields = [
-                    "id_employee"
+                    "id_employee", "carton"
                 ];
 
                 $status = $request->status;
@@ -803,6 +803,8 @@ class DesktopController extends Controller
 
                 if (strtolower($id) === "harian") {
                     $_employee = DB::table($_table->BASETABLE)
+                        ->where('status', '=', $_table->STATUS_HARIAN_ATAS)
+                        ->orWhere('status', '=', $_table->STATUS_HARIAN_BAWAH)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
 
@@ -817,12 +819,8 @@ class DesktopController extends Controller
 
                             if ($emp->status === 1) {
                                 $status = "Harian Atas";
-                            } elseif ($emp->status === 2) {
-                                $status = "Borongan";
                             } elseif ($emp->status === 3) {
                                 $status = "Harian Bawah";
-                            } elseif ($emp->status === 4) {
-                                $status = "Bulanan";
                             }
 
                             $_is_att = DB::select(DB::raw("SELECT * FROM attendance
@@ -909,56 +907,87 @@ class DesktopController extends Controller
                         }
                     }
                 } elseif (strtolower($id) === "borongan") {
-                    $_employee = DB::table($_table->BASETABLE)
+                    $_date = date("d-m-Y");
+                    $group_carton_id = "";
+                    $group_carton = "0";
+                    $temp2 = array();
+                    $_table = new GroupHeader();
+                    $_group_headers = DB::table($_table->BASETABLE)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
+                    if (count($_group_headers) > 0) {
+                        foreach ($_group_headers as $_group_header => $group_header) {
+                            $_table2 = new GroupDetail();
+                            $_group_details = DB::table($_table2->BASETABLE)
+                                ->join('employee', 'employee.id', '=', 'group_detail.id_employee')
+                                ->where('group_detail.id_group', '=', $group_header->id)
+                                ->select('employee.id as employee_id', 'employee.first_name', 'employee.last_name')
+                                ->get();
+                            if (count($_group_details) > 0) {
+                                foreach ($_group_details as $_group_detail => $group_detail) {
+                                    $_date = date("d");
+                                    $_month = date("m");
+                                    $_year = date("Y");
 
-                    $_table = new Attendance();
-                    $_date = date("d");
-                    $_month = date("m");
-                    $_year = date("Y");
-
-                    if (count($_employee) > 0) {
-                        foreach ($_employee as $emplo => $emp) {
-                            $_emp_id = $emp->id;
-
-                            if ($emp->status === 1) {
-                                $status = "Harian Atas";
-                            } elseif ($emp->status === 2) {
-                                $status = "Borongan";
-                            } elseif ($emp->status === 3) {
-                                $status = "Harian Bawah";
-                            } elseif ($emp->status === 4) {
-                                $status = "Bulanan";
-                            }
-
-                            $_is_att = DB::select(DB::raw("SELECT * FROM attendance
-                                                            WHERE id_employee = '$_emp_id'
+                                    $_is_att = DB::select(DB::raw("SELECT * FROM attendance
+                                                            WHERE id_employee = '$group_detail->employee_id'
                                                             AND SUBSTR(`date`,1,2) = '$_date'
                                                             AND SUBSTR(`date`,4,2) = '$_month'
                                                             AND SUBSTR(`date`,7,4) = '$_year'
                                                             AND is_active = '1'"));
 
-                            $att_status = "";
-                            $att_id = "";
+                                    $att_status = "";
+                                    $att_id = "";
+                                    $att_carton = "";
 
-                            if (count($_is_att) > 0) {
-                                foreach ($_is_att as $is_att => $att) {
-                                    $att_status = $att->status;
-                                    $att_id = $att->id;
+                                    if (count($_is_att) > 0) {
+                                        foreach ($_is_att as $is_att => $att) {
+                                            $att_status = $att->status;
+                                            $att_id = $att->id;
+                                            $att_carton = $att->carton;
+                                        }
+                                    }
+
+
+                                    $temp3 = array(
+                                        "employee_id" => $group_detail->employee_id,
+                                        "employee_fname" => $group_detail->first_name,
+                                        "employee_lname" => $group_detail->last_name,
+                                        "attendance_id" => $att_id,
+                                        "attendance_status" => $att_status,
+                                        "attendance_carton" => $att_carton,
+                                    );
+
+                                    array_push($temp2, $temp3);
                                 }
+                                $temp3 = array();
+                            }
+
+
+                            $_table3 = new Carton();
+                            $cartons = DB::table($_table3->BASETABLE)
+                                ->where('id_group', '=', $group_header->id)
+                                ->where('date', '=', date("d-m-Y"))
+                                ->where('is_active', '=', $_table3->STATUS_ACTIVE)
+                                ->first();
+
+                            if (!empty($cartons)) {
+                                $group_carton_id = $cartons->id;
+                                $group_carton = $cartons->carton;
+                            } else {
+                                $group_carton_id = "";
+                                $group_carton = "0";
                             }
 
                             $temp = array(
-                                "id" => $emp->id,
-                                "first_name" => $emp->first_name,
-                                "last_name" => $emp->last_name,
-                                "status" => $status,
-                                "attendance" => $att_status,
-                                "attendance_id" => $att_id
+                                "group_id" => $group_header->id,
+                                "group_name" => $group_header->name,
+                                "group_carton_id" => $group_carton_id,
+                                "group_carton" => $group_carton,
+                                "employee_datas" => $temp2
                             );
-
                             array_push($_data, $temp);
+                            $temp2 = array();
                         }
                     }
                 } elseif (strtolower($id) === "update_attendance") {
@@ -2585,7 +2614,7 @@ class DesktopController extends Controller
             if (strtolower($table) === "attendance") {
                 $_table = new Attendance();
                 $fields = [
-
+                    "carton"
                 ];
 
                 $status = $request->status;
@@ -2602,6 +2631,14 @@ class DesktopController extends Controller
                 }
 
                 $data += ["status" => $status];
+
+            }
+
+            if (strtolower($table) === "attendance_borongan_carton") {
+                $_table = new Attendance();
+                $fields = [
+                    "carton"
+                ];
 
             }
 
@@ -2931,7 +2968,7 @@ class DesktopController extends Controller
                 $fpdf = new Fpdf('L','mm',array(210,330));
                 $fpdf->AddPage();
                 $fpdf->SetFont('Arial', 'B', 12);
-                $fpdf->Cell(0, 0, 'Gaji Harian');
+                $fpdf->Cell(0, 0, 'Gaji Harian Rungkut');
                 $fpdf->Ln(2);
                 $fpdf->SetFont('Arial', '', 10);
                 $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date);
@@ -3040,6 +3077,9 @@ class DesktopController extends Controller
                 $rajang = null;
                 $_datas = $request->datas;
                 $_days = $request->days;
+                $final_pokok = 0;
+                $final_premi = 0;
+                $final_total = 0;
 
                 $temp_arr_days = array();
                 // set date for float right or left
@@ -3055,7 +3095,7 @@ class DesktopController extends Controller
                 $fpdf->SetMargins(4,5,4);
                 $fpdf->AddPage();
                 $fpdf->SetFont('Arial', 'B', 12);
-                $fpdf->Cell(0, 0, 'Gaji Harian');
+                $fpdf->Cell(0, 0, 'Gaji Harian Rungkut');
                 $fpdf->Ln(2);
                 $fpdf->SetFont('Arial', '', 10);
                 $datetime1 = new \DateTime(explode("-", $start_date)[2] . '-' . explode("-", $start_date)[1] . '-' . explode("-", $start_date)[0]);
@@ -4023,6 +4063,9 @@ class DesktopController extends Controller
                     $_total_pokok = $_global_class->removeMoneySeparator(explode("#", $datas[$i])[$tot_days + 5]);
                     $_total_premi = $_global_class->removeMoneySeparator(explode("#", $datas[$i])[$tot_days + 6]);
                     $_total_terima =  $_total_pokok + $_total_premi;
+                    $final_pokok += $_total_pokok;
+                    $final_premi += $_total_premi;
+                    $final_total += $_total_terima;
 
                     $fpdf->Cell(30,10, $_global_class->addMoneySeparator($_total_terima, 0),1, 0, 'R');
                     $fpdf->Cell(15, 10, ' ', 1, 0, 'C');
@@ -4033,6 +4076,26 @@ class DesktopController extends Controller
                     $fpdf->Ln();
                     $counter++;
                 }
+                $fpdf->SetFont('Arial', 'B', 10);
+                $fpdf->Cell(8, 10, "", 1);
+                $fpdf->Cell(40, 10, "TOTAL", 1, 0, 'R');
+                $fpdf->Cell(8, 10, "", 1,0,'C');
+                $fpdf->Cell(8, 10, ' ', 1);
+                $fpdf->Cell(8,10, "",1, 0, 'C');
+                $fpdf->Cell(8,10, "",1, 0, 'C');
+                $fpdf->Cell(8,10, "",1, 0, 'C');
+                $fpdf->Cell(8,10, "",1, 0, 'C');
+                $fpdf->Cell(8,10, "",1, 0, 'C');
+                $fpdf->Cell(8,10, "",1, 0, 'C');
+                $fpdf->Cell(20, 10, '', 1, 0, 'C');
+                $fpdf->Cell(30,10, $_global_class->addMoneySeparator($final_pokok, 0),1, 0, 'R');
+                $fpdf->Cell(15, 10, ' ', 1, 0, 'C');
+                $fpdf->Cell(30, 10, $_global_class->addMoneySeparator($final_premi, 0), 1, 0, 'R');
+                $fpdf->Cell(30,10, $_global_class->addMoneySeparator($final_total, 0),1, 0, 'R');
+                $fpdf->Cell(15, 10, ' ', 1, 0, 'C');
+                $fpdf->Cell(20, 10, ' ', '1', 0, 'C');
+                $fpdf->Cell(10, 10, "", 1, 0, 'C');
+                $fpdf->Cell(40, 10, ' ', 1, 0, 'C');
 
                 $target_path = base_path('public/pdf/');
 //                $file_name = $_date_now . '_gaji_harian_tt.pdf';
