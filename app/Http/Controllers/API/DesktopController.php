@@ -689,6 +689,28 @@ class DesktopController extends Controller
                         }
                     }
 
+                } else if (strtolower($id) === "bulanan") {
+                    $_employee = DB::table($_table->BASETABLE)
+                        ->where('status', '=', $_table->STATUS_SATPAM)
+                        ->orWhere('status', '=', $_table->STATUS_SUPIR)
+                        ->orWhere('status', '=', $_table->STATUS_BULANAN)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    if (count($_employee) > 0) {
+                        foreach ($_employee as $emplo => $emp) {
+                            $_emp_id = $emp->id;
+
+                            $temp = array(
+                                "id" => $emp->id,
+                                "first_name" => $emp->first_name,
+                                "last_name" => $emp->last_name,
+                            );
+
+                            array_push($_data, $temp);
+                        }
+                    }
+
                 } else {
                     $_employee = DB::table($_table->BASETABLE)
                         ->where('id', '=', $id)
