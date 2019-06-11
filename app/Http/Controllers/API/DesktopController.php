@@ -701,10 +701,48 @@ class DesktopController extends Controller
                         foreach ($_employee as $emplo => $emp) {
                             $_emp_id = $emp->id;
 
+                            if ($emp->status === 4) {
+                                $status = "Bulanan";
+                            } elseif ($emp->status === 5) {
+                                $status = "Satpam";
+                            } elseif ($emp->status === 6) {
+                                $status = "Supir";
+                            }
                             $temp = array(
                                 "id" => $emp->id,
                                 "first_name" => $emp->first_name,
                                 "last_name" => $emp->last_name,
+                                "status" => $status
+                            );
+
+                            array_push($_data, $temp);
+                        }
+                    }
+
+                } else if (strtolower($id) === "harian") {
+                    $_employee = DB::table($_table->BASETABLE)
+                        ->where('status', '=', $_table->STATUS_HARIAN_ATAS)
+                        ->orWhere('status', '=', $_table->STATUS_HARIAN_BAWAH)
+                        ->orWhere('status', '=', $_table->STATUS_BORONGAN)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    if (count($_employee) > 0) {
+                        foreach ($_employee as $emplo => $emp) {
+                            $_emp_id = $emp->id;
+
+                            if ($emp->status === 1) {
+                                $status = "Harian Atas";
+                            } elseif ($emp->status === 2) {
+                                $status = "Borongan";
+                            } elseif ($emp->status === 3) {
+                                $status = "Harian Bawah";
+                            }
+                            $temp = array(
+                                "id" => $emp->id,
+                                "first_name" => $emp->first_name,
+                                "last_name" => $emp->last_name,
+                                "status" => $status
                             );
 
                             array_push($_data, $temp);
