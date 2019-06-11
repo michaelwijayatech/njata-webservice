@@ -20,6 +20,7 @@ use App\Model\GroupHeader;
 use App\Model\Haid;
 use App\Model\Holiday;
 use App\Model\Income;
+use App\Model\LiburSatpam;
 use App\Model\Payment;
 use App\Model\Product;
 use App\Model\Purchase;
@@ -117,6 +118,17 @@ class DesktopController extends Controller
                 $data += ["id" => $generate_id];
                 $data += ["is_active" => $_table->STATUS_ACTIVE];
             }
+
+            if(strtolower($table) === "libur_satpam"){
+                $_table = new LiburSatpam();
+                $fields = [
+                    "id_employee", "date"
+                ];
+                $generate_id = $_global_class->generateID($_table->NAME);
+                $data += ["id" => $generate_id];
+                $data += ["is_active" => $_table->STATUS_ACTIVE];
+            }
+
 
             if(strtolower($table) === "administrator"){
                 $_table = new Administrator();
@@ -565,6 +577,51 @@ class DesktopController extends Controller
                 }
             }
 
+            if (strtolower($table) === "libur_satpam") {
+                $_table = new LiburSatpam();
+
+                if (strtolower($id) === "all") {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+                } elseif (strtolower($id) === "month") {
+                    $id_employee = $request->id_employee;
+                    $_month = date("m");
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id_employee', '=', $id_employee)
+                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '=', $_month)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->orderBy('date', 'asc')
+                        ->get();
+                } elseif (strtolower($id) === "id_date") {
+                    $id_employee = $request->id_employee;
+                    $date = $request->date;
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id_employee', '=', $id_employee)
+                        ->where('date', '=', $date)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                    if (!empty($_data)){
+                        $feedback = [
+                            "message" => "Date already exist for this employee.",
+                            "status" => $_global_class->STATUS_ERROR,
+                        ];
+                        return response()->json($feedback);
+                    } else {
+                        $feedback = [
+                            "message" => "Okay.",
+                            "status" => $_global_class->STATUS_SUCCESS,
+                        ];
+                        return response()->json($feedback);
+                    }
+                } else {
+                    $_data = DB::table($_table->BASETABLE)
+                        ->where('id', '=', $id)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+                }
+            }
+
             if (strtolower($table) === "administrator") {
                 $_table = new Administrator();
 
@@ -612,12 +669,33 @@ class DesktopController extends Controller
                         }
                     }
 
+                } else if (strtolower($id) === "satpam") {
+                    $_employee = DB::table($_table->BASETABLE)
+                        ->where('status', '=', $_table->STATUS_SATPAM)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->get();
+
+                    if (count($_employee) > 0) {
+                        foreach ($_employee as $emplo => $emp) {
+                            $_emp_id = $emp->id;
+
+                            $temp = array(
+                                "id" => $emp->id,
+                                "first_name" => $emp->first_name,
+                                "last_name" => $emp->last_name,
+                            );
+
+                            array_push($_data, $temp);
+                        }
+                    }
+
                 } else {
                     $_employee = DB::table($_table->BASETABLE)
                         ->where('id', '=', $id)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->first();
 
+                    $status = "";
                     if ($_employee->status === 1) {
                         $status = "Harian Atas";
                     } elseif ($_employee->status === 2) {
@@ -2422,7 +2500,7 @@ class DesktopController extends Controller
             if (strtolower($table) === "employee") {
                 $_table = new Employee();
                 $fields = [
-                    "id_company", "first_name", "last_name", "email", "phone_1", "phone_2", "domicile_address", "premi", "potongan_bpjs", "dob", "start_date"
+                    "id_company", "first_name", "last_name", "email", "phone_1", "phone_2", "domicile_address", "premi", "potongan_bpjs", "tunjangan", "dob", "start_date"
                 ];
 
                 $gender = $request->gender;
@@ -2916,6 +2994,10 @@ class DesktopController extends Controller
 
             if (strtolower($table) === "attendance") {
                 $_table = new Attendance();
+            }
+
+            if (strtolower($table) === "libur_satpam") {
+                $_table = new LiburSatpam();
             }
 
             if (strtolower($table) === "carton") {
@@ -4112,6 +4194,345 @@ class DesktopController extends Controller
 
                 return response()->json($feedback);
             }
+
+            if (strtolower($table) === "libur_satpam") {
+                $start_date = $request->start_date;
+                $end_date = $request->end_date;
+                $_start_date = explode("-", $start_date);
+                $_end_date = explode("-", $end_date);
+                $res = array();
+                $standard = 0;
+                $final = 0;
+                $days = 0;
+
+                $_table3 = new Standard();
+                $_standards = DB::table($_table3->BASETABLE)
+                    ->where('name', '=', 'libur_jaga_satpam')
+                    ->where('year', '=', date('Y'))
+                    ->where('is_active', '=', $_table3->STATUS_ACTIVE)
+                    ->first();
+                if (!empty($_standards)){
+                    $standard = $_global_class->removeMoneySeparator($_standards->nominal);
+                }
+
+                $_table = new Employee();
+                $_employees = DB::table($_table->BASETABLE)
+                    ->where('status', '=', $_table->STATUS_SATPAM)
+                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                    ->get();
+                if (count($_employees) > 0) {
+                    foreach ($_employees as $_employee => $employee) {
+                        $employee_id = $employee->id;
+
+                        $_table2 = new LiburSatpam();
+                        $_libur_satpams = DB::table($_table2->BASETABLE)
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+                            ->where('id_employee', '=', $employee_id)
+                            ->where('is_active', '=', $_table2->STATUS_ACTIVE)
+                            ->orderBy('date', 'asc')
+                            ->get();
+
+                        $temp2 = array();
+                        if (count($_libur_satpams) > 0) {
+                            foreach ($_libur_satpams as $_libur_satpam => $libur_satpam) {
+                                $_libur_satpam_date = $libur_satpam->date;
+                                if (!in_array($_libur_satpam_date,$temp2)){
+                                    array_push($temp2, $_libur_satpam_date);
+                                }
+                            }
+                        }
+
+                        $temp = array(
+                            "employee_id" => $employee_id,
+                            "employee_fname" => $employee->first_name,
+                            "employee_lname" => $employee->last_name,
+                            "dates" => $temp2
+                        );
+
+                        array_push($res,$temp);
+                    }
+                }
+
+                $fpdf = new Fpdf('P','mm',array(210,330));
+                $fpdf->AddPage();
+                $fpdf->SetFont('Arial', 'B', 12);
+                $fpdf->Cell(0, 0, 'Upah Libur Satpam Rungkut');
+                $fpdf->Ln(2);
+                $fpdf->SetFont('Arial', '', 10);
+                $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date);
+                $fpdf->Ln(10);
+
+                for($i=0; $i<count($res);$i++) {
+                    if (count($res[$i]['dates']) > 0){
+                        $fpdf->SetFont('Arial', 'B', 10);
+                        $employee_name = "";
+                        if ($res[$i]['employee_fname'] === $res[$i]['employee_lname']){
+                            $employee_name = $res[$i]['employee_fname'];
+                        } else {
+                            $employee_name = $res[$i]['employee_fname'] . ' ' . $res[$i]['employee_lname'];
+                        }
+                        $fpdf->Cell(80,7, $employee_name,1, 0, 'L');
+                        $fpdf->Cell(30,7, count($res[$i]['dates']) . ' X ' . $_global_class->addMoneySeparator($standard, 0),1, 0, 'R');
+                        $total = count($res[$i]['dates']) * $standard;
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($total, 0),1, 0, 'R');
+                        $fpdf->Cell(50,14, '',1, 0, 'R');
+                        $fpdf->Ln(7);
+                        $fpdf->SetFont('Arial', '', 10);
+                        $_date = "";
+                        for($j=0; $j<count($res[$i]['dates']);$j++) {
+                            $_date .= $res[$i]['dates'][$j] . ', ';
+                        }
+                        $fpdf->Cell(140,7, $_date,1, 0, 'L');
+                        $fpdf->Ln(10);
+                        $days += count($res[$i]['dates']);
+                        $final += $total;
+                    }
+                }
+
+                $fpdf->SetFont('Arial', 'B', 10);
+                $fpdf->Cell(80,7, 'Total ',1, 0, 'R');
+                $fpdf->Cell(30,7, $days . ' X ' . $_global_class->addMoneySeparator($standard, 0),1, 0, 'R');
+                $fpdf->Cell(30,7, $_global_class->addMoneySeparator($final, 0),1, 0, 'R');
+
+                $target_path = base_path('public/pdf/');
+                $fname = date("YmdHis");
+                $file_name = $fname . '_upah_libur_satpam_tt.pdf';
+                $file_path = $target_path . $file_name;
+                $fpdf->Output($file_path, 'F');
+
+                $feedback = [
+                    "message" => $file_name,
+                    "status" => $_global_class->STATUS_SUCCESS,
+                ];
+
+                return response()->json($feedback);
+            }
+
+            if (strtolower($table) === "borongan_mingguan") {
+                $start_date = $request->start_date;
+                $end_date = $request->end_date;
+                $_start_date = explode("-", $start_date);
+                $_end_date = explode("-", $end_date);
+                $_conv_start_date = date('Y-m-d', strtotime($start_date));
+                $_conv_end_date = date('Y-m-d', strtotime($end_date));
+                $res = array();
+                $standard = 0;
+                $final = 0;
+                $days = 0;
+                $carton_column = 0;
+
+                $_table3 = new Standard();
+                $_standards = DB::table($_table3->BASETABLE)
+                    ->where('name', '=', 'upah_borongan')
+                    ->where('year', '=', date('Y'))
+                    ->where('is_active', '=', $_table3->STATUS_ACTIVE)
+                    ->first();
+                if (!empty($_standards)) {
+                    $standard = $_global_class->removeMoneySeparator($_standards->nominal);
+                }
+
+                $_table = new GroupHeader();
+                $_groups = DB::table($_table->BASETABLE)
+                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                    ->get();
+                if (count($_groups) > 0) {
+                    foreach ($_groups as $_group => $group) {
+                        $group_id = $group->id;
+                        $temp2 = array();
+
+                        $_table2 = new Carton();
+                        $_cartons = DB::table($_table2->BASETABLE)
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', $_start_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', $_end_date[1])
+                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_start_date[2])
+                            ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', $_end_date[2])
+                            ->where('id_group', '=', $group_id)
+                            ->where('is_active', '=', $_table2->STATUS_ACTIVE)
+                            ->orderBy('id', 'asc')
+                            ->get();
+                        if (count($_cartons) > 0) {
+                            foreach ($_cartons as $_carton => $carton) {
+                                $_conv_date = date('Y-m-d', strtotime($carton->date));
+                                if (($_conv_date >= $_conv_start_date) && ($_conv_date <= $_conv_end_date)) {
+                                    $temp = array(
+                                        "carton_id" => $carton->id,
+                                        "carton_date" => $carton->date,
+                                        "carton_carton" => $carton->carton
+                                    );
+                                    array_push($temp2, $temp);
+                                }
+                            }
+                        }
+
+                        $temp3 = array(
+                            "group_id" => $group_id,
+                            "group_name" => $group->name,
+                            "carton_datas" => $temp2
+                        );
+                        array_push($res, $temp3);
+                    }
+                }
+
+                $fpdf = new Fpdf('P','mm',array(210,330));
+                $fpdf->AddPage();
+                $fpdf->SetFont('Arial', 'B', 12);
+                $fpdf->Cell(0, 0, 'Upah Borongan Rungkut');
+                $fpdf->Ln(2);
+                $fpdf->SetFont('Arial', '', 10);
+                $fpdf->Cell(0, 10, 'Periode : ' . $start_date . ' s/d ' . $end_date);
+                $fpdf->Ln(10);
+
+                $total_date_column_length = 48;
+                $date_column_length = $total_date_column_length / count($res[0]['carton_datas']);
+
+                $fpdf->SetFont('Arial', 'B', 10);
+                $fpdf->Cell(40,7, 'Group',1, 0, 'L');
+
+                for ($j=0; $j<count($res[0]['carton_datas']); $j++){
+                    $fpdf->Cell($date_column_length,7, explode('-', $res[0]['carton_datas'][$j]['carton_date'])[0],1, 0, 'C');
+                }
+                $fpdf->Cell(20,7, 'Carton',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Upah',1, 0, 'C');
+                $fpdf->Cell(40,7, 'Total',1, 0, 'C');
+                $fpdf->Ln(7);
+
+                $fpdf->SetFont('Arial', '', 10);
+                if (count($res) > 0) {
+                    for($i=0; $i<count($res);$i++) {
+                        $carton_row = 0;
+                        $fpdf->Cell(40,7, $res[$i]['group_name'],1, 0, 'L');
+                        for ($j=0; $j<count($res[$i]['carton_datas']); $j++){
+                            $carton = $res[$i]['carton_datas'][$j]['carton_carton'];
+                            $fpdf->Cell($date_column_length,7, $carton,1, 0, 'C');
+                            $carton_row += $carton;
+                        }
+                        $fpdf->Cell(20,7, $carton_row,1, 0, 'C');
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($standard, 0),1, 0, 'R');
+                        $total_row = $carton_row * $standard;
+                        $fpdf->Cell(40,7, $_global_class->addMoneySeparator($total_row, 0),1, 0, 'R');
+                        $fpdf->Ln(7);
+                        $carton_column += $carton_row;
+                    }
+                }
+
+                $fpdf->SetFont('Arial', 'B', 10);
+                $fpdf->Cell(40 + $total_date_column_length,7, 'Total',1, 0, 'R');
+                $fpdf->Cell(20,7, $carton_column,1, 0, 'C');
+                $fpdf->Cell(30,7, $_global_class->addMoneySeparator($standard, 0),1, 0, 'R');
+                $total_column = $carton_column * $standard;
+                $fpdf->Cell(40,7, $_global_class->addMoneySeparator($total_column, 0),1, 0, 'R');
+                $fpdf->Ln(7);
+
+                $target_path = base_path('public/pdf/');
+                $fname = date("YmdHis");
+                $file_name = $fname . '_upah_borongan_mingguan.pdf';
+                $file_path = $target_path . $file_name;
+                $fpdf->Output($file_path, 'F');
+
+                $feedback = [
+                    "message" => $file_name,
+                    "status" => $_global_class->STATUS_SUCCESS,
+                ];
+
+                return response()->json($feedback);
+            }
+
+            if (strtolower($table) === "gaji_bulanan_tt") {
+                $start_date = $request->start_date;
+                $end_date = $request->end_date;
+                $_start_date = explode("-", $start_date);
+                $_end_date = explode("-", $end_date);
+
+                $fpdf = new Fpdf('P','mm',array(210,330));
+                $fpdf->AddPage();
+
+                $_table = new Employee();
+                $_employees = DB::table($_table->BASETABLE)
+                    ->where('status', '=', $_table->STATUS_BULANAN)
+                    ->orWhere('status', '=', $_table->STATUS_SUPIR)
+                    ->orWhere('status', '=', $_table->STATUS_SATPAM)
+                    ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                    ->get();
+                if (count($_employees) > 0) {
+                    foreach ($_employees as $_employee => $employee) {
+                        $fpdf->SetFont('Arial', 'B', 11);
+                        $fpdf->Cell(210,7, 'TANDA TERIMA',0, 0, 'C');
+                        $fpdf->Ln(7);
+                        $fpdf->Cell(210,7, 'GAJI BULAN ' . $_global_class->getMonthText($_start_date[1]) . ' ' . $_start_date[2],0, 0, 'C');
+                        $fpdf->Ln(2);
+                        $fpdf->SetFont('Arial', '', 10);
+                        $fpdf->Ln(10);
+                        $fpdf->Cell(40,7, 'Nama',0, 0, 'L');
+                        $fpdf->Cell(5,7, ':',0, 0, 'C');
+                        $employee_name = "";
+                        if ($employee->first_name === $employee->last_name){
+                            $employee_name = $employee->first_name;
+                        } else {
+                            $employee_name = $employee->first_name . ' ' . $employee->last_name;
+                        }
+                        $fpdf->Cell(150,7, $employee_name,0, 0, 'L');
+                        $fpdf->Ln(10);
+
+                        $fpdf->Cell(40,7, 'Gaji Pokok',0, 0, 'L');
+                        $fpdf->Cell(5,7, ':',0, 0, 'C');
+                        $fpdf->Cell(8,7, 'Rp.',0, 0, 'L');
+                        $fpdf->Cell(20,7, $employee->premi,0, 0, 'R');
+                        $fpdf->Ln(7);
+
+                        $fpdf->Cell(40,7, 'Tunjangan','B', 0, 'L');
+                        $fpdf->Cell(5,7, ':','B', 0, 'C');
+                        $fpdf->Cell(8,7, 'Rp.','B', 0, 'L');
+                        $fpdf->Cell(20,7, $employee->tunjangan,'B', 0, 'R');
+                        $fpdf->Ln(7);
+
+                        $total = $_global_class->removeMoneySeparator($employee->premi) + $_global_class->removeMoneySeparator($employee->tunjangan);
+                        $fpdf->SetFont('Arial', 'B', 10);
+                        $fpdf->Cell(40,7, 'Total',0, 0, 'L');
+                        $fpdf->Cell(5,7, ':',0, 0, 'C');
+                        $fpdf->Cell(8,7, 'Rp.',0, 0, 'L');
+                        $fpdf->Cell(20,7, $_global_class->addMoneySeparator($total, 0),0, 0, 'R');
+                        $fpdf->Ln(7);
+
+                        $fpdf->SetFont('Arial', '', 9);
+                        $fpdf->Cell(40,7, '',0, 0, 'L');
+                        $fpdf->Cell(5,7, '',0, 0, 'C');
+                        $fpdf->Cell(40,7, '( ' . $_global_class->terbilang($total) . ' )',0, 0, 'L');
+                        $fpdf->Ln(7);
+
+                        $fpdf->SetFont('Arial', '', 10);
+                        $fpdf->Cell(115,7, '',0, 0, 'L');
+                        $fpdf->Cell(40,7, 'Tgl.             ' . $_global_class->getMonthText($_start_date[1]) . ' ' . $_start_date[2],0, 0, 'L');
+                        $fpdf->Ln(22);
+
+                        $fpdf->Cell(110,7, '',0, 0, 'L');
+                        $fpdf->Cell(5,7, '(',0, 0, 'L');
+                        $fpdf->Cell(40,7, $employee_name,0, 0, 'C');
+                        $fpdf->Cell(5,7, ' )',0, 0, 'L');
+                        $fpdf->Ln(10);
+
+                        $fpdf->Cell(90,7, '_',0, 0, 'L');
+                        $fpdf->Cell(90,7, '_',0, 0, 'R');
+
+                        $fpdf->Ln(10);
+                    }
+                }
+
+                $target_path = base_path('public/pdf/');
+                $fname = date("YmdHis");
+                $file_name = $fname . '_upah_bulanan_tt.pdf';
+                $file_path = $target_path . $file_name;
+                $fpdf->Output($file_path, 'F');
+
+                $feedback = [
+                    "message" => $file_name,
+                    "status" => $_global_class->STATUS_SUCCESS,
+                ];
+
+                return response()->json($feedback);
+            }
         }
 
     }
@@ -4784,6 +5205,7 @@ class DesktopController extends Controller
             $domicile_address = $request->domicile_address;
             $premi = $request->premi;
             $potongan_bpjs = $request->potongan_bpjs;
+            $tunjangan = $request->tunjangan;
             $dob = $request->dob;
             $start_date = $request->start_date;
             $gender = $request->gender;
@@ -4822,6 +5244,7 @@ class DesktopController extends Controller
                 "domicile_address" => $domicile_address,
                 "premi" => $premi,
                 "potongan_bpjs" => $potongan_bpjs,
+                "tunjangan" => $tunjangan,
                 "dob" => $dob,
                 "start_date" => $start_date,
                 "gender" => $gender,
@@ -5094,12 +5517,25 @@ class DesktopController extends Controller
     }
 
     public function employee_upload_image(){
-        $_global_class = new GlobalClass();
+//        $_global_class = new GlobalClass();
+//        $postdata = file_get_contents("php://input");
+//        if (isset($postdata)) {
+//            $request = json_decode($postdata);
+//            $images = $request->image;
+//            $new_name = rand() . '.jpg';
+//            $images->move(base_path('public/images/employee/') . $new_name);
+//            return response()->json([
+//                "message" => $new_name,
+//                "status" => $_global_class->STATUS_SUCCESS
+//            ]);
+//        }
 
+        $_global_class = new GlobalClass();
+//
         $name = $_global_class->generateID('IMG');
         $img = $name . '.jpg';
         $target_path 	= base_path('public/images/employee/') . $img;
-
+//
         if (move_uploaded_file($_FILES['image']['tmp_name'], $target_path)) {
             return response()->json([
                 "message" => $img,
@@ -5111,6 +5547,20 @@ class DesktopController extends Controller
                 "status" => $_global_class->STATUS_ERROR
             ]);
         }
+
+//        if (isset($_FILES['files'])) {
+//            if (move_uploaded_file($_FILES['files']['tmp_name'], $target_path)) {
+//                return response()->json([
+//                    "message" => $img,
+//                    "status" => $_global_class->STATUS_SUCCESS
+//                ]);
+//            } else {
+//                return response()->json([
+//                    "message" => 'Something when wrong. Please try again later.',
+//                    "status" => $_global_class->STATUS_ERROR
+//                ]);
+//            }
+//        }
     }
 
     public function employee_resign(){

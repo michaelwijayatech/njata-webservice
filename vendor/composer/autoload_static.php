@@ -375,6 +375,7 @@ class ComposerStaticInitbe8c83f102eb035422e07963de4c9dc0
         'App\\Model\\Haid' => __DIR__ . '/../..' . '/app/Model/Haid.php',
         'App\\Model\\Holiday' => __DIR__ . '/../..' . '/app/Model/Holiday.php',
         'App\\Model\\Income' => __DIR__ . '/../..' . '/app/Model/Income.php',
+        'App\\Model\\LiburSatpam' => __DIR__ . '/../..' . '/app/Model/LiburSatpam.php',
         'App\\Model\\Payment' => __DIR__ . '/../..' . '/app/Model/Payment.php',
         'App\\Model\\Product' => __DIR__ . '/../..' . '/app/Model/Product.php',
         'App\\Model\\Purchase' => __DIR__ . '/../..' . '/app/Model/Purchase.php',

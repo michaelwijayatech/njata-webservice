@@ -39,6 +39,7 @@ return array(
     'App\\Model\\Haid' => $baseDir . '/app/Model/Haid.php',
     'App\\Model\\Holiday' => $baseDir . '/app/Model/Holiday.php',
     'App\\Model\\Income' => $baseDir . '/app/Model/Income.php',
+    'App\\Model\\LiburSatpam' => $baseDir . '/app/Model/LiburSatpam.php',
     'App\\Model\\Payment' => $baseDir . '/app/Model/Payment.php',
     'App\\Model\\Product' => $baseDir . '/app/Model/Product.php',
     'App\\Model\\Purchase' => $baseDir . '/app/Model/Purchase.php',
