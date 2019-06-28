@@ -1832,6 +1832,9 @@ class DesktopController extends Controller
                             $ijin = 0;
                             $ijin_name = null;
                             $ijin_name_arr = [];
+                            $sakit = 0;
+                            $sakit_name = null;
+                            $sakit_name_arr = [];
                             $potongan_bpjs = 0;
                             $_upah_libur = 0;
                             $_total = 0;
