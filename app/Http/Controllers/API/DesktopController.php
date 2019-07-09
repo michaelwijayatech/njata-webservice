@@ -237,19 +237,9 @@ class DesktopController extends Controller
 
             if(strtolower($table) === "attendance"){
                 $_table = new Attendance();
-//                 $fields = [
-//                     "id_employee", "carton"
-//                 ];
-                
                 $fields = [
-                    "id_employee"
+                    "id_employee", "carton"
                 ];
-                
-                if($request->has('carton')){
-                    $data += ["carton" => $request->carton];
-                } else {
-                    $data += ["carton" => "0"];
-                }
 
                 $status = $request->status;
                 if(strtolower($status) === "masuk"){
@@ -2764,28 +2754,9 @@ class DesktopController extends Controller
 
             if (strtolower($table) === "attendance") {
                 $_table = new Attendance();
-//                 $fields = [
-//                     "carton"
-//                 ];
-                
-//                 $carton = $request->carton;
-//                 if($carton === null || $carton === undefined){
-//                     $data += ["carton" => "0"];
-//                 } else {
-//                     $data += ["carton" => $carton];
-//                 }
-                
-//                 if($request->has('carton')){
-//                     $data += ["carton" => $request->carton];
-//                 } else {
-//                     $data += ["carton" => "0"];
-//                 }
-                
-                if($request->request->has('carton')){
-                    $data += ["carton" => $request->carton];
-                } else {
-                    $data += ["carton" => "0"];
-                }
+                $fields = [
+                    "carton"
+                ];
 
                 $status = $request->status;
                 if(strtolower($status) === "masuk"){
