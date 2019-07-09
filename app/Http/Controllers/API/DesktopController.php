@@ -2758,11 +2758,17 @@ class DesktopController extends Controller
 //                     "carton"
 //                 ];
                 
-                $carton = $request->carton;
-                if($carton === null || $carton === undefined){
-                    $data += ["carton" => "0"];
-                } else {
+//                 $carton = $request->carton;
+//                 if($carton === null || $carton === undefined){
+//                     $data += ["carton" => "0"];
+//                 } else {
+//                     $data += ["carton" => $carton];
+//                 }
+                
+                if($request->has('carton')){
                     $data += ["carton" => $carton];
+                } else {
+                    $data += ["carton" => "0"];
                 }
 
                 $status = $request->status;
