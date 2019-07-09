@@ -2781,7 +2781,7 @@ class DesktopController extends Controller
 //                     $data += ["carton" => "0"];
 //                 }
                 
-                if($request->query->has('carton')){
+                if($request->request->has('carton')){
                     $data += ["carton" => $request->carton];
                 } else {
                     $data += ["carton" => "0"];
