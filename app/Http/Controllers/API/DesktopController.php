@@ -2754,9 +2754,16 @@ class DesktopController extends Controller
 
             if (strtolower($table) === "attendance") {
                 $_table = new Attendance();
-                $fields = [
-                    "carton"
-                ];
+//                 $fields = [
+//                     "carton"
+//                 ];
+                
+                $carton = $request->carton;
+                if($carton === null || $carton === undefined){
+                    $data += ["carton" => "0"];
+                } else {
+                    $data += ["carton" => $carton];
+                }
 
                 $status = $request->status;
                 if(strtolower($status) === "masuk"){
