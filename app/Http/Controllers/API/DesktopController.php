@@ -237,9 +237,19 @@ class DesktopController extends Controller
 
             if(strtolower($table) === "attendance"){
                 $_table = new Attendance();
+//                 $fields = [
+//                     "id_employee", "carton"
+//                 ];
+                
                 $fields = [
-                    "id_employee", "carton"
+                    "id_employee"
                 ];
+                
+                if($request->has('carton')){
+                    $data += ["carton" => $request->carton];
+                } else {
+                    $data += ["carton" => "0"];
+                }
 
                 $status = $request->status;
                 if(strtolower($status) === "masuk"){
