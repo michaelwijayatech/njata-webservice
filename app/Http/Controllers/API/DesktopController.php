@@ -2846,6 +2846,14 @@ class DesktopController extends Controller
 
             }
 
+            if (strtolower($table) === "carton_by_carton_id") {
+                $_table = new Carton();
+                $fields = [
+                    "carton"
+                ];
+
+            }
+
             if (strtolower($table) === "carton") {
                 $_table = new Carton();
                 $id = $request->id;
