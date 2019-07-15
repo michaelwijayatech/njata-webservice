@@ -1173,15 +1173,16 @@ class DesktopController extends Controller
                                 ->join('employee', 'employee.id', '=', 'attendance.id_employee')
                                 ->where('attendance.id_employee', '=', $_emp_id)
                                 ->where('attendance.date', '=', $date)
-                                ->select('attendance.id', 'attendance.date', 'attendance.status', 'employee.first_name', 'employee.last_name', 'attendance.carton')
+                                ->select('attendance.id as att_id', 'attendance.date', 'attendance.status', 'employee.id as employee_id', 'employee.first_name', 'employee.last_name', 'attendance.carton')
                                 ->get();
 
                             if (count($_atts) > 0) {
                                 foreach ($_atts as $_att => $att) {
                                     $temp3 = array(
-                                        "employee_id" => $att->id,
+                                        "employee_id" => $att->employee_id,
                                         "employee_fname" => $att->first_name,
                                         "employee_lname" => $att->last_name,
+                                        "attendance_id" => $att->att_id,
                                         "attendance_status" => $att->status,
                                         "attendance_carton" => $att->carton
                                     );
