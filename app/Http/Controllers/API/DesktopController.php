@@ -1157,10 +1157,7 @@ class DesktopController extends Controller
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->first();
 
-                    $temp = array(
-                        "carton_id" => $_cartons->id,
-                        "carton" => $_cartons->carton,
-                    );
+                    $temp2 = array();
 
                     $_table2 = new GroupDetail();
                     $_gds = DB::table($_table2->BASETABLE)
@@ -1181,18 +1178,24 @@ class DesktopController extends Controller
 
                             if (count($_atts) > 0) {
                                 foreach ($_atts as $_att => $att) {
-                                    $temp2 = array(
+                                    $temp3 = array(
                                         "employee_id" => $att->id,
                                         "employee_name" => $att->first_name . ' ' . $att->last_name,
                                         "employee_status" => $att->status,
                                         "employee_carton" => $att->carton
                                     );
 
-                                    array_push($temp, $temp2);
+                                    array_push($temp2, $temp3);
                                 }
                             }
                         }
                     }
+
+                    $temp = array(
+                        "carton_id" => $_cartons->id,
+                        "carton" => $_cartons->carton,
+                        "datas" => $temp2
+                    );
 
                     array_push($_data, $temp);
 
