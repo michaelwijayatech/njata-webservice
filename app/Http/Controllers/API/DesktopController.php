@@ -1175,7 +1175,7 @@ class DesktopController extends Controller
                             $_atts = DB::table($_table3->BASETABLE)
                                 ->join('employee', 'employee.id', '=', 'attendance.id_employee')
                                 ->where('attendance.date', '=', $date)
-                                ->select('attendance.id', 'attendance.date', 'attendance.status', 'employee.first_name', 'employee.last_name')
+                                ->select('attendance.id', 'attendance.date', 'attendance.status', 'employee.first_name', 'employee.last_name', 'attendance.carton')
                                 ->get();
 
                             if (count($_atts) > 0) {
