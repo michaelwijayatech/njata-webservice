@@ -1172,7 +1172,7 @@ class DesktopController extends Controller
                             $_table3 = new Attendance();
                             $_emp_id = $gd->id_employee;
 
-                            $_atts = DB::table($_table->BASETABLE)
+                            $_atts = DB::table($_table3->BASETABLE)
                                 ->join('employee', 'employee.id', '=', 'attendance.id_employee')
                                 ->where('attendance.date', '=', $date)
                                 ->select('attendance.id', 'attendance.date', 'attendance.status', 'employee.first_name', 'employee.last_name')
