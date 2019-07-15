@@ -1191,7 +1191,15 @@ class DesktopController extends Controller
                         }
                     }
 
+                    $_table4 = new GroupHeader();
+                    $_ghs = DB::table($_table4->BASETABLE)
+                        ->where('id', '=', $id_employee)
+                        ->where('is_active', '=', $_table4->STATUS_ACTIVE)
+                        ->first();
+
                     $temp = array(
+                        "group_id" => $_ghs->id,
+                        "group_name" => $_ghs->name,
                         "carton_id" => $_cartons->id,
                         "carton" => $_cartons->carton,
                         "datas" => $temp2
