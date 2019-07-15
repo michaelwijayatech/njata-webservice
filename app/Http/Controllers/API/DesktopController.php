@@ -1180,9 +1180,10 @@ class DesktopController extends Controller
                                 foreach ($_atts as $_att => $att) {
                                     $temp3 = array(
                                         "employee_id" => $att->id,
-                                        "employee_name" => $att->first_name . ' ' . $att->last_name,
-                                        "employee_status" => $att->status,
-                                        "employee_carton" => $att->carton
+                                        "employee_fname" => $att->first_name,
+                                        "employee_lname" => $att->last_name,
+                                        "attendance_status" => $att->status,
+                                        "attendance_carton" => $att->carton
                                     );
 
                                     array_push($temp2, $temp3);
@@ -1202,7 +1203,7 @@ class DesktopController extends Controller
                         "group_name" => $_ghs->name,
                         "carton_id" => $_cartons->id,
                         "carton" => $_cartons->carton,
-                        "datas" => $temp2
+                        "employee_datas" => $temp2
                     );
 
                     array_push($_data, $temp);
