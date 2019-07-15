@@ -2838,6 +2838,29 @@ class DesktopController extends Controller
 
             }
 
+            if (strtolower($table) === "attendance_borongan") {
+                $_table = new Attendance();
+                $fields = [
+
+                ];
+
+                $status = $request->status;
+                if(strtolower($status) === "masuk"){
+                    $status = $_table->STATUS_MASUK;
+                } elseif(strtolower($status) === "setengah hari"){
+                    $status = $_table->STATUS_SETENGAH_HARI;
+                } elseif(strtolower($status) === "tidak masuk"){
+                    $status = $_table->STATUS_TIDAK_MASUK;
+                } elseif(strtolower($status) === "ijin"){
+                    $status = $_table->STATUS_IJIN;
+                } elseif(strtolower($status) === "sakit"){
+                    $status = $_table->STATUS_SAKIT;
+                }
+
+                $data += ["status" => $status];
+
+            }
+
             if (strtolower($table) === "attendance_borongan_carton") {
                 $_table = new Attendance();
                 $fields = [
