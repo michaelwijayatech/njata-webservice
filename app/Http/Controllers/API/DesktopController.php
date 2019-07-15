@@ -1146,6 +1146,55 @@ class DesktopController extends Controller
                         ->where('attendance.date', '=', $date)
                         ->select('attendance.id', 'attendance.date', 'attendance.status', 'employee.first_name', 'employee.last_name')
                         ->get();
+                } elseif (strtolower($id) === "update_attendance_borongan") {
+                    $id_employee = $request->id_employee;
+                    $date = $request->date;
+
+                    $_table = new Carton();
+                    $_cartons = DB::table($_table->BASETABLE)
+                        ->where('id_group', '=', $id_employee)
+                        ->where('date', '=', $date)
+                        ->where('is_active', '=', $_table->STATUS_ACTIVE)
+                        ->first();
+
+                    $temp = array(
+                        "carton_id" => $_cartons->id,
+                        "carton" => $_cartons->carton,
+                    );
+
+                    $_table2 = new GroupDetail();
+                    $_gds = DB::table($_table2->BASETABLE)
+                        ->where('id_group', '=', $id_employee)
+                        ->where('is_active', '=', $_table2->STATUS_ACTIVE)
+                        ->get();
+                    if (count($_gds) > 0) {
+                        foreach ($_gds as $_gd => $gd) {
+                            $_table3 = new Attendance();
+                            $_emp_id = $gd->id_employee;
+
+                            $_atts = DB::table($_table->BASETABLE)
+                                ->join('employee', 'employee.id', '=', 'attendance.id_employee')
+                                ->where('attendance.date', '=', $date)
+                                ->select('attendance.id', 'attendance.date', 'attendance.status', 'employee.first_name', 'employee.last_name')
+                                ->get();
+
+                            if (count($_atts) > 0) {
+                                foreach ($_atts as $_att => $att) {
+                                    $temp2 = array(
+                                        "employee_id" => $att->id,
+                                        "employee_name" => $att->first_name . ' ' . $att->last_name,
+                                        "employee_status" => $att->status,
+                                        "employee_carton" => $att->carton
+                                    );
+
+                                    array_push($temp, $temp2);
+                                }
+                            }
+                        }
+                    }
+
+                    array_push($_data, $temp);
+
                 }
             }
 
