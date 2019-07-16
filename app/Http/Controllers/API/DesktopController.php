@@ -2093,9 +2093,18 @@ class DesktopController extends Controller
                                     if ($___attendances->status === (string)$_table->STATUS_SETENGAH_HARI){
                                         $_pokok += ($_std_harian / 2);
                                         $ctr_temp = 0;
-                                        if (in_array($_date[$i], $_chop_arr)){
+                                        
+                                        if ($employee->status === $_stat_harian_atas){
                                             $_premi += $_global_class->removeMoneySeparator($employee->premi) / 2;
                                         }
+                                        
+                                        if ($employee->status === $_stat_harian_bawah){
+                                            if (in_array($_date[$i], $_chop_arr)){
+                                                $_premi += $_global_class->removeMoneySeparator($employee->premi) / 2;
+                                            }
+                                        }
+                                        
+                                       
 //                                        for ($i = 0; $i < count($_chop_date_arr); $i++) {
 //                                            if ($_chop_date_arr[$i] === $att_date){
 //                                                $ctr_temp++;
