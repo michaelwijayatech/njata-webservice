@@ -4310,13 +4310,14 @@ class DesktopController extends Controller
 
                     $_total_pokok = $_global_class->removeMoneySeparator(explode("#", $datas[$i])[$tot_days + 5]);
                     $_total_premi = $_global_class->removeMoneySeparator(explode("#", $datas[$i])[$tot_days + 6]);
+                    $_total_revisi = $_global_class->removeMoneySeparator(explode("#", $datas[$i])[$tot_days + 10]);
                     $_total_terima =  $_total_pokok + $_total_premi;
                     $final_pokok += $_total_pokok;
                     $final_premi += $_total_premi;
                     $final_total += $_total_terima;
 
                     $fpdf->Cell(30,10, $_global_class->addMoneySeparator($_total_terima, 0),1, 0, 'R');
-                    $fpdf->Cell(15, 10, ' ', 1, 0, 'C');
+                    $fpdf->Cell(15, 10, $_global_class->addMoneySeparator($_total_revisi, 0), 1, 0, 'C');
                     $fpdf->Cell(20, 10, ' ', '1', 0, 'C');
                     $fpdf->Cell(10, 10, $counter, 1, 0, 'C');
                     $fpdf->Cell(40, 10, ' ', 1, 0, 'C');
