@@ -106,15 +106,17 @@ class DesktopController extends Controller
             if(strtolower($table) === "pdf"){
                 // $files = \File::allFiles(public_path('pdf'));
                 $id = $request->id;
-                foreach (base_path('public/pdf/') as $filename) {
+                // foreach (base_path('public/pdf/') as $filename) {
                     // $file = \Illuminate\Support\Facades\Storage::get($filename);
-                    array_push($_data, $filename);
+                    // array_push($_data, $filename);
                     // do whatever with $file;
-                }
+                // }
+                $directory = base_path('public/pdf/');
+                $scanned_directory = array_diff(scandir($directory), array('..', '.'));
             }
 
             $feedback = [
-                "message" => $_data,
+                "message" => $scanned_directory,
                 "status" => $_global_class->STATUS_SUCCESS,
             ];
 
