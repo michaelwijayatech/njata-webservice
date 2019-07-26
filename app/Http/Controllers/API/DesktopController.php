@@ -93,6 +93,28 @@ class DesktopController extends Controller
         }
     }
 
+    public function get_public_files(){
+        $postdata = file_get_contents("php://input");
+        if (isset($postdata)) {
+            $request = json_decode($postdata);
+            $table = $request->table;
+            $_data = array();
+            $files = null;
+
+            if(strtolower($table) === "pdf"){
+                $files = Storage::allFiles($directory);
+                $id = $request->id;
+            }
+
+            $feedback = [
+                "message" => $files,
+                "status" => $_global_class->STATUS_SUCCESS,
+            ];
+
+            return response()->json($feedback);
+        }
+    }
+
     public function add_data(){
         date_default_timezone_set("Asia/Jakarta");
         $_global_class = new GlobalClass();
