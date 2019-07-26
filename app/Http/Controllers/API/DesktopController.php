@@ -32,6 +32,7 @@ use App\Model\Supplier;
 use Codedge\Fpdf\Fpdf\Fpdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Suppoer\Facades\Storage;
 use App\Http\Controllers\Controller;
 
 class DesktopController extends Controller
@@ -103,12 +104,17 @@ class DesktopController extends Controller
             $files = null;
 
             if(strtolower($table) === "pdf"){
-                $files = \File::allFiles(public_path('pdf'));
+                // $files = \File::allFiles(public_path('pdf'));
                 $id = $request->id;
+                foreach (Storage::files('pdf') as $filename) {
+                    $file = Storage::get($filename);
+                    array_push($_data, file);
+                    // do whatever with $file;
+                }
             }
 
             $feedback = [
-                "message" => $files,
+                "message" => $_data,
                 "status" => $_global_class->STATUS_SUCCESS,
             ];
 
