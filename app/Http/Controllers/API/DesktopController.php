@@ -106,9 +106,9 @@ class DesktopController extends Controller
             if(strtolower($table) === "pdf"){
                 // $files = \File::allFiles(public_path('pdf'));
                 $id = $request->id;
-                foreach (Storage::files('pdf') as $filename) {
-                    $file = Storage::get($filename);
-                    array_push($_data, file);
+                foreach (\Illuminate\Support\Facades\Storage::files('pdf') as $filename) {
+                    $file = \Illuminate\Support\Facades\Storage::get($filename);
+                    array_push($_data, $file);
                     // do whatever with $file;
                 }
             }
