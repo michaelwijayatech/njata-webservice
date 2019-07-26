@@ -94,6 +94,7 @@ class DesktopController extends Controller
     }
 
     public function get_public_files(){
+        $_global_class = new GlobalClass();
         $postdata = file_get_contents("php://input");
         if (isset($postdata)) {
             $request = json_decode($postdata);
