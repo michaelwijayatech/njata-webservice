@@ -102,7 +102,7 @@ class DesktopController extends Controller
             $files = null;
 
             if(strtolower($table) === "pdf"){
-                $files = Storage::allFiles($directory);
+                $files = \File::allFiles(public_path('pdf'));
                 $id = $request->id;
             }
 
