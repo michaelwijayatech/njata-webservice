@@ -112,7 +112,7 @@ class DesktopController extends Controller
                     // do whatever with $file;
                 // }
                 $directory = base_path('public/pdf/');
-                $scanned_directory = array_diff(scandir($directory), array('..', '.'));
+                $scanned_directory = array(scandir($directory), array('..', '.'));
             }
 
             $feedback = [
