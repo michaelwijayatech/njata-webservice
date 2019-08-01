@@ -4736,6 +4736,73 @@ class DesktopController extends Controller
 
                 return response()->json($feedback);
             }
+
+            if (strtolower($table) === "rekap_bulanan") {
+                $start_date_week_1 = $request->start_date_week_1;
+                $end_date_week_1 = $request->end_date_week_1;
+                $start_date_week_2 = $request->start_date_week_2;
+                $end_date_week_2 = $request->end_date_week_2;
+                $start_date_week_3 = $request->start_date_week_3;
+                $end_date_week_3 = $request->end_date_week_3;
+                $start_date_week_4 = $request->start_date_week_4;
+                $end_date_week_4 = $request->end_date_week_4;
+                $start_date_week_5 = $request->start_date_week_5;
+                $end_date_week_5 = $request->end_date_week_5;
+                $start_date_week_6 = $request->start_date_week_6;
+                $end_date_week_6 = $request->end_date_week_6;
+
+                $_groupheader = new GroupHeader();
+                $_groupheaders = DB::table($_groupheader->BASETABLE)
+                    ->where('is_active', '=', $_groupheader->STATUS_ACTIVE)
+                    ->get();
+                if (count($_groupheaders) > 0) {
+                    foreach ($_groupheaders as $_groupheader => $groupheader) {
+
+                        // $temp = array(
+                        //     "hd" => $_temp_haid_date,
+                        //     "id_employee" => $empl_id,
+                        //     "employee_name" => $empl_name,
+                        //     "gender" => $empl_gender,
+                        //     "pokok" => $_pokok,
+                        //     "haid" => $_haid,
+                        //     "premi" => $_premi,
+                        //     "potongan_bpjs" => $_pot_bpjs,
+                        //     "msit" => $_masuk . ' | ' . $_setengah_hari . ' | ' . $_ijin . ' | ' . $_tidak_masuk,
+                        //     "libur" => $_holiday,
+                        //     "total" => $_tot,
+                        //     "std_harian" => $_std_harian,
+                        //     "std_cuti" => $_std_haid,
+                        //     "rajang" => count($_chop_date_arr),
+                        //     "_rajang" => $_chop_date_arr,
+                        //     "_attendance" => $_atts
+                        // );
+
+                        // array_push($_data, $temp);
+
+
+                        // $target_path = base_path('public/pdftemp/');
+                        // $fname = date("YmdHis");
+                        // $file_name = $fname . '_rekapbulanan.pdf';
+                        // $file_path = $target_path . $file_name;
+                        // $fpdf->Output($file_path, 'F');
+
+                        // $feedback = [
+                        //     "message" => $file_name,
+                        //     "status" => $_global_class->STATUS_SUCCESS,
+                        // ];
+
+                        // return response()->json($feedback);
+                    }
+                }
+
+                $feedback = [
+                    "message" => $_groupheaders,
+                    "status" => $_global_class->STATUS_SUCCESS,
+                ];
+    
+                return response()->json($feedback);
+
+            }
         }
 
     }
