@@ -4685,13 +4685,24 @@ class DesktopController extends Controller
                         $fpdf->Cell(20,7, $employee->premi,0, 0, 'R');
                         $fpdf->Ln(7);
 
-                        $fpdf->Cell(40,7, 'Tunjangan','B', 0, 'L');
-                        $fpdf->Cell(5,7, ':','B', 0, 'C');
-                        $fpdf->Cell(8,7, 'Rp.','B', 0, 'L');
-                        $fpdf->Cell(20,7, $employee->tunjangan,'B', 0, 'R');
-                        $fpdf->Ln(7);
+                        if ($employee->status ===  $_table->STATUS_SUPIR){
+                            $fpdf->Cell(40,7, 'Tunjangan','B', 0, 'L');
+                            $fpdf->Cell(5,7, ':','B', 0, 'C');
+                            $fpdf->Cell(8,7, 'Rp.','B', 0, 'L');
+                            $fpdf->Cell(20,7, '0','B', 0, 'R');
+                            $fpdf->Ln(7);
 
-                        $total = $_global_class->removeMoneySeparator($employee->premi) + $_global_class->removeMoneySeparator($employee->tunjangan);
+                            $total = $_global_class->removeMoneySeparator($employee->premi) + 0;
+                        } else {
+                            $fpdf->Cell(40,7, 'Tunjangan','B', 0, 'L');
+                            $fpdf->Cell(5,7, ':','B', 0, 'C');
+                            $fpdf->Cell(8,7, 'Rp.','B', 0, 'L');
+                            $fpdf->Cell(20,7, $employee->tunjangan,'B', 0, 'R');
+                            $fpdf->Ln(7);
+
+                            $total = $_global_class->removeMoneySeparator($employee->premi) + $_global_class->removeMoneySeparator($employee->tunjangan);
+                        }
+
                         $fpdf->SetFont('Arial', 'B', 10);
                         $fpdf->Cell(40,7, 'Total',0, 0, 'L');
                         $fpdf->Cell(5,7, ':',0, 0, 'C');
@@ -4737,6 +4748,46 @@ class DesktopController extends Controller
                 return response()->json($feedback);
             }
 
+            if (strtolower($table) === "temp_langsung_hapus") {
+                $start_date_week_1 = $request->start_date_week_1;
+                $end_date_week_1 = $request->end_date_week_1;
+                $start_date_week_2 = $request->start_date_week_2;
+                $end_date_week_2 = $request->end_date_week_2;
+                $start_date_week_3 = $request->start_date_week_3;
+                $end_date_week_3 = $request->end_date_week_3;
+                $start_date_week_4 = $request->start_date_week_4;
+                $end_date_week_4 = $request->end_date_week_4;
+                $start_date_week_5 = $request->start_date_week_5;
+                $end_date_week_5 = $request->end_date_week_5;
+                $start_date_week_6 = $request->start_date_week_6;
+                $end_date_week_6 = $request->end_date_week_6;
+
+                $end_date = "";
+
+                if($start_date_week_6 !== ""){
+                    $end_date = $end_date_week_6;
+                } else if($start_date_week_5 !== ""){
+                    $end_date = $end_date_week_5;
+                } else if($start_date_week_4 !== ""){
+                    $end_date = $end_date_week_4;
+                } else if($start_date_week_3 !== ""){
+                    $end_date = $end_date_week_3;
+                } else if($start_date_week_2 !== ""){
+                    $end_date = $end_date_week_2;
+                } else {
+                    $end_date = $end_date_week_1;
+                }
+
+                $final_driver = $this->_read_rekap_security($start_date_week_1, $end_date);
+                $feedback = [
+                    "message" => $final_driver,
+                    "status" => $_global_class->STATUS_SUCCESS,
+                ];
+
+                return response()->json($feedback);
+            }
+
+
             if (strtolower($table) === "rekap_bulanan") {
                 $start_date_week_1 = $request->start_date_week_1;
                 $end_date_week_1 = $request->end_date_week_1;
@@ -4751,60 +4802,1244 @@ class DesktopController extends Controller
                 $start_date_week_6 = $request->start_date_week_6;
                 $end_date_week_6 = $request->end_date_week_6;
 
-                $_groupheader = new GroupHeader();
-                $_groupheaders = DB::table($_groupheader->BASETABLE)
-                    ->where('is_active', '=', $_groupheader->STATUS_ACTIVE)
-                    ->get();
-                if (count($_groupheaders) > 0) {
-                    foreach ($_groupheaders as $_groupheader => $groupheader) {
+                $final_borongan = $this->_read_rekap_borongan($start_date_week_1, $end_date_week_1, $start_date_week_2, $end_date_week_2, $start_date_week_3, $end_date_week_3, $start_date_week_4, $end_date_week_4, $start_date_week_5, $end_date_week_5, $start_date_week_6, $end_date_week_6);
 
-                        // $temp = array(
-                        //     "hd" => $_temp_haid_date,
-                        //     "id_employee" => $empl_id,
-                        //     "employee_name" => $empl_name,
-                        //     "gender" => $empl_gender,
-                        //     "pokok" => $_pokok,
-                        //     "haid" => $_haid,
-                        //     "premi" => $_premi,
-                        //     "potongan_bpjs" => $_pot_bpjs,
-                        //     "msit" => $_masuk . ' | ' . $_setengah_hari . ' | ' . $_ijin . ' | ' . $_tidak_masuk,
-                        //     "libur" => $_holiday,
-                        //     "total" => $_tot,
-                        //     "std_harian" => $_std_harian,
-                        //     "std_cuti" => $_std_haid,
-                        //     "rajang" => count($_chop_date_arr),
-                        //     "_rajang" => $_chop_date_arr,
-                        //     "_attendance" => $_atts
-                        // );
+                $fpdf = new Fpdf('L','mm',array(330,210));
+                $fpdf->AddPage();
+                $fpdf->SetFont('Arial', 'B', 12);
+                $fpdf->Cell(0, 0, 'Rekapitulasi Upah Akhir Bulan (Borongan) | PT. NJATA - RUNGKUT');
+                $fpdf->Ln(2);
+                $fpdf->SetFont('Arial', '', 10);
+                $fpdf->Cell(0, 10, 'Periode : ' . $_global_class->getMonthText(explode("-", $start_date_week_1)[1]) . ' - ' . explode("-", $start_date_week_1)[2]);
+                $fpdf->Ln(10);
 
-                        // array_push($_data, $temp);
+                $final_total_week_1 = 0;
+                $final_total_week_2 = 0;
+                $final_total_week_3 = 0;
+                $final_total_week_4 = 0;
+                $final_total_week_5 = 0;
+                $final_total_week_6 = 0;
+                $final_total_haid = 0;
+                $final_total_extra_libur = 0;
+                $final_total_total = 0;
 
+                foreach($final_borongan as $borongan){
+                    $fpdf->SetFont('Arial', 'B', 10);
+                    // SHOW GROUP NAME
+                    $fpdf->Cell(0,7, $borongan['group_name'],1, 0, 'L');
+                    $fpdf->Ln(7);
 
-                        // $target_path = base_path('public/pdftemp/');
-                        // $fname = date("YmdHis");
-                        // $file_name = $fname . '_rekapbulanan.pdf';
-                        // $file_path = $target_path . $file_name;
-                        // $fpdf->Output($file_path, 'F');
+                    // SHOW HEADER EACH GRUOP
+                    $fpdf->Cell(10,7, 'No',1, 0, 'C');
+                    $fpdf->Cell(45,7, 'Nama',1, 0, 'C');
+                    $fpdf->Cell(30,7, 'Minggu 1',1, 0, 'C');
+                    $fpdf->Cell(30,7, 'Minggu 2',1, 0, 'C');
+                    $fpdf->Cell(30,7, 'Minggu 3',1, 0, 'C');
+                    $fpdf->Cell(30,7, 'Minggu 4',1, 0, 'C');
+                    $fpdf->Cell(30,7, 'Minggu 5',1, 0, 'C');
+                    $fpdf->Cell(30,7, 'Minggu 6',1, 0, 'C');
+                    $fpdf->Cell(20,7, 'Cuti Haid',1, 0, 'C');
+                    $fpdf->Cell(20,7, 'Extra Libur',1, 0, 'C');
+                    $fpdf->Cell(35,7, 'Total',1, 0, 'C');
+                    $fpdf->Ln(7);
 
-                        // $feedback = [
-                        //     "message" => $file_name,
-                        //     "status" => $_global_class->STATUS_SUCCESS,
-                        // ];
+                    //SHOW EMPLOYEE DATA EACH GROUP
+                    $number = 1;
+                    $haid = null;
+                    $extra_libur = 0;
+                    $total_each_employee = 0;
+                    $total_column_week_1 = 0;
+                    $total_column_week_2 = 0;
+                    $total_column_week_3 = 0;
+                    $total_column_week_4 = 0;
+                    $total_column_week_5 = 0;
+                    $total_column_week_6 = 0;
+                    $total_column_haid = 0;
+                    $total_column_extra_libur = 0;
+                    $total_column_total = 0;
+                    $total_extra_libur_hari = 0;
 
-                        // return response()->json($feedback);
+                    foreach($borongan['employee_datas'] as $employee){
+                        $fpdf->SetFont('Arial', '', 10);
+                        $employee_name = $employee['employee_fname'] . ' ' . $employee['employee_lname'];
+                        if($employee['employee_fname'] === $employee['employee_lname']){
+                            $employee_name = $employee['employee_fname'];
+                        }
+                        $fpdf->Cell(10,7, $number,1, 0, 'C');
+                        $fpdf->Cell(45,7, $employee_name,1, 0, 'L');
+                        if (array_key_exists('week_1', $employee)){ 
+                            if($employee['week_1']['total_attendance'] !== 0){
+                                $fpdf->Cell(6,7, $employee['week_1']['total_attendance'],'L,B', 0, 'L');
+                                $fpdf->Cell(2,7, '|','B', 0, 'C');
+                                $fpdf->Cell(22,7, $employee['week_1']['total_carton_money'],'R,B', 0, 'R');
+                            } else {
+                                $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                            }
+                            if($haid === null || $haid === "0"){
+                                $haid = $employee['week_1']['total_haid'];
+                                $total_each_employee += $_global_class->removeMoneySeparator($haid);
+                                $total_column_haid += $_global_class->removeMoneySeparator($haid);
+                            }
+                            $extra_libur += $_global_class->removeMoneySeparator($employee['week_1']['total_extra_libur']);
+                            $total_each_employee += $_global_class->removeMoneySeparator($employee['week_1']['total_extra_libur']);
+                            $total_each_employee += $_global_class->removeMoneySeparator($employee['week_1']['total_carton_money']);
+                            $total_column_week_1 += $_global_class->removeMoneySeparator($employee['week_1']['total_carton_money']);
+                            $total_column_extra_libur += $_global_class->removeMoneySeparator($employee['week_1']['total_extra_libur']);
+                            $total_extra_libur_hari += $employee['week_1']['total_extra_libur_hari'];
+                        } else {
+                            $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                        }
+                        if (array_key_exists('week_2', $employee)){ 
+                            if($employee['week_2']['total_attendance'] !== 0){
+                                $fpdf->Cell(6,7, $employee['week_2']['total_attendance'],'L,B', 0, 'L');
+                                $fpdf->Cell(2,7, '|','B', 0, 'C');
+                                $fpdf->Cell(22,7, $employee['week_2']['total_carton_money'],'R,B', 0, 'R');
+                            } else {
+                                $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                            }
+                            if($haid === null || $haid === "0"){
+                                $haid = $employee['week_2']['total_haid'];
+                                $total_each_employee += $_global_class->removeMoneySeparator($haid);
+                                $total_column_haid += $_global_class->removeMoneySeparator($haid);
+                            }
+                            $extra_libur += $_global_class->removeMoneySeparator($employee['week_2']['total_extra_libur']);
+                            $total_each_employee += $_global_class->removeMoneySeparator($employee['week_2']['total_extra_libur']);
+                            $total_each_employee += $_global_class->removeMoneySeparator($employee['week_2']['total_carton_money']);
+                            $total_column_week_2 += $_global_class->removeMoneySeparator($employee['week_2']['total_carton_money']);
+                            $total_column_extra_libur += $_global_class->removeMoneySeparator($employee['week_2']['total_extra_libur']);
+                            $total_extra_libur_hari += $employee['week_2']['total_extra_libur_hari'];
+                        } else {
+                            $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                        }
+                        if (array_key_exists('week_3', $employee)){ 
+                            if($employee['week_3']['total_attendance'] !== 0){
+                                $fpdf->Cell(6,7, $employee['week_3']['total_attendance'],'L,B', 0, 'L');
+                                $fpdf->Cell(2,7, '|','B', 0, 'C');
+                                $fpdf->Cell(22,7, $employee['week_3']['total_carton_money'],'R,B', 0, 'R');
+                            } else {
+                                $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                            }
+                            if($haid === null || $haid === "0"){
+                                $haid = $employee['week_3']['total_haid'];
+                                $total_each_employee += $_global_class->removeMoneySeparator($haid);
+                                $total_column_haid += $_global_class->removeMoneySeparator($haid);
+                            }
+                            $extra_libur += $_global_class->removeMoneySeparator($employee['week_3']['total_extra_libur']);
+                            $total_each_employee += $_global_class->removeMoneySeparator($employee['week_3']['total_extra_libur']);
+                            $total_each_employee += $_global_class->removeMoneySeparator($employee['week_3']['total_carton_money']);
+                            $total_column_week_3 += $_global_class->removeMoneySeparator($employee['week_3']['total_carton_money']);
+                            $total_column_extra_libur += $_global_class->removeMoneySeparator($employee['week_3']['total_extra_libur']);
+                            $total_extra_libur_hari += $employee['week_3']['total_extra_libur_hari'];
+                        } else {
+                            $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                        }
+                        if (array_key_exists('week_4', $employee)){ 
+                            if($employee['week_4']['total_attendance'] !== 0){
+                                $fpdf->Cell(6,7, $employee['week_4']['total_attendance'],'L,B', 0, 'L');
+                                $fpdf->Cell(2,7, '|','B', 0, 'C');
+                                $fpdf->Cell(22,7, $employee['week_4']['total_carton_money'],'R,B', 0, 'R');
+                            } else {
+                                $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                            }
+                            if($haid === null || $haid === "0"){
+                                $haid = $employee['week_4']['total_haid'];
+                                $total_each_employee += $_global_class->removeMoneySeparator($haid);
+                                $total_column_haid += $_global_class->removeMoneySeparator($haid);
+                            }
+                            $extra_libur += $_global_class->removeMoneySeparator($employee['week_4']['total_extra_libur']);
+                            $total_each_employee += $_global_class->removeMoneySeparator($employee['week_4']['total_extra_libur']);
+                            $total_each_employee += $_global_class->removeMoneySeparator($employee['week_4']['total_carton_money']);
+                            $total_column_week_4 += $_global_class->removeMoneySeparator($employee['week_4']['total_carton_money']);
+                            $total_column_extra_libur += $_global_class->removeMoneySeparator($employee['week_4']['total_extra_libur']);
+                            $total_extra_libur_hari += $employee['week_4']['total_extra_libur_hari'];
+                        } else {
+                            $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                        }
+                        if (array_key_exists('week_5', $employee)){ 
+                            if($employee['week_5']['total_attendance'] !== 0){
+                                $fpdf->Cell(6,7, $employee['week_5']['total_attendance'],'L,B', 0, 'L');
+                                $fpdf->Cell(2,7, '|','B', 0, 'C');
+                                $fpdf->Cell(22,7, $employee['week_5']['total_carton_money'],'R,B', 0, 'R');
+                            } else {
+                                $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                            }
+                            if($haid === null || $haid === "0"){
+                                $haid = $employee['week_5']['total_haid'];
+                                $total_each_employee += $_global_class->removeMoneySeparator($haid);
+                                $total_column_haid += $_global_class->removeMoneySeparator($haid);
+                            }
+                            $extra_libur += $_global_class->removeMoneySeparator($employee['week_5']['total_extra_libur']);
+                            $total_each_employee += $_global_class->removeMoneySeparator($employee['week_5']['total_extra_libur']);
+                            $total_each_employee += $_global_class->removeMoneySeparator($employee['week_5']['total_carton_money']);
+                            $total_column_week_5 += $_global_class->removeMoneySeparator($employee['week_5']['total_carton_money']);
+                            $total_column_extra_libur += $_global_class->removeMoneySeparator($employee['week_5']['total_extra_libur']);
+                            $total_extra_libur_hari += $employee['week_5']['total_extra_libur_hari'];
+                        } else {
+                            $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                        }
+                        if (array_key_exists('week_6', $employee)){ 
+                            if($employee['week_6']['total_attendance'] !== 0){
+                                $fpdf->Cell(6,7, $employee['week_6']['total_attendance'],'L,B', 0, 'L');
+                                $fpdf->Cell(2,7, '|','B', 0, 'C');
+                                $fpdf->Cell(22,7, $employee['week_6']['total_carton_money'],'R,B', 0, 'R');
+                            } else {
+                                $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                            }
+                            if($haid === null || $haid === "0"){
+                                $haid = $employee['week_6']['total_haid'];
+                                $total_each_employee += $_global_class->removeMoneySeparator($haid);
+                                $total_column_haid += $_global_class->removeMoneySeparator($haid);
+                            }
+                            $extra_libur += $_global_class->removeMoneySeparator($employee['week_6']['total_extra_libur']);
+                            $total_each_employee += $_global_class->removeMoneySeparator($employee['week_6']['total_extra_libur']);
+                            $total_each_employee += $_global_class->removeMoneySeparator($employee['week_6']['total_carton_money']);
+                            $total_column_week_6 += $_global_class->removeMoneySeparator($employee['week_6']['total_carton_money']);
+                            $total_column_extra_libur += $_global_class->removeMoneySeparator($employee['week_6']['total_extra_libur']);
+                            $total_extra_libur_hari += $employee['week_6']['total_extra_libur_hari'];
+                        } else {
+                            $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                        }
+                        if($haid !== "0"){
+                            $fpdf->Cell(20,7, $haid,1, 0, 'R');
+                        } else {
+                            $fpdf->Cell(20,7, ' ',1, 0, 'R');
+                        }
+
+                        if($total_extra_libur_hari !== 0){
+                            $fpdf->Cell(20,7, $_global_class->addMoneySeparator($extra_libur,0),1, 0, 'R');
+                        } else {
+                            $fpdf->Cell(20,7, ' ',1, 0, 'R');
+                        }
+
+                        if($total_each_employee !== 0){
+                            $fpdf->Cell(35,7, $_global_class->addMoneySeparator($total_each_employee,0),1, 0, 'R');
+                        } else {
+                            $fpdf->Cell(35,7, ' ',1, 0, 'R');
+                        }
+                        
+                        $fpdf->Ln(7);
+                        $number++;
+                        $haid = null;
+                        $extra_libur = 0;
+                        $total_column_total += $total_each_employee;
+                        $total_each_employee = 0;
+                        $total_extra_libur_hari = 0;
                     }
+                    $fpdf->SetFont('Arial', 'B', 10);
+                    $fpdf->Cell(55,7, 'Sub Total',1, 0, 'R');
+                    if($total_column_week_1 !== 0){
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($total_column_week_1,0),1, 0, 'R');
+                    } else {
+                        $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                    }
+                    $final_total_week_1 += $total_column_week_1;
+
+                    if($total_column_week_2 !== 0){
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($total_column_week_2,0),1, 0, 'R');
+                    } else {
+                        $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                    }
+                    $final_total_week_2 += $total_column_week_2;
+
+                    if($total_column_week_3 !== 0){
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($total_column_week_3,0),1, 0, 'R');
+                    } else {
+                        $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                    }
+                    $final_total_week_3 += $total_column_week_3;
+
+                    if($total_column_week_4 !== 0){
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($total_column_week_4,0),1, 0, 'R');
+                    } else {
+                        $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                    }
+                    $final_total_week_4 += $total_column_week_4;
+
+                    if($total_column_week_5 !== 0){
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($total_column_week_5,0),1, 0, 'R');
+                    } else {
+                        $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                    }
+                    $final_total_week_5 += $total_column_week_5;
+                    
+                    if($total_column_week_6 !== 0){
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($total_column_week_6,0),1, 0, 'R');
+                    } else {
+                        $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                    }
+                    $final_total_week_6 += $total_column_week_6;
+
+                    if($total_column_haid !== 0){
+                        $fpdf->Cell(20,7, $_global_class->addMoneySeparator($total_column_haid,0),1, 0, 'R');
+                    } else {
+                        $fpdf->Cell(20,7, ' ',1, 0, 'R');
+                    }
+                    $final_total_haid += $total_column_haid;
+
+                    if($total_column_extra_libur !== 0){
+                        $fpdf->Cell(20,7, $_global_class->addMoneySeparator($total_column_extra_libur,0),1, 0, 'R');
+                    } else {
+                        $fpdf->Cell(20,7, ' ',1, 0, 'R');
+                    }
+                    $final_total_extra_libur += $total_column_extra_libur;
+
+                    if($total_column_total !== 0){
+                        $fpdf->Cell(35,7, $_global_class->addMoneySeparator($total_column_total,0),1, 0, 'R');
+                    } else {
+                        $fpdf->Cell(35,7, ' ',1, 0, 'R');
+                    }
+                    $final_total_total += $total_column_total;
+
+                    $fpdf->Ln(10);
                 }
 
+                $fpdf->SetFont('Arial', 'B', 10);
+
+                $fpdf->Cell(55,7, 'Total',1, 0, 'R');
+                if($final_total_week_1 === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($final_total_week_1, 0),1, 0, 'R');
+                }
+                if($final_total_week_2 === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($final_total_week_2, 0),1, 0, 'R');
+                }
+                if($final_total_week_3 === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($final_total_week_3, 0),1, 0, 'R');
+                }
+                if($final_total_week_4 === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($final_total_week_4, 0),1, 0, 'R');
+                }
+                if($final_total_week_5 === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($final_total_week_5, 0),1, 0, 'R');
+                }
+                if($final_total_week_6 === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($final_total_week_6, 0),1, 0, 'R');
+                }
+                if($final_total_haid === 0){
+                    $fpdf->Cell(20,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(20,7, $_global_class->addMoneySeparator($final_total_haid, 0),1, 0, 'R');
+                }
+                if($final_total_extra_libur === 0){
+                    $fpdf->Cell(20,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(20,7, $_global_class->addMoneySeparator($final_total_extra_libur, 0),1, 0, 'R');
+                }
+                if($final_total_total === 0){
+                    $fpdf->Cell(35,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(35,7, $_global_class->addMoneySeparator($final_total_total, 0),1, 0, 'R');
+                }
+                $fpdf->Ln(7);
+                $number = 1;
+
+                // READ DATA DRIVER
+                $final_driver = $this->_read_rekap_driver($start_date_week_1, $end_date_week_1, $start_date_week_2, $end_date_week_2, $start_date_week_3, $end_date_week_3, $start_date_week_4, $end_date_week_4, $start_date_week_5, $end_date_week_5, $start_date_week_6, $end_date_week_6);
+
+                if($start_date_week_6 !== ""){
+                    $end_date = $end_date_week_6;
+                } else if($start_date_week_5 !== ""){
+                    $end_date = $end_date_week_5;
+                } else if($start_date_week_4 !== ""){
+                    $end_date = $end_date_week_4;
+                } else if($start_date_week_3 !== ""){
+                    $end_date = $end_date_week_3;
+                } else if($start_date_week_2 !== ""){
+                    $end_date = $end_date_week_2;
+                } else {
+                    $end_date = $end_date_week_1;
+                }
+                $final_bulanan = $this->_read_rekap_bulanan($start_date_week_1, $end_date);
+                $final_security = $this->_read_rekap_security($start_date_week_1, $end_date);
+
+                //SHOW DRIVER, BULANAN, AND SECURITY
+                $fpdf->AddPage();
+                $fpdf->SetFont('Arial', 'B', 10);
+                $fpdf->SetFont('Arial', 'B', 12);
+                $fpdf->Cell(0, 0, 'Rekapitulasi Upah Akhir Bulan (SUPIR, BULANAN, SATPAM) | PT. NJATA - RUNGKUT');
+                $fpdf->Ln(2);
+                $fpdf->SetFont('Arial', '', 10);
+                $fpdf->Cell(0, 10, 'Periode : ' . $_global_class->getMonthText(explode("-", $start_date_week_1)[1]) . ' - ' . explode("-", $start_date_week_1)[2]);
+                $fpdf->Ln(10);
+
+                //DRIVER
+                $_driver_total_week_1 = 0;
+                $_driver_total_week_2 = 0;
+                $_driver_total_week_3 = 0;
+                $_driver_total_week_4 = 0;
+                $_driver_total_week_5 = 0;
+                $_driver_total_week_6 = 0;
+                $_driver_total_gaji = 0;
+                $_driver_total_total = 0;
+                // SHOW HEADER
+                $fpdf->Cell(10,7, 'No',1, 0, 'C');
+                $fpdf->Cell(45,7, 'Nama',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Minggu 1',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Minggu 2',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Minggu 3',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Minggu 4',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Minggu 5',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Minggu 6',1, 0, 'C');
+                $fpdf->Cell(40,7, 'Gaji',1, 0, 'C');
+                $fpdf->Cell(35,7, 'Total',1, 0, 'C');
+                $fpdf->Ln(7);
+
+                foreach($final_driver as $driver){
+                    $fpdf->SetFont('Arial', '', 10);
+                    $driver_name = $driver['first_name'] . ' ' . $driver['last_name'];
+                    if($driver['first_name'] === $driver['last_name']){
+                        $driver_name = $driver['first_name'];
+                    }
+                    $fpdf->Cell(10,7, $number,1, 0, 'C');
+                    $fpdf->Cell(45,7, $driver_name,1, 0, 'L');
+                    if (array_key_exists('week_1', $driver['employee_datas'])){
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($driver['employee_datas']['week_1']['total_money'], 0),1, 0, 'R');
+                        $_driver_total_week_1 += $driver['employee_datas']['week_1']['total_money'];
+                    } else {
+                        $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    }
+                    if (array_key_exists('week_2', $driver['employee_datas'])){
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($driver['employee_datas']['week_2']['total_money'], 0),1, 0, 'R');
+                        $_driver_total_week_2 += $driver['employee_datas']['week_2']['total_money'];
+                    } else {
+                        $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    }
+                    if (array_key_exists('week_3', $driver['employee_datas'])){
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($driver['employee_datas']['week_3']['total_money'], 0),1, 0, 'R');
+                        $_driver_total_week_3 += $driver['employee_datas']['week_3']['total_money'];
+                    } else {
+                        $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    }
+                    if (array_key_exists('week_4', $driver['employee_datas'])){
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($driver['employee_datas']['week_4']['total_money'], 0),1, 0, 'R');
+                        $_driver_total_week_4 += $driver['employee_datas']['week_4']['total_money'];
+                    } else {
+                        $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    }
+                    if (array_key_exists('week_5', $driver['employee_datas'])){
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($driver['employee_datas']['week_5']['total_money'], 0),1, 0, 'R');
+                        $_driver_total_week_5 += $driver['employee_datas']['week_5']['total_money'];
+                    } else {
+                        $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    }
+                    if (array_key_exists('week_6', $driver['employee_datas'])){
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($driver['employee_datas']['week_6']['total_money'], 0),1, 0, 'R');
+                        $_driver_total_week_6 += $driver['employee_datas']['week_6']['total_money'];
+                    } else {
+                        $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    }
+                    $fpdf->Cell(40,7, $driver['gaji'],1, 0, 'R');
+                    $fpdf->Cell(35,7, $_global_class->addMoneySeparator($driver['total'], 0),1, 0, 'R');
+                    $fpdf->Ln(7);
+                    
+                    $_driver_total_gaji += $_global_class->removeMoneySeparator($driver['gaji']);
+                    $_driver_total_total += $driver['total'];
+                    $number++;
+                }
+                $fpdf->SetFont('Arial', 'B', 10);
+
+                $fpdf->Cell(55,7, 'Total',1, 0, 'R');
+                if($_driver_total_week_1 === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($_driver_total_week_1, 0),1, 0, 'R');
+                }
+                if($_driver_total_week_2 === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($_driver_total_week_2, 0),1, 0, 'R');
+                }
+                if($_driver_total_week_3 === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($_driver_total_week_3, 0),1, 0, 'R');
+                }
+                if($_driver_total_week_4 === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($_driver_total_week_4, 0),1, 0, 'R');
+                }
+                if($_driver_total_week_5 === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($_driver_total_week_5, 0),1, 0, 'R');
+                }
+                if($_driver_total_week_6 === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($_driver_total_week_6, 0),1, 0, 'R');
+                }
+                if($_driver_total_gaji === 0){
+                    $fpdf->Cell(40,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(40,7, $_global_class->addMoneySeparator($_driver_total_gaji, 0),1, 0, 'R');
+                }
+                if($_driver_total_total === 0){
+                    $fpdf->Cell(35,7, ' ',1, 0, 'R');
+                } else {
+                    $fpdf->Cell(35,7, $_global_class->addMoneySeparator($_driver_total_total, 0),1, 0, 'R');
+                }
+                $fpdf->Ln(10);
+                $number = 1;
+
+                // BULANAN
+                $_bulanan_total_gaji = 0;
+                $_bulanan_total_tunjangan = 0;
+                $_bulanan_total_lembur = 0;
+                $_bulanan_total_uang_makan = 0;
+                $_bulanan_total_total = 0;
+                // SHOW HEADER
+                $fpdf->Cell(10,7, 'No',1, 0, 'C');
+                $fpdf->Cell(45,7, 'Nama',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Gaji',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Tunjangan',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Lembur',1, 0, 'C');
+                $fpdf->Cell(30,7, 'U. Makan',1, 0, 'C');
+                $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                $fpdf->Cell(40,7, ' ',1, 0, 'C');
+                $fpdf->Cell(35,7, 'Total',1, 0, 'C');
+                $fpdf->Ln(7);
+
+                foreach($final_bulanan as $bulanan){
+                    $fpdf->SetFont('Arial', '', 10);
+                    $bulanan_name = $bulanan['first_name'] . ' ' . $bulanan['last_name'];
+                    if($bulanan['first_name'] === $bulanan['last_name']){
+                        $bulanan_name = $bulanan['first_name'];
+                    }
+                    $fpdf->Cell(10,7, $number,1, 0, 'C');
+                    $fpdf->Cell(45,7, $bulanan_name,1, 0, 'L');
+                    $fpdf->Cell(30,7, $bulanan['gaji'],1, 0, 'R');
+                    $fpdf->Cell(30,7, $bulanan['tunjangan'],1, 0, 'R');
+                    $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    $fpdf->Cell(40,7, ' ',1, 0, 'C');
+                    $fpdf->Cell(35,7, $_global_class->addMoneySeparator($bulanan['total'], 0),1, 0, 'R');
+                    $fpdf->Ln(7);
+                    $number++;
+                    $_bulanan_total_gaji += $_global_class->removeMoneySeparator($bulanan['gaji']);
+                    $_bulanan_total_tunjangan += $_global_class->removeMoneySeparator($bulanan['tunjangan']);
+                    $_bulanan_total_total += $bulanan['total'];
+                }
+                $fpdf->SetFont('Arial', 'B', 10);
+
+                $fpdf->Cell(55,7, 'Total',1, 0, 'R');
+                $fpdf->Cell(30,7, $_global_class->addMoneySeparator($_bulanan_total_gaji, 0),1, 0, 'R');
+                $fpdf->Cell(30,7, $_global_class->addMoneySeparator($_bulanan_total_tunjangan, 0),1, 0, 'R');
+                $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                $fpdf->Cell(40,7, ' ',1, 0, 'R');
+                $fpdf->Cell(35,7, $_global_class->addMoneySeparator($_bulanan_total_total, 0),1, 0, 'R');
+                $fpdf->Ln(10);
+                $number = 1;
+
+                // SECURITY
+                $_security_total_gaji = 0;
+                $_security_total_tunjangan = 0;
+                $_security_total_extra_libur = 0;
+                $_security_total_total = 0;
+                // SHOW HEADER
+                $fpdf->Cell(10,7, 'No',1, 0, 'C');
+                $fpdf->Cell(45,7, 'Nama',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Gaji',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Tunjangan',1, 0, 'C');
+                $fpdf->Cell(30,7, 'Extra Libur',1, 0, 'C');
+                $fpdf->Cell(30,7, '',1, 0, 'C');
+                $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                $fpdf->Cell(40,7, ' ',1, 0, 'C');
+                $fpdf->Cell(35,7, 'Total',1, 0, 'C');
+                $fpdf->Ln(7);
+
+                foreach($final_security as $security){
+                    $fpdf->SetFont('Arial', '', 10);
+                    $security_name = $security['first_name'] . ' ' . $security['last_name'];
+                    if($security['first_name'] === $security['last_name']){
+                        $security_name = $security['first_name'];
+                    }
+                    $fpdf->Cell(10,7, $number,1, 0, 'C');
+                    $fpdf->Cell(45,7, $security_name,1, 0, 'L');
+                    $fpdf->Cell(30,7, $security['gaji'],1, 0, 'R');
+                    $fpdf->Cell(30,7, $security['tunjangan'],1, 0, 'R');
+                    if($security['extra_libur_money'] === 0){
+                        $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                    } else {
+                        $fpdf->Cell(30,7, $_global_class->addMoneySeparator($security['extra_libur_money'], 0),1, 0, 'R');
+                    }
+                    $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    $fpdf->Cell(30,7, ' ',1, 0, 'C');
+                    $fpdf->Cell(40,7, ' ',1, 0, 'C');
+                    $fpdf->Cell(35,7, $_global_class->addMoneySeparator($security['total'], 0),1, 0, 'R');
+                    $fpdf->Ln(7);
+                    $number++;
+                    $_security_total_gaji += $_global_class->removeMoneySeparator($security['gaji']);
+                    $_security_total_tunjangan += $_global_class->removeMoneySeparator($security['tunjangan']);
+                    $_security_total_extra_libur += $security['extra_libur_money'];
+                    $_security_total_total += $security['total'];
+                }
+                $fpdf->SetFont('Arial', 'B', 10);
+
+                $fpdf->Cell(55,7, 'Total',1, 0, 'R');
+                if($_security_total_gaji === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');    
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($_security_total_gaji, 0),1, 0, 'R');
+                }
+                if($_security_total_tunjangan === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');    
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($_security_total_tunjangan, 0),1, 0, 'R');
+                }
+                if($_security_total_extra_libur === 0){
+                    $fpdf->Cell(30,7, ' ',1, 0, 'R');    
+                } else {
+                    $fpdf->Cell(30,7, $_global_class->addMoneySeparator($_security_total_extra_libur, 0),1, 0, 'R');
+                }
+                $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                $fpdf->Cell(30,7, ' ',1, 0, 'R');
+                $fpdf->Cell(40,7, ' ',1, 0, 'R');
+                if($_security_total_total === 0){
+                    $fpdf->Cell(35,7, ' ',1, 0, 'R');    
+                } else {
+                    $fpdf->Cell(35,7, $_global_class->addMoneySeparator($_security_total_total, 0),1, 0, 'R');
+                }
+                $fpdf->Ln(10);
+                $number = 1;
+
+
+                $target_path = base_path('public/pdf/');
+                $fname = date("YmdHis");
+                $file_name = $fname . '_rekap_akhir_bulan_borongan_supir_bulanan_satpam.pdf';
+                $file_path = $target_path . $file_name;
+                $fpdf->Output($file_path, 'F');
+
                 $feedback = [
-                    "message" => $_groupheaders,
+                    "message" => $file_name,
                     "status" => $_global_class->STATUS_SUCCESS,
                 ];
-    
-                return response()->json($feedback);
 
+                return response()->json($feedback);
             }
         }
 
+    }
+
+    public function _read_rekap_borongan($start_date_week_1, $end_date_week_1, $start_date_week_2, $end_date_week_2, $start_date_week_3, $end_date_week_3, $start_date_week_4, $end_date_week_4, $start_date_week_5, $end_date_week_5, $start_date_week_6, $end_date_week_6){
+        $_global_class = new GlobalClass();
+        $_year = date("Y");
+        $total_weeks = 0;
+        $_total_attendace = 0;
+        $_total_carton = 0;
+        $_total_extra_libur_hari = 0;
+        $_total_haid = 0;
+        $_total_carton_by_date_by_group = 0;
+        $_total_extra_carton = 0;
+        $_final_data = array();
+        $_standard_harian = 0;
+        $_standard_haid = 0;
+        $_standard_borongan = 0;
+
+        //READ GLOBAL STANDARD
+        $___standard = new Standard();
+        $_standards = DB::table($___standard->BASETABLE)
+            ->where('year', '=', $_year)
+            ->where('is_active', '=', $___standard->STATUS_ACTIVE)
+            ->get();
+        if (count($_standards) > 0) {
+            foreach ($_standards as $_standard => $standard) {
+                if ($standard->name === "upah_harian"){
+                    $_standard_harian = $_global_class->removeMoneySeparator($standard->nominal);
+                }
+                if ($standard->name === "cuti_haid"){
+                    $_standard_haid = $_global_class->removeMoneySeparator($standard->nominal);
+                }
+                if ($standard->name === "upah_borongan"){
+                    $_standard_borongan = $_global_class->removeMoneySeparator($standard->nominal);
+                }
+            }
+        }
+
+        //READ GROUP HEADER
+        $__groupheader = new GroupHeader();
+        $_groupheaders = DB::table($__groupheader->BASETABLE)
+            ->where('is_active', '=', $__groupheader->STATUS_ACTIVE)
+            ->get();
+        if (count($_groupheaders) > 0) {
+            foreach ($_groupheaders as $_groupheader => $groupheader) {
+                $arr_1 = [
+                    "group_id" => $groupheader->id,
+                    "group_name" => $groupheader->name,
+                ];
+
+                // ->select('sales_detail.id as sd_id', 'sales_detail.id_product as sd_id_product', 'sales_detail.quantity as sd_quantity', 'sales_detail.price as sd_price', 'sales_detail.total as sd_total', 'product.name as product_name')
+
+                // READ EMPLOYEE EACH GROUP HEADER
+                $___groupdetail = new GroupDetail();
+                $_data_2 = DB::table($___groupdetail->BASETABLE)
+                    ->join('employee', 'employee.id', '=', $___groupdetail->BASETABLE.'.id_employee')
+                    ->where($___groupdetail->BASETABLE.'.id_group', '=', $groupheader->id)
+                    ->where($___groupdetail->BASETABLE.'.is_active', '=', $___groupdetail->STATUS_ACTIVE)
+                    ->where('employee.is_active', '=', $___groupdetail->STATUS_ACTIVE)
+                    ->select('employee.id as id', 'employee.first_name', 'employee.last_name', $___groupdetail->BASETABLE.'.id_group as id_group')
+                    ->get();
+                if (count($_data_2) > 0) {
+                    $arr_2 = array();
+                    foreach ($_data_2 as $_data2 => $data2) {
+                        $_arr_2 = [
+                            "employee_id" => $data2->id,
+                            "employee_fname" => $data2->first_name,
+                            "employee_lname" => $data2->last_name,
+                        ];
+
+                        if($start_date_week_1 !== ""){
+                            if($start_date_week_2 !== ""){
+                                if($start_date_week_3 !== ""){
+                                    if($start_date_week_4 !== ""){
+                                        if($start_date_week_5 !== ""){
+                                            if($start_date_week_6 !== ""){
+                                                $total_weeks = 6;
+                                            } else {
+                                                $total_weeks = 5;
+                                            }
+                                        } else {
+                                            $total_weeks = 4;
+                                        }
+                                    } else {
+                                        $total_weeks = 3;
+                                    }
+                                } else {
+                                    $total_weeks = 2;
+                                }
+                            } else {
+                                $total_weeks = 1;
+                            }
+                        } else {
+                            $total_weeks = 0;
+                        }
+
+                        for($i=1; $i<$total_weeks+1; $i++){
+                            if ($i === 1) { $__start_date = $start_date_week_1; $__end_date = $end_date_week_1; }
+                            if ($i === 2) { $__start_date = $start_date_week_2; $__end_date = $end_date_week_2; }
+                            if ($i === 3) { $__start_date = $start_date_week_3; $__end_date = $end_date_week_3; }
+                            if ($i === 4) { $__start_date = $start_date_week_4; $__end_date = $end_date_week_4; }
+                            if ($i === 5) { $__start_date = $start_date_week_5; $__end_date = $end_date_week_5; }
+                            if ($i === 6) { $__start_date = $start_date_week_6; $__end_date = $end_date_week_6; }
+                            $___attendances = new Attendance();
+                            $_attendances = DB::table($___attendances->BASETABLE)
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', explode('-', $__start_date)[1])
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', explode('-', $__end_date)[1])
+                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', explode('-', $__start_date)[2])
+                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', explode('-', $__end_date)[2])
+                                ->where('id_employee', '=', $data2->id)
+                                ->where('is_active', '=', $___attendances->STATUS_ACTIVE)
+                                ->get();
+                            if (count($_attendances) > 0) {
+                                $arr_3 = array();
+                                foreach ($_attendances as $_attendance => $attendance) {
+                                    
+                                    // CEK  IF IN BETWEEN DATE
+                                    $attendance_date = $attendance->date;
+                                    $_attendance_date = date('Y-m-d', strtotime($attendance_date));
+
+                                    $_attendance_start = date('Y-m-d', strtotime($__start_date));
+                                    $_attendance_end = date('Y-m-d', strtotime($__end_date));
+
+                                    if (($_attendance_date >= $_attendance_start) && ($_attendance_date <= $_attendance_end)) {
+                                        $__extra_carton = 0;
+                                        $_arr_3 = [
+                                            "attendance_id" => $attendance->id,
+                                            "attendance_id_employee" => $attendance->id_employee,
+                                            "attendance_date" => $attendance->date,
+                                            "attendance_status" => $attendance->status,
+                                            "attendance_carton" => $attendance->carton,
+                                            "extra_carton" => $this->_calculate_extra_carton_each_week($data2->id_group, $attendance->date),
+                                        ];
+                                        array_push($arr_3, $_arr_3);
+                                        $__extra_carton = $this->_calculate_extra_carton_each_week($data2->id_group, $attendance->date);
+                                        
+                                        if($attendance->status === "1"){
+                                            $_total_attendace++;
+                                            $_total_carton += $__extra_carton;
+                                        } else if($attendance->status === "2"){
+                                            $_total_attendace += 0.5;
+                                        } else if($attendance->status === "3" || $attendance->status === "5"){
+                                            $_total_extra_libur_hari += 1;
+                                        }
+                                        $_total_carton += $attendance->carton;
+
+                                        // $_total_carton_by_date_by_group = $this->_calculate_total_carton_by_date_by_group($id_group, $date);
+                                    }
+
+                                    $___haid = new Haid();
+                                    $_haids = DB::table($___haid->BASETABLE)
+                                        ->where('id_employee', '=', $data2->id)
+                                        ->where('date', '=', $attendance_date)
+                                        ->where('is_active', '=', $___haid->STATUS_ACTIVE)
+                                        ->first();
+                                    if (!empty($_haids)) {
+                                        $_total_haid += $_global_class->removeMoneySeparator($_standard_haid);
+                                    }
+
+                                }
+
+                                // COUNT EXTRA CARTON IN ONE WEEK FOR EACH EMPLOYEE
+                                // $res = $this->_calculate_extra_carton_each_week($start_date, $end_date, $id_group, $id_employee);
+
+                                // GET TOTAL CARTON ON ONE DAY
+
+                                $arr_4 = [
+                                    "total_attendance" => $_total_attendace,
+                                    "total_carton" => $_total_carton,
+                                    "total_extra_libur_hari" => $_total_extra_libur_hari,
+                                    "total_extra_libur" => $_global_class->addMoneySeparator($_total_extra_libur_hari * $_standard_harian, 0),
+                                    "total_haid" => $_global_class->addMoneySeparator($_total_haid, 0),
+                                    "total_extra_carton" => $_total_extra_carton,
+                                    "total_carton_money" => $_global_class->addMoneySeparator($_total_carton * $_standard_borongan, 0),
+                                ];
+                                $_arr_2["week_{$i}"] = $arr_4;
+                                $_arr_2["detail_week_{$i}"] = $arr_3;
+                                $_total_attendace = 0;
+                                $_total_carton = 0;
+                                $_total_extra_libur_hari = 0;
+                                $_total_haid = 0;
+                                $_total_extra_carton = 0;
+                            }
+                        }
+                        array_push($arr_2, $_arr_2);
+                    }
+                    $arr_1["employee_datas"] = $arr_2;
+                    $arr_1["total_weeks"] = $total_weeks;
+                }
+
+                array_push($_final_data, $arr_1);
+            }
+        }
+
+        return $_final_data;
+    }
+
+    public function _read_rekap_driver($start_date_week_1, $end_date_week_1, $start_date_week_2, $end_date_week_2, $start_date_week_3, $end_date_week_3, $start_date_week_4, $end_date_week_4, $start_date_week_5, $end_date_week_5, $start_date_week_6, $end_date_week_6){
+        $_global_class = new GlobalClass();
+        $_year = date("Y");
+        $_final_data = array();
+        $total_weeks = 0;
+        $_total_attendace = 0;
+        $_total_money = 0;
+        //READ EMPLOYEE
+        $__employee = new Employee();
+        $_employees = DB::table($__employee->BASETABLE)
+            ->where('status', '=', $__employee->STATUS_SUPIR)
+            ->where('is_active', '=', $__employee->STATUS_ACTIVE)
+            ->get();
+        if (count($_employees) > 0) {
+            foreach ($_employees as $_employee => $employee) {
+                $employee_id = $employee->id;
+                $employee_tunjangan = $employee->tunjangan;
+                $employee_gaji = $employee->premi;
+                if($start_date_week_1 !== ""){
+                    if($start_date_week_2 !== ""){
+                        if($start_date_week_3 !== ""){
+                            if($start_date_week_4 !== ""){
+                                if($start_date_week_5 !== ""){
+                                    if($start_date_week_6 !== ""){
+                                        $total_weeks = 6;
+                                    } else {
+                                        $total_weeks = 5;
+                                    }
+                                } else {
+                                    $total_weeks = 4;
+                                }
+                            } else {
+                                $total_weeks = 3;
+                            }
+                        } else {
+                            $total_weeks = 2;
+                        }
+                    } else {
+                        $total_weeks = 1;
+                    }
+                } else {
+                    $total_weeks = 0;
+                }
+                $_arr_2 = array();
+                for($i=1; $i<$total_weeks+1; $i++){
+                    if ($i === 1) { $__start_date = $start_date_week_1; $__end_date = $end_date_week_1; }
+                    if ($i === 2) { $__start_date = $start_date_week_2; $__end_date = $end_date_week_2; }
+                    if ($i === 3) { $__start_date = $start_date_week_3; $__end_date = $end_date_week_3; }
+                    if ($i === 4) { $__start_date = $start_date_week_4; $__end_date = $end_date_week_4; }
+                    if ($i === 5) { $__start_date = $start_date_week_5; $__end_date = $end_date_week_5; }
+                    if ($i === 6) { $__start_date = $start_date_week_6; $__end_date = $end_date_week_6; }
+                    
+                    $___attendances = new Attendance();
+                    $_attendances = DB::table($___attendances->BASETABLE)
+                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', explode('-', $__start_date)[1])
+                        ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', explode('-', $__end_date)[1])
+                        ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', explode('-', $__start_date)[2])
+                        ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', explode('-', $__end_date)[2])
+                        ->where('id_employee', '=', $employee_id)
+                        ->where('is_active', '=', $___attendances->STATUS_ACTIVE)
+                        ->get();
+                    if (count($_attendances) > 0) {
+                        $arr_3 = array();
+                        
+                        foreach ($_attendances as $_attendance => $attendance) {
+                            
+                            // CEK  IF IN BETWEEN DATE
+                            $attendance_date = $attendance->date;
+                            $_attendance_date = date('Y-m-d', strtotime($attendance_date));
+
+                            $_attendance_start = date('Y-m-d', strtotime($__start_date));
+                            $_attendance_end = date('Y-m-d', strtotime($__end_date));
+
+                            if (($_attendance_date >= $_attendance_start) && ($_attendance_date <= $_attendance_end)) {
+                                if($attendance->status === "1"){
+                                    $_total_attendace++;
+                                }
+                            }
+                        }
+                        $arr_4 = [
+                            "total_attendance" => $_total_attendace,
+                            "total_money" => $_total_attendace * $_global_class->removeMoneySeparator($employee_tunjangan),
+                        ];
+                        $_arr_2["week_{$i}"] = $arr_4;
+                        $_total_money += $_total_attendace * $_global_class->removeMoneySeparator($employee_tunjangan);
+                    }
+                    $_total_attendace = 0;
+                }
+
+                $_total_money += $_global_class->removeMoneySeparator($employee->premi);
+
+                $arr_2 = [
+                    "id" => $employee->id,
+                    "first_name" => $employee->first_name,
+                    "last_name" => $employee->last_name,
+                    "gaji" => $employee->premi,
+                    "total" => $_total_money,
+                    "employee_datas" => $_arr_2,
+                ];
+            }
+            array_push($_final_data, $arr_2);
+        }
+
+        return $_final_data;
+    }
+
+    public function _read_rekap_bulanan($start_date, $end_date){
+        $_global_class = new GlobalClass();
+        $_final_data = array();
+        $_total_money = 0;
+
+        //READ EMPLOYEE
+        $__employee = new Employee();
+        $_employees = DB::table($__employee->BASETABLE)
+            ->where('status', '=', $__employee->STATUS_BULANAN)
+            ->where('is_active', '=', $__employee->STATUS_ACTIVE)
+            ->get();
+        if (count($_employees) > 0) {
+            foreach ($_employees as $_employee => $employee) {
+                $_total_money = $_global_class->removeMoneySeparator($employee->premi) + $_global_class->removeMoneySeparator($employee->tunjangan);
+                $arr_2 = [
+                    "id" => $employee->id,
+                    "first_name" => $employee->first_name,
+                    "last_name" => $employee->last_name,
+                    "gaji" => $employee->premi,
+                    "tunjangan" => $employee->tunjangan,
+                    "total" => $_total_money,
+                ];
+                array_push($_final_data, $arr_2);
+            }
+        }
+        return $_final_data;
+    }
+    
+    public function _read_rekap_security($start_date, $end_date){
+        $_global_class = new GlobalClass();
+        $_final_data = array();
+        $_total_money = 0;
+        $_total_extra_libur = 0;
+        $_year = date("Y");
+        $_standard_extra_libur = 0;
+        $_extra_libur_money = 0;
+
+        //READ GLOBAL STANDARD
+        $___standard = new Standard();
+        $_standards = DB::table($___standard->BASETABLE)
+            ->where('year', '=', $_year)
+            ->where('is_active', '=', $___standard->STATUS_ACTIVE)
+            ->get();
+        if (count($_standards) > 0) {
+            foreach ($_standards as $_standard => $standard) {
+                if ($standard->name === "libur_jaga_satpam"){
+                    $_standard_extra_libur = $_global_class->removeMoneySeparator($standard->nominal);
+                }
+            }
+        }
+
+        //READ EMPLOYEE
+        $__employee = new Employee();
+        $_employees = DB::table($__employee->BASETABLE)
+            ->where('status', '=', $__employee->STATUS_SATPAM)
+            ->where('is_active', '=', $__employee->STATUS_ACTIVE)
+            ->get();
+        if (count($_employees) > 0) {
+            foreach ($_employees as $_employee => $employee) {
+                $___attendances = new LiburSatpam();
+                $_attendances = DB::table($___attendances->BASETABLE)
+                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', explode('-', $start_date)[1])
+                    ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', explode('-', $end_date)[1])
+                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', explode('-', $start_date)[2])
+                    ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', explode('-', $end_date)[2])
+                    ->where('id_employee', '=', $employee->id)
+                    ->where('is_active', '=', $___attendances->STATUS_ACTIVE)
+                    ->get();
+                if (count($_attendances) > 0) {
+                    foreach ($_attendances as $_attendance => $attendance) {
+                        
+                        // CEK  IF IN BETWEEN DATE
+                        $attendance_date = $attendance->date;
+                        $_attendance_date = date('Y-m-d', strtotime($attendance_date));
+
+                        $_attendance_start = date('Y-m-d', strtotime($start_date));
+                        $_attendance_end = date('Y-m-d', strtotime($end_date));
+
+                        if (($_attendance_date >= $_attendance_start) && ($_attendance_date <= $_attendance_end)) {
+                            $_total_extra_libur++;
+                            $_total_money += $_standard_extra_libur;
+                            $_extra_libur_money += $_standard_extra_libur;
+                        }
+                    }
+                }
+                $_total_money += $_global_class->removeMoneySeparator($employee->premi) + $_global_class->removeMoneySeparator($employee->tunjangan);
+                $arr_2 = [
+                    "id" => $employee->id,
+                    "first_name" => $employee->first_name,
+                    "last_name" => $employee->last_name,
+                    "gaji" => $employee->premi,
+                    "tunjangan" => $employee->tunjangan,
+                    "total" => $_total_money,
+                    "extra_libur" => $_total_extra_libur,
+                    "extra_libur_money" => $_extra_libur_money,
+                ];
+                array_push($_final_data, $arr_2);
+
+                $_total_extra_libur = 0;
+                $_total_money = 0;
+                $_extra_libur_money = 0;
+            }
+        }
+        return $_final_data;
+    }
+
+    public function _calculate_total_carton_by_date_by_group($id_group, $date){
+        $___cartons = new Carton();
+        $_carton = DB::table($___cartons->BASETABLE)
+            ->where('id_group', '=', $id_group)
+            ->where('date', '=', $date)
+            ->where('is_active', '=', $___cartons->STATUS_ACTIVE)
+            ->first();
+        if (!empty($_carton)) {
+            return $_carton->carton;
+        }
+        return "0";
+    }
+
+    // public function _calculate_extra_carton_each_week($start_date, $end_date, $id_group, $id_employee, $date){
+    public function _calculate_extra_carton_each_week($id_group, $date){
+        $_global_class = new GlobalClass();
+
+        // $start_date = "01-07-2019";
+        // $end_date = "06-07-2019";
+        // $id_group = "GRPH20190121215024";
+        //SUBSTRING TO FIND DATE
+        // $_date = int(explode("-", $start_date)[0]);
+        $_data = array();
+        $_extra_carton = 0;
+        
+        //COUNT PEOPLE THAT ABSENCE IN EACH DAY
+        $___cartons = new Carton();
+        $_cartons = DB::table($___cartons->BASETABLE)
+            ->where('date', '=', $date)
+            ->where('id_group', '=', $id_group)
+            ->where('is_active', '=', $___cartons->STATUS_ACTIVE)
+            ->get();
+        if (count($_cartons) > 0) {
+            foreach ($_cartons as $_carton => $carton) {
+                $_total_employee_absence = 0; // total employee yang masuk pada satu hari
+                $_total_carton_employee = 0; // total karton dari seluruh employee yang masuk
+
+                $__data = [
+                    "id_group" => $carton->id_group,
+                    "carton" => $carton->carton,
+                    "date" => $carton->date,
+                ];
+
+                $__carton = $carton->carton;
+                $__date = $carton->date;
+
+
+                $___groupdetail = new GroupDetail();
+                $___attendances = new Attendance();
+                $_data_2 = DB::table($___attendances->BASETABLE)
+                    ->join($___groupdetail->BASETABLE, $___groupdetail->BASETABLE.'.id_employee', '=', $___attendances->BASETABLE.'.id_employee')
+                    ->where($___groupdetail->BASETABLE.'.id_group', '=', $id_group)
+                    ->where($___attendances->BASETABLE.'.date', '=', $__date)
+                    ->where($___groupdetail->BASETABLE.'.is_active', '=', $___groupdetail->STATUS_ACTIVE)
+                    ->where($___attendances->BASETABLE.'.is_active', '=', $___attendances->STATUS_ACTIVE)
+                    ->get();
+                if (count($_data_2) > 0) {
+                    $_sum_carton = 0;
+                    $_sum_attendance = 0;
+                    $temp = array();
+                    foreach ($_data_2 as $_data2 => $data2) {
+                        $_sum_carton += $data2->carton;
+                        if($data2->status === "1" || $data2->status === "2"){
+                            $_sum_attendance++;
+                        }
+                    }
+                    $__data["sum_carton"] = $_sum_carton;
+                    $__data["sum_attendance"] = $_sum_attendance;
+
+                    if((int)$carton->carton > (int)$_sum_carton){
+                        $_extra_carton = ((int)$carton->carton - (int)$_sum_carton) / $_sum_attendance;
+                        return $_extra_carton;
+                    }
+                    $__data["extra_carton"] = $_extra_carton;
+                }
+
+                    
+                array_push($_data, $__data);
+                $_extra_carton = 0;
+            }
+        }
+
+        return $_extra_carton;
+
+
+
+        // $___cartons = new Carton();
+        // $_cartons = DB::table($___cartons->BASETABLE)
+        //     ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', explode('-', $start_date)[1])
+        //     ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', explode('-', $end_date)[1])
+        //     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', explode('-', $start_date)[2])
+        //     ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', explode('-', $end_date)[2])
+        //     ->where('id_group', '=', $id_group)
+        //     ->where('is_active', '=', $___cartons->STATUS_ACTIVE)
+        //     ->get();
+        // if (count($_cartons) > 0) {
+        //     $arr_3 = array();
+        //     foreach ($_cartons as $_carton => $carton) {
+        //         $_total_employee_absence = 0; // total employee yang masuk pada satu hari
+        //         $_total_carton_employee = 0; // total karton dari seluruh employee yang masuk
+        //         $_extra_carton = 0;
+        //         // CEK  IF IN BETWEEN DATE
+        //         $carton_date = $carton->date;
+        //         $_carton_date = date('Y-m-d', strtotime($carton_date));
+
+        //         $_carton_start = date('Y-m-d', strtotime($start_date));
+        //         $_carton_end = date('Y-m-d', strtotime($end_date));
+
+        //         if (($_carton_date >= $_carton_start) && ($_carton_date <= $_carton_end)) {
+        //             $__data = [
+        //                 "id_group" => $carton->id_group,
+        //                 "carton" => $carton->carton,
+        //                 "date" => $carton->date,
+        //             ];
+
+        //             $__carton = $carton->carton;
+        //             $__date = $carton->date;
+
+
+        //             $___groupdetail = new GroupDetail();
+        //             $___attendances = new Attendance();
+        //             $_data_2 = DB::table($___attendances->BASETABLE)
+        //                 ->join($___groupdetail->BASETABLE, $___groupdetail->BASETABLE.'.id_employee', '=', $___attendances->BASETABLE.'.id_employee')
+        //                 ->where($___groupdetail->BASETABLE.'.id_group', '=', $id_group)
+        //                 ->where($___attendances->BASETABLE.'.date', '=', $__date)
+        //                 ->where($___groupdetail->BASETABLE.'.is_active', '=', $___groupdetail->STATUS_ACTIVE)
+        //                 ->where($___attendances->BASETABLE.'.is_active', '=', $___attendances->STATUS_ACTIVE)
+        //                 ->get();
+        //             if (count($_data_2) > 0) {
+        //                 $_sum_carton = 0;
+        //                 $_sum_attendance = 0;
+        //                 $temp = array();
+        //                 foreach ($_data_2 as $_data2 => $data2) {
+        //                     $_sum_carton += $data2->carton;
+        //                     if($data2->status === "1" || $data2->status === "2"){
+        //                         $_sum_attendance++;
+        //                     }
+        //                 }
+        //                 $__data["sum_carton"] = $_sum_carton;
+        //                 $__data["sum_attendance"] = $_sum_attendance;
+
+        //                 if((int)$carton->carton > (int)$_sum_carton){
+        //                     $_extra_carton = ((int)$carton->carton - (int)$_sum_carton) / $_sum_attendance;
+        //                 }
+        //                 $__data["extra_carton"] = $_extra_carton;
+        //             }
+
+                        
+        //             array_push($_data, $__data);
+
+                    //READ DATA ON ATTENDANCE EACH DAY EACH GROUP
+                    // $___groupdetail = new GroupDetail();
+                    // $_groupdetails = DB::table($___groupdetail->BASETABLE)
+                    //     ->where('id_group', '=', $id_group)
+                    //     ->where('is_active', '=', $___groupdetail->STATUS_ACTIVE)
+                    //     ->get();
+                    // if (count($_groupdetails) > 0) {
+                    //     $arr_2 = array();
+                    //     foreach ($_groupdetails as $_groupdetail => $groupdetail) {
+                    //         // CHECK ATTENDANCE EACH EMPLOYEE BY DATE
+                    //         $___attendances = new Attendance();
+                    //         $_attendances = DB::table($___attendances->BASETABLE)
+                    //             ->where('id_employee', '=', $groupdetail->id_employee)
+                    //             ->where('date', '=', $__date)
+                    //             ->where('is_active', '=', $___attendances->STATUS_ACTIVE)
+                    //             ->first();
+                    //         if (!empty($_attendances)) {
+                    //             // return $_attendances->carton;
+                    //             $__data = [
+                    //                 "id_group" => $carton->id_group,
+                    //                 "carton" => $carton->carton,
+                    //                 "date" => $carton->date,
+                    //                 "status" => $_attendances->status,
+                    //                 "att_carton" => $_attendances->carton,
+                    //             ];
+                    //             array_push($_data, $__data);
+                    //         }
+
+                    //     }
+                    // }
+                    
+        //         }
+        //         $_extra_carton = 0;
+        //     }
+        // }
+
+
+        //COUNT EXTRA CARTON EACH DAY
+
+
+        //cek masuk apa ndak tiap hari nya dalam 1 kelompok
+
+        // return $_data;
     }
 
     public function accountancy($STATUS, $PART, $ID_ACTIVITY, $DATE, $NOMINAL){
