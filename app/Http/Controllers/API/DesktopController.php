@@ -2663,6 +2663,24 @@ class DesktopController extends Controller
                 ];
             }
 
+            if (strtolower($table) === "employee_image_data") {
+                $_table = new Employee();
+                $_field = $request->field;
+                $_name = $request->name;
+                if($_field === "ktp"){
+                    $data += ["image_ktp" => $_name];
+                }
+                if($_field === "kk"){
+                    $data += ["image_kk" => $_name];
+                }
+                if($_field === "bpjs_ketenagakerjaan"){
+                    $data += ["image_bpjs_ketenagakerjaan" => $_name];
+                }
+                if($_field === "bpjs_kesehatan"){
+                    $data += ["image_bpjs_kesehatan" => $_name];
+                }
+            }
+
             if (strtolower($table) === "employee") {
                 $_table = new Employee();
                 $fields = [
