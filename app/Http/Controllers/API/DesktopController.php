@@ -1960,6 +1960,7 @@ class DesktopController extends Controller
                 $_holiday_arr = [];
                 $_chop = 0;
                 $_chop_arr = [];
+                $_standard_premi = 0;
                 $_start_date = explode('-', $start_date);
                 $_end_date = explode('-', $end_date);
                 $_conv_start_date = date('Y-m-d', strtotime($start_date));
@@ -2081,6 +2082,7 @@ class DesktopController extends Controller
                     if (count($_employees) > 0) {
                         foreach ($_employees as $_employee => $employee) {
                             $temp_arr_attendance = [];
+                            $_standard_premi = $employee->premi;
                             for ($i=0; $i<count($_date); $i++){
                                 // => GET ALL ATTENDANCE BY DATE
                                 $_temp_date = explode("-", $_date[$i])[2] . '-' . explode("-", $_date[$i])[1] . '-' . explode("-", $_date[$i])[0];
@@ -2105,7 +2107,14 @@ class DesktopController extends Controller
                                         }
                                         if ($employee->status === $_stat_harian_bawah){
                                             if (in_array($_date[$i], $_chop_arr)){
-                                                $_premi += $_global_class->removeMoneySeparator($employee->premi);
+                                                $cnt = 0;
+                                                for ($j = 0; $j < count($_chop_arr); $j++) {
+                                                    if ($_chop_arr[$j] == $_date[$i]) {
+                                                        $cnt++;
+                                                    }
+                                                }
+
+                                                $_premi += $_global_class->removeMoneySeparator($employee->premi) * $cnt;
                                             }
                                         }
                                     }
@@ -2151,12 +2160,19 @@ class DesktopController extends Controller
                                 } else {
                                     if ($_global_class->checkDifferenceBetweenTwoDate($employee->start_date, date("d-m-Y")) >= 12){
                                         $_pokok += $_std_harian;
+                                        $arr_attendance = array(
+                                            "att_id" => "",
+                                            "date" => $_temp_date,
+                                            "status" => "1",
+                                        );
+                                    } else {
+                                        $arr_attendance = array(
+                                            "att_id" => "",
+                                            "date" => $_temp_date,
+                                            "status" => "0",
+                                        );
                                     }
-                                    $arr_attendance = array(
-                                        "att_id" => "",
-                                        "date" => $_temp_date,
-                                        "status" => "",
-                                    );
+                                    
                                 }
                                 array_push($temp_arr_attendance, $arr_attendance);
 
@@ -2183,8 +2199,14 @@ class DesktopController extends Controller
                             } else {
                                 $nm = $employee->first_name . ' ' . $employee->last_name;
                             }
+
+                            $_temp_premi_rajang = $_global_class->removeMoneySeparator($_standard_premi) * count($_chop_arr);
+
+                            $temp = array();
+
                             $temp = array(
                                 "id_employee" => $employee->id,
+                                "employee_status" => $employee->status,
                                 "employee_name" => $nm,
                                 "gender" => $employee->gender,
                                 "_attendance" => $temp_arr_attendance,
@@ -2194,11 +2216,39 @@ class DesktopController extends Controller
                                 "_rajamg" => $_chop_arr,
                                 "pokok" => $_pokok,
                                 "premi" => $_premi,
+                                "standard_premi" => $_standard_premi,
+                                "total_premi_rajang" => $_temp_premi_rajang,
                                 "haid" => $_haid,
                                 "potongan_bpjs" => $_pot_bpjs,
                                 "total" => $_tot,
                                 "_date" => $_date
                             );
+
+                            // if($employee->status === "1"){
+                                
+                            // } else {
+                            //     $temp = array(
+                            //         "id_employee" => $employee->id,
+                            //         "employee_status" => $employee->status,
+                            //         "employee_name" => $nm,
+                            //         "gender" => $employee->gender,
+                            //         "_attendance" => $temp_arr_attendance,
+                            //         "msit" => $_masuk . ' | ' . $_setengah_hari . ' | ' . $_ijin . ' | ' . $_tidak_masuk,
+                            //         "libur" => count($_holiday_arr),
+                            //         "rajang" => count($_chop_arr),
+                            //         "_rajamg" => $_chop_arr,
+                            //         "pokok" => $_pokok,
+                            //         "premi" => $_premi,
+                            //         "standard_premi" => $_standard_premi,
+                            //         "total_premi_rajang" => $_temp_premi_rajang,
+                            //         "haid" => $_haid,
+                            //         "potongan_bpjs" => $_pot_bpjs,
+                            //         "total" => $_tot + $_temp_premi_rajang,
+                            //         "_date" => $_date
+                            //     );
+                            // }
+
+                            
 
                             array_push($_data, $temp);
 
