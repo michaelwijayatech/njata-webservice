@@ -919,6 +919,7 @@ class DesktopController extends Controller
                 if (strtolower($id) === "all") {
                     $_employee = DB::table($_table->BASETABLE)
                         ->where('gender', '=', $_table->GENDER_FEMALE)
+                        ->where('status', '!=', $_table->STATUS_BULANAN)
                         ->where('is_active', '=', $_table->STATUS_ACTIVE)
                         ->get();
 
@@ -929,38 +930,43 @@ class DesktopController extends Controller
                     if (count($_employee) > 0) {
                         foreach ($_employee as $emplo => $emp) {
                             $_emp_id = $emp->id;
+                            $_emp_age = $emp->dob;
+                            $birthDate = explode("-", $_emp_age);
+                            $age = (date("md", date("U", mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md") ? ((date("Y") - $birthDate[2]) - 1) : (date("Y") - $birthDate[2]));
 
-                            if ($emp->status === 1) {
-                                $status = "Harian Atas";
-                            } elseif ($emp->status === 2) {
-                                $status = "Borongan";
-                            } elseif ($emp->status === 3) {
-                                $status = "Harian Bawah";
-                            }
-
-                            $_is_haid = DB::select(DB::raw("SELECT * FROM haid
-                                                            WHERE id_employee = '$_emp_id'
-                                                            AND SUBSTR(`date`,4,2) = '$_month'
-                                                            AND SUBSTR(`date`,7,4) = '$_year'
-                                                            AND is_active = '1'"));
-
-                            $date = "";
-
-                            if (count($_is_haid) > 0) {
-                                foreach ($_is_haid as $is_haid => $sh) {
-                                    $date = $sh->date;
+                            if($age < 50) {
+                                if ($emp->status === 1) {
+                                    $status = "Harian Atas";
+                                } elseif ($emp->status === 2) {
+                                    $status = "Borongan";
+                                } elseif ($emp->status === 3) {
+                                    $status = "Harian Bawah";
                                 }
+    
+                                $_is_haid = DB::select(DB::raw("SELECT * FROM haid
+                                                                WHERE id_employee = '$_emp_id'
+                                                                AND SUBSTR(`date`,4,2) = '$_month'
+                                                                AND SUBSTR(`date`,7,4) = '$_year'
+                                                                AND is_active = '1'"));
+    
+                                $date = "";
+    
+                                if (count($_is_haid) > 0) {
+                                    foreach ($_is_haid as $is_haid => $sh) {
+                                        $date = $sh->date;
+                                    }
+                                }
+    
+                                $temp = array(
+                                    "id" => $emp->id,
+                                    "first_name" => $emp->first_name,
+                                    "last_name" => $emp->last_name,
+                                    "status" => $status,
+                                    "date" => $date
+                                );
+    
+                                array_push($_data, $temp);
                             }
-
-                            $temp = array(
-                                "id" => $emp->id,
-                                "first_name" => $emp->first_name,
-                                "last_name" => $emp->last_name,
-                                "status" => $status,
-                                "date" => $date
-                            );
-
-                            array_push($_data, $temp);
                         }
                     }
                 }
@@ -2072,6 +2078,7 @@ class DesktopController extends Controller
 //                    $temp_arr_attendance = [];
                     // => GET ALL EMPLOYEES BY STATUS
                     $_table = new Employee();
+                    $_table_employee = new Employee();
                     $_stat_harian_atas = $_table->STATUS_HARIAN_ATAS;
                     $_stat_harian_bawah = $_table->STATUS_HARIAN_BAWAH;
                     $_employees = DB::table($_table->BASETABLE)
@@ -2158,19 +2165,27 @@ class DesktopController extends Controller
                                         $_tidak_masuk += 1;
                                     }
                                 } else {
-                                    if ($_global_class->checkDifferenceBetweenTwoDate($employee->start_date, date("d-m-Y")) >= 12){
-                                        $_pokok += $_std_harian;
-                                        $arr_attendance = array(
-                                            "att_id" => "",
-                                            "date" => $_temp_date,
-                                            "status" => "1",
-                                        );
-                                    } else {
+                                    if ($employee->is_active === $_table_employee->STATUS_CUTI){
                                         $arr_attendance = array(
                                             "att_id" => "",
                                             "date" => $_temp_date,
                                             "status" => "0",
                                         );
+                                    } else {
+                                        if ($_global_class->checkDifferenceBetweenTwoDate($employee->start_date, date("d-m-Y")) >= 12){
+                                            $_pokok += $_std_harian;
+                                            $arr_attendance = array(
+                                                "att_id" => "",
+                                                "date" => $_temp_date,
+                                                "status" => "1",
+                                            );
+                                        } else {
+                                            $arr_attendance = array(
+                                                "att_id" => "",
+                                                "date" => $_temp_date,
+                                                "status" => "0",
+                                            );
+                                        }
                                     }
                                     
                                 }
@@ -2729,6 +2744,22 @@ class DesktopController extends Controller
                 if($_field === "bpjs_kesehatan"){
                     $data += ["image_bpjs_kesehatan" => $_name];
                 }
+            }
+
+            if (strtolower($table) === "employee_cuti") {
+                $_table = new Employee();
+                $fields = [
+                    
+                ];
+                $status = $request->status;
+                if($status === "set_cuti"){
+                    $data += ["is_active" => $_table->STATUS_CUTI];
+                } else if($status === "set_active") {
+                    $data += ["is_active" => $_table->STATUS_ACTIVE];
+                } else {
+                    $data += ["is_active" => $_table->STATUS_INACTIVE];
+                }
+                
             }
 
             if (strtolower($table) === "employee") {
@@ -5565,7 +5596,7 @@ class DesktopController extends Controller
                     ->where($___groupdetail->BASETABLE.'.id_group', '=', $groupheader->id)
                     ->where($___groupdetail->BASETABLE.'.is_active', '=', $___groupdetail->STATUS_ACTIVE)
                     ->where('employee.is_active', '=', $___groupdetail->STATUS_ACTIVE)
-                    ->select('employee.id as id', 'employee.first_name', 'employee.last_name', $___groupdetail->BASETABLE.'.id_group as id_group')
+                    ->select('employee.id as id', 'employee.first_name', 'employee.last_name', 'employee.start_date', 'employee.is_active', $___groupdetail->BASETABLE.'.id_group as id_group')
                     ->get();
                 if (count($_data_2) > 0) {
                     $arr_2 = array();
@@ -5609,6 +5640,54 @@ class DesktopController extends Controller
                             if ($i === 4) { $__start_date = $start_date_week_4; $__end_date = $end_date_week_4; }
                             if ($i === 5) { $__start_date = $start_date_week_5; $__end_date = $end_date_week_5; }
                             if ($i === 6) { $__start_date = $start_date_week_6; $__end_date = $end_date_week_6; }
+
+                            /** START HOLIDAY */
+                            $___holidays = new Holiday();
+                            $_holidays = DB::table($___holidays->BASETABLE)
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', explode('-', $__start_date)[1])
+                                ->where(\DB::raw('SUBSTR(`date`,4,2)'), '<=', explode('-', $__end_date)[1])
+                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', explode('-', $__start_date)[2])
+                                ->where(\DB::raw('SUBSTR(`date`,7,4)'), '=', explode('-', $__end_date)[2])
+                                ->where('is_active', '=', $___holidays->STATUS_ACTIVE)
+                                ->get();
+                            if (count($_holidays) > 0) {
+                                foreach ($_holidays as $_holiday => $holiday) {
+                                    
+                                    // CEK  IF IN BETWEEN DATE
+                                    $holiday_date = $holiday->date;
+                                    $_holiday_date = date('Y-m-d', strtotime($holiday_date));
+
+                                    $_attendance_start = date('Y-m-d', strtotime($__start_date));
+                                    $_attendance_end = date('Y-m-d', strtotime($__end_date));
+
+                                    if (($_holiday_date >= $_attendance_start) && ($_holiday_date <= $_attendance_end)) {
+                                        if ($_global_class->checkDifferenceBetweenTwoDate($data2->start_date, date("d-m-Y")) >= 12){
+                                            /** CHECK ATTENDANCE */
+                                            $___atts = new Attendance();
+                                            $_atts = DB::table($___atts->BASETABLE)
+                                                ->where('id_employee', '=', $data2->id)
+                                                ->where('date', '=', $holiday_date)
+                                                ->first();
+
+                                            if(!empty($_atts)){
+                                                if(
+                                                    ($_atts->status === $___atts->STATUS_TIDAK_MASUK) || 
+                                                    ($_atts->status === $___atts->STATUS_SETENGAH_HARI) || 
+                                                    ($_atts->status === $___atts->STATUS_IJIN) ||
+                                                    ($_atts->status === $___atts->STATUS_CUTI) ||
+                                                    ($_atts->status === $___atts->STATUS_SAKIT)
+                                                ){
+                                                    $_total_extra_libur_hari += 1;   
+                                                }
+                                            } else {
+                                                $_total_extra_libur_hari += 1;  
+                                            }
+                                        }                                  
+                                    }
+                                }
+                            }
+                            /** END HOLIDAY */
+
                             $___attendances = new Attendance();
                             $_attendances = DB::table($___attendances->BASETABLE)
                                 ->where(\DB::raw('SUBSTR(`date`,4,2)'), '>=', explode('-', $__start_date)[1])
@@ -5777,7 +5856,13 @@ class DesktopController extends Controller
                             $_attendance_end = date('Y-m-d', strtotime($__end_date));
 
                             if (($_attendance_date >= $_attendance_start) && ($_attendance_date <= $_attendance_end)) {
-                                if($attendance->status === "1"){
+                                if($attendance->status === strval($___attendances->STATUS_MASUK)){
+                                    $_total_attendace++;
+                                }
+                                if($attendance->status === strval($___attendances->STATUS_SETENGAH_HARI)){
+                                    $_total_attendace += 0.5;
+                                }
+                                if($attendance->status === strval($___attendances->STATUS_SAKIT)){
                                     $_total_attendace++;
                                 }
                             }
@@ -6738,6 +6823,7 @@ class DesktopController extends Controller
             if(strtolower($id) === "all"){
                 $_data = DB::table($_employee->BASETABLE)
                     ->where('is_active', '=', $_employee->STATUS_ACTIVE)
+                    ->orWhere('is_active', '=', $_employee->STATUS_CUTI)
                     ->get();
 
                 $feedback = [
@@ -6749,7 +6835,6 @@ class DesktopController extends Controller
             } else {
                 $_data = DB::table($_employee->BASETABLE)
                     ->where('id' , '=', $id)
-                    ->where('is_active', '=', $_employee->STATUS_ACTIVE)
                     ->first();
 
                 $feedback = [

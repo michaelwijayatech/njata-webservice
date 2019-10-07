@@ -24,4 +24,5 @@ class Employee extends Model
 
     public $STATUS_INACTIVE = 0;
     public $STATUS_ACTIVE = 1;
+    public $STATUS_CUTI = 2;
 }
